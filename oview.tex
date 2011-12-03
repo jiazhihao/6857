@@ -1,0 +1,30 @@
+\section{Overview}
+\label{s:oview}
+
+This paper assumes two's complement integers~\cite{intel:int}, a
+de facto standard representation in modern computer systems.  It
+uses $n$ bits to represent either unsigned integers in the range
+$0$ to $2^n-1$, or signed integers in the range $-2^{n-1}$ to
+$2^{n-1}-1$, with the most significant bit indicating the sign.
+
+\subsection{Integer Semantics}
+
+what are considered to be correct/wrong?
+
+\subsection{A Strawman Approach}
+
+describe a strawman solution:
+generate path conditions and integer constraints,
+and feed into a solver.
+
+\subsection{Challenges}
+
+type conversion: too many FPs;
+
+pointer arithmetic.
+
+overflow checking idioms.
+
+loops.
+
+solver performance.
