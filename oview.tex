@@ -3,7 +3,11 @@
 
 This section gives an overview of \sys's goals and challanges.
 
-\subsection{Integer Semantics}
+\subsection{Safe Integer Operations}
+
+\newcommand{\zeros}[1]{\mathbf{0}^{#1}}
+\newcommand{\ones}[1]{\mathbf{1}^{#1}}
+\newcommand{\concat}{\cdot}
 
 \newcommand{\smin}{\mathrm{smin}}
 \newcommand{\smax}{\mathrm{smax}}
@@ -14,11 +18,11 @@ This section gives an overview of \sys's goals and challanges.
 \newcommand{\ssube}{\mathtt{ssub}_e}
 \newcommand{\usube}{\mathtt{usub}_e}
 \newcommand{\smule}{\mathtt{smul}_e}
-\newcommand{\umule}{\mathtt{umul}_e}
+\newcommand{\umule}[2]{(#1 \times_u #2)_e}
 \newcommand{\sdive}{\mathtt{sdiv}_e}
 \newcommand{\udive}{\mathtt{udiv}_e}
-\newcommand{\shle}{\mathtt{shl}_e}
-\newcommand{\shre}{\mathtt{shr}_e}
+\newcommand{\shle}[2]{(#1 \ll #2)_e}
+\newcommand{\shre}[2]{(#1 \gg #2)_e}
 \newcommand{\conve}{\mathtt{conv}_e}
 
 RICH~\cite{brumley:rich}
@@ -33,8 +37,10 @@ with the most significant bit indicating the sign.
 \subsubsection*{Arithmetic}
 
 unsigned multiplication.
+Extend $x$ and $y$ to $2n$ bits, and see if any of the high $n$ bits is 1.
 \begin{align}
-\umule(x, y)&: x \neq 0 \land y >_u \umax / x
+\umule{x}{y}&: %x \neq 0 \land y >_u \umax / x
+(\zeros{n}\concat v_0 \times \zeros{n}\concat v_1)[2n-1:n] \neq \zeros{n}
 \end{align}
 
 
@@ -44,8 +50,8 @@ unsigned multiplication.
 \subsubsection*{Bitwise Shift}
 
 \begin{align}
-\shle(x, y)&: y \geq_u n \\
-\shre(x, y)&: y \geq_u n
+\shle{x}{y}&: y \geq_u n \\
+\shre{x}{y}&: y \geq_u n
 \end{align}
 
 \subsubsection*{Type Conversion}
@@ -60,7 +66,7 @@ and feed into a solver.
 \autoref{f:vmwgfx}.
 multiplication overflow conditions.
 \begin{align*}
-e = \umule(\cc{arg->num_outputs!}, 16)
+e = \umule{\cc{arg->num_outputs!}}{16}
 \end{align*}
 path conditions.
 \begin{align*}
