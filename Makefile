@@ -10,7 +10,7 @@ ASPELL_CMDS=\
 	--add-tex-command='newcommand pp' \
 	--add-tex-command='renewcommand pp'
 
-all:
+all: code/fmt.tex
 	$(LATEXMK) -pdf p
 
 code/fmt.tex:
@@ -19,6 +19,10 @@ code/fmt.tex:
 
 clean:
 	$(LATEXMK) -C
+
+distclean:
+	$(LATEXMK) -C
+	rm -f code/*.tex
 
 spell:
 	@ for i in *.tex; do aspell -t $(ASPELL_CMDS) -p ./aspell.words -c $$i; done
