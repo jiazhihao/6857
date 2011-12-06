@@ -9,14 +9,14 @@ misinterpreted data.  It may introduce logic errors and security
 vulnerabilities if the consequence is unexpected.
 
 \autoref{f:vmwgfx} shows an example of integer errors in a Linux
-kernel driver.  The size for allocating \lstinline!rects! is computed
-from the multiplication of \lstinline!arg->num_outputs!, a variable
-controlled by userspace, and \lstinline!sizeof(struct drm_vmw_rect)!,
+kernel driver.  The size for allocating \cc{rects} is computed
+from the multiplication of \cc{arg->num_outputs}, a variable
+controlled by userspace, and \cc{sizeof(struct drm_vmw_rect)},
 the constant $16$.  If an attacker supplies a big integer, say
-\lstinline!0xf0000000!, for the variable, the multiplication would
-wrap, resulting in \lstinline!0xf0000000 * 16 = 0! for the allocation
-size.  Then \lstinline!rects! is a zero-length array, and the access
-\lstinline!rects[i]! is out of bounds, which may cause a kernel
+\cc{0xf0000000}, for the variable, the multiplication would
+wrap, resulting in \cc{0xf0000000 * 16 = 0} for the allocation
+size.  Then \cc{rects} is a zero-length array, and the access
+\cc{rects[i]} is out of bounds, which may cause a kernel
 panic.
 
 \begin{figure}[h]

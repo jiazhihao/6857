@@ -3,6 +3,7 @@ ASPELL_CMDS=\
 	--add-tex-command="autoref p" \
 	--add-tex-command='bibliography p' \
 	--add-tex-command='bibliographystyle p' \
+	--add-tex-command='cc p' \
 	--add-tex-command='fvset p' \
 	--add-tex-command='lstset p' \
 	--add-tex-command='mathrm p' \

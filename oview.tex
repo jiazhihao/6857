@@ -59,11 +59,11 @@ and feed into a solver.
 \autoref{f:vmwgfx}.
 multiplication overflow conditions.
 \begin{align*}
-e = \umule(\text{\lstinline!arg->num_outputs!}, 16)
+e = \umule(\cc{arg->num_outputs!}, 16)
 \end{align*}
 path conditions.
 \begin{align*}
-g = \text{\lstinline!arg->num_outputs!} \neq 0
+g = \cc{arg->num_outputs!} \neq 0
 \end{align*}
 
 The predicate for the solver is $e \land g$.
