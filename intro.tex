@@ -9,22 +9,18 @@ misinterpreted data.  It may introduce logic errors and security
 vulnerabilities if the consequence is unexpected.
 
 \autoref{f:vmwgfx} shows an example of integer errors in a Linux
-kernel driver.  The size for allocating \cc{rects} is computed
-from the multiplication of \cc{arg->num_outputs}, a variable
-controlled by userspace, and \cc{sizeof(struct drm_vmw_rect)},
-the constant $16$.  If an attacker supplies a big integer, say
-\cc{0xf0000000}, for the variable, the multiplication would
-wrap, resulting in \cc{0xf0000000 * 16 = 0} for the allocation
-size.  Then \cc{rects} is a zero-length array, and the access
-\cc{rects[i]} is out of bounds, which may cause a kernel
-panic.
+kernel driver.  The size for allocating \cc{rects} is computed from
+the multiplication of \cc{arg->num_outputs}, a variable controlled
+by userspace, and \cc{sizeof(struct drm_vmw_rect)}, the constant
+$16$.  Since both \cc{arg->num_outputs} and \cc{rects} are 32-bit
+integers, their values are within the range from 0 to $2^{32} - 1$.
 
-\begin{figure}[h]
-\input{code/vmwgfx}
-\caption{An integer error (simplified) in the VMware graphics driver
-for the Linux kernel that would result in out-of-bounds reads.}
-\label{f:vmwgfx}
-\end{figure}
+If a malicious user supplies a big integer, say \cc{0xf0000000},
+for the variable \cc{arg->num_outputs}, the multiplication would
+overflow the 32-bit integer range and wrap to \cc{0xf0000000 * 16
+= 0} for the allocation size.  Then \cc{rects} is a zero-length
+array, and the access \cc{rects[i]} is out of bounds, which may
+cause a kernel panic.
 
 [[[more security impacts --- buffer overflow, information leak,
 privilege escalation]]]
@@ -41,3 +37,10 @@ its integrity.
 --- precise bit-level reasoning of bounds required.
 
 [[[apps?]]]patch validation/bug finding.
+
+\begin{figure}
+\input{code/vmwgfx}
+\caption{An integer error (simplified) in the VMware graphics driver
+for the Linux kernel that would result in out-of-bounds reads.}
+\label{f:vmwgfx}
+\end{figure}
