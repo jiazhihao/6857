@@ -1,4 +1,5 @@
 \newcommand{\sys}{\textsc{Kint}\xspace}
+\newcommand{\code}[1]{\verb!#1!}
 
 \renewcommand{\ttdefault}{pxtt}
 
@@ -7,6 +8,20 @@
 %\clubpenalty=10000
 %\widowpenalty=10000
 
-\fvset{fontsize=\footnotesize}
+
+\lstset{basicstyle=\ttfamily\small,breaklines=true}
+
+%\fvset{fontsize=\footnotesize,xleftmargin=8pt}
+\fvset{fontsize=\small,xleftmargin=8pt}
+%\fvset{fontsize=\scriptsize}
 
 \graphicspath{{figs//}}
+
+\input{code/fmt}
+
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+\newcommand{\subfigureautorefname}{\figureautorefname}
+
+\numberwithin{equation}{section}

@@ -1,10 +1,33 @@
 \section{Introduction}
 \label{s:intro}
 
-Integers are fundamental data types in computer systems.
-They may be used to ...
+Integers are fundamental data types in systems code.  Unlike
+mathematical integers, they use a fixed number of bits to represent
+integral values bounded by a predefined range.  An operation producing
+a value that does not fall into the range may cause lost or
+misinterpreted data.  It may introduce logic errors and security
+vulnerabilities if the consequence is unexpected.
 
-Integer errors have emerged as a threat to system security. A 2007
+\autoref{f:vmwgfx} shows an example of integer errors in a Linux
+kernel driver.  The size for allocating \lstinline!rects! is computed
+from the multiplication of \lstinline!arg->num_outputs!, a variable
+controlled by userspace, and \lstinline!sizeof(struct drm_vmw_rect)!,
+the constant $16$.  If an attacker supplies a big integer, say
+\lstinline!0xf0000000!, for the variable, the multiplication would
+wrap, resulting in \lstinline!0xf0000000 * 16 = 0! for the allocation
+size.  Then \lstinline!rects! is a zero-length array, and the access
+\lstinline!rects[i]! is out of bounds, which may cause a kernel
+panic.
+
+\begin{figure}[h]
+\input{code/vmwgfx}
+\caption{An integer error (simplified) in the VMware graphics driver
+for the Linux kernel that would result in out-of-bounds reads.}
+\label{f:vmwgfx}
+\end{figure}
+
+[[[more security impacts?]]]
+Integer errors have emerged as a threat to system security.  A 2007
 study of the CVE list~\cite{christey:vuln} suggests that they ``are
 number 2 for OS vendor advisories''.  A recent survey~\cite{chen:kbugs}
 confirms the finding, where integer errors account for more than
@@ -12,8 +35,3 @@ one third of the reported Linux kernel vulnerabilities from 2010
 to early 2011 that can be misused to corrupt the kernel and break
 its integrity.
 
-Integer errors:
-arithmetic overflow,
-division-by-zero,
-oversized shift, and
-signedness bugs.

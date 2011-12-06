@@ -1,12 +1,21 @@
 LATEXMK=scripts/latexmk
 ASPELL_CMDS=\
+	--add-tex-command="autoref p" \
 	--add-tex-command='bibliography p' \
 	--add-tex-command='bibliographystyle p' \
 	--add-tex-command='fvset p' \
+	--add-tex-command='lstset p' \
+	--add-tex-command='mathrm p' \
+	--add-tex-command='mathtt p' \
+	--add-tex-command='newcommand pp' \
 	--add-tex-command='renewcommand pp'
 
 all:
 	$(LATEXMK) -pdf p
+
+code/fmt.tex:
+	pygmentize -f latex -S default > $@~
+	mv $@~ $@
 
 clean:
 	$(LATEXMK) -C
