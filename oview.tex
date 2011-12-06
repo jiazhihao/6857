@@ -1,6 +1,8 @@
 \section{Overview}
 \label{s:oview}
 
+This section gives an overview of \sys's goals and challanges.
+
 \subsection{Integer Semantics}
 
 \newcommand{\smin}{\mathrm{smin}}
@@ -22,30 +24,31 @@
 
 what are considered to be correct/wrong?
 
-This paper assumes two's complement~\cite{intel:int}, a de facto
+\sys assumes two's complement~\cite{intel:int}, a de facto
 standard way to represent either unsigned integers in the range $0$
 to $2^n-1$, or signed integers in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.
 
-\begin{figure}
+\subsubsection*{Arithmetic}
+
+unsigned multiplication.
 \begin{align}
-\sadde(x, y)&: \\
-\uadde(x, y)&: \\
-\ssube(x, y)&: \\
-\usube(x, y)&: \\
-\smule(x, y)&: \\
-\umule(x, y)&: x \neq 0 \land y >_u \umax / x \\
-\sdive(x, y^n)&: y = 0 \lor (x = \smin \land y = -1) \\
-\udive(x, y)&: y = 0 \\
+\umule(x, y)&: x \neq 0 \land y >_u \umax / x
+\end{align}
+
+
+%\sdive(x, y^n)&: y = 0 \lor (x = \smin \land y = -1) \\
+%\udive(x, y)&: y = 0 \\
+
+\subsubsection*{Bitwise Shift}
+
+\begin{align}
 \shle(x, y)&: y \geq_u n \\
 \shre(x, y)&: y \geq_u n
 \end{align}
-\caption{Integer error conditions for integral operations.}
-\end{figure}
 
-\subsubsection*{Arithmetic}
-\subsubsection*{Bitwise Shift}
 \subsubsection*{Type Conversion}
+
 
 \subsection{A Strawman Approach}
 
@@ -56,12 +59,14 @@ and feed into a solver.
 \autoref{f:vmwgfx}.
 multiplication overflow conditions.
 \begin{align*}
-\umule(\text{\lstinline!arg->num_outputs!}, 16)
+e = \umule(\text{\lstinline!arg->num_outputs!}, 16)
 \end{align*}
-path guards.
+path conditions.
 \begin{align*}
-\text{\lstinline!arg->num_outputs!} \neq 0
+g = \text{\lstinline!arg->num_outputs!} \neq 0
 \end{align*}
+
+The predicate for the solver is $e \land g$.
 
 consider two patches.
 
@@ -72,7 +77,9 @@ and a correct one.
 
 \subsection{Challenges}
 
-type conversion: too many FPs;
+how to generate constraints?
+
+type conversion: ppl mix signed/unsigned integers.
 
 pointer arithmetic.
 
