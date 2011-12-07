@@ -1,7 +1,7 @@
 \section{Overview}
 \label{s:oview}
 
-This section gives an overview of \sys's goals and challanges.
+This section gives an overview of \sys's goals and challenges.
 
 \subsection{Safe Integer Operations}
 
@@ -21,8 +21,8 @@ This section gives an overview of \sys's goals and challanges.
 \newcommand{\umule}[2]{(#1 \times_u #2)_e}
 \newcommand{\sdive}{\mathtt{sdiv}_e}
 \newcommand{\udive}{\mathtt{udiv}_e}
-\newcommand{\shle}[2]{(#1 \ll #2)_e}
-\newcommand{\shre}[2]{(#1 \gg #2)_e}
+\newcommand{\shle}[2]{(#1\ \cc{<}\cc{<}\ #2)_e}
+\newcommand{\shre}[2]{(#1\ \cc{>}\cc{>}\ #2)_e}
 \newcommand{\conve}{\mathtt{conv}_e}
 
 RICH~\cite{brumley:rich}
@@ -37,7 +37,7 @@ with the most significant bit indicating the sign.
 \subsubsection*{Arithmetic}
 
 unsigned multiplication.
-Extend $x$ and $y$ to $2n$ bits, and see if any of the high $n$ bits is 1.
+Zero-extend $x$ and $y$ to $2n$ bits, and see if any of the high $n$ bits of their product is 1.
 \begin{align}
 \umule{x}{y}&: %x \neq 0 \land y >_u \umax / x
 (\zeros{n}\concat v_0 \times \zeros{n}\concat v_1)[2n-1:n] \neq \zeros{n}
