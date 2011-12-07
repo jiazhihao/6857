@@ -49,29 +49,25 @@ If $x$ is converted from type $s$ to $t$, the conversion is insecure
 if the value of $x$ does not fall into the range of $t$.  For example,
 ...
 
+\subsection{A Strawman Approach}
+
 We use $(x\ \mathrm{op}\ y)_e$ to denote the predicate under which
 the operation $x\ \mathrm{op}\ y$ is insecure.
-For example, 
+Take \autoref{f:vmwgfx} for an example.
 \begin{align*}
 \umule{\cc{arg->num_outputs}}{16}
 \end{align*}
-gives the predicate
+represents the predicate
 \begin{align*}
 \cc{arg->num_outputs} >_u (2^{32} - 1) / 16,
 \end{align*}
-since the product will overflow if the predicate is true.
-
-\subsection{A Strawman Approach}
+since the product will not fall into the range of 32-bit integers
+if the predicate is true.
 
 describe a strawman solution:
 generate path conditions and integer constraints,
 and feed into a solver.
 
-\autoref{f:vmwgfx}.
-multiplication overflow conditions.
-\begin{align*}
-e = \umule{\cc{arg->num_outputs}}{16}
-\end{align*}
 path conditions.
 \begin{align*}
 g = \cc{arg->num_outputs} \neq 0
