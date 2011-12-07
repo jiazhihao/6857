@@ -22,6 +22,7 @@ overflow the 32-bit integer range and wrap to \cc{0xf0000000 * 16
 array, and the access \cc{rects[i]} is out of bounds, which may
 cause a kernel panic.
 
+[[[they are serious.]
 [[[more security impacts --- buffer overflow, information leak,
 privilege escalation]]]
 Integer errors have emerged as a threat to system security.  A 2007
@@ -32,11 +33,12 @@ one third of the reported Linux kernel vulnerabilities from 2010
 to early 2011 that can be misused to corrupt the kernel and break
 its integrity.
 
-[[[challenges]]]
-1. non-trivial to make the code right
---- precise bit-level reasoning of bounds required.
+[[[won't triggered under inputs, but impose a security threat
+on abnormal input or rarely executed code --- testing is hard.
+]]]
 
-[[[apps?]]]patch validation/bug finding.
+[[[non-trivial to make the code right. patches may be incorrect.]]]
+--- precise bit-level reasoning of bounds required.
 
 \begin{figure}
 \input{code/vmwgfx}
