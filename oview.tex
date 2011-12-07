@@ -3,59 +3,63 @@
 
 This section gives an overview of \sys's goals and challenges.
 
-\subsection{Safe Integer Operations}
+\subsection{Integer Security}
 
-\newcommand{\zeros}[1]{\mathbf{0}^{#1}}
-\newcommand{\ones}[1]{\mathbf{1}^{#1}}
-\newcommand{\concat}{\cdot}
+\sys adopts the CERT C secure coding
+standard~\cite[Ch.~5]{seacord:secure-c} as a basis for detecting
+insecure integer operations, summaried as follows (see \autoref{s:sema}
+for a formal definition).
 
-\newcommand{\smin}{\mathrm{smin}}
-\newcommand{\smax}{\mathrm{smax}}
-\newcommand{\umax}{\mathrm{umax}}
+\sys assumes two's complement~\cite[Ch.~4.2.1]{intel:vol1}, a de
+facto standard integer representation on most modern architectures.
+$n$ bits are used to represent either unsigned integers in the range
+$0$ to $2^n-1$, or signed integers in the range $-2^{n-1}$ to
+$2^{n-1}-1$, with the most significant bit indicating the sign.  If
+not particularly indicated, $x$ and $y$ are $n$-bit integers in
+this subsection.
 
-\newcommand{\sadde}{\mathtt{sadd}_e}
-\newcommand{\uadde}{\mathtt{uadd}_e}
-\newcommand{\ssube}{\mathtt{ssub}_e}
-\newcommand{\usube}{\mathtt{usub}_e}
-\newcommand{\smule}{\mathtt{smul}_e}
-\newcommand{\umule}[2]{(#1 \times_u #2)_e}
-\newcommand{\sdive}{\mathtt{sdiv}_e}
-\newcommand{\udive}{\mathtt{udiv}_e}
-\newcommand{\shle}[2]{(#1\ \cc{<}\cc{<}\ #2)_e}
-\newcommand{\shre}[2]{(#1\ \cc{>}\cc{>}\ #2)_e}
-\newcommand{\conve}{\mathtt{conv}_e}
+\noindent
+{\it Addition \& subtraction}.
+Extend $x$ and $y$ to $n+1$ bits and perform the addition / subtraction.
+The operation is insecure if the result does not fall into the range of
+$n$-bit integers.  For example, ...
 
-RICH~\cite{brumley:rich}
+\noindent
+{\it Multiplication}.
+Extend $x$ and $y$ to $2n$ bits and perform the multiplication.
+The operation is insecure if the result does not fall
+into the range of $n$-bit integers.
 
-what are considered to be correct/wrong?
+\noindent
+{\it Division}.
+The operation is insecure if the divisor is 0, Additionally, signed
+division $x\ /_s\ y$ is insecure if $x = -2^{n-1}$ and $y = -1$,
+because the result $2^{n-1}$ cannot be represented by an $n$-bit
+signed integer.
 
-\sys assumes two's complement~\cite{intel:int}, a de facto
-standard way to represent either unsigned integers in the range $0$
-to $2^n-1$, or signed integers in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.
+\noindent
+{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq n$,
+because oversized shifts are undefined in C.  For example, $(1 \shl
+32)$ may yield 0 or 1 for 32-bit integers, depending on the underlying
+architecture.
 
-\subsubsection*{Arithmetic}
+\noindent
+{\it Conversion}.
+If $x$ is converted from type $s$ to $t$, the conversion is insecure
+if the value of $x$ does not fall into the range of $t$.  For example,
+...
 
-unsigned multiplication.
-Zero-extend $x$ and $y$ to $2n$ bits, and see if any of the high $n$ bits of their product is 1.
-\begin{align}
-\umule{x}{y}&: %x \neq 0 \land y >_u \umax / x
-(\zeros{n}\concat v_0 \times \zeros{n}\concat v_1)[2n-1:n] \neq \zeros{n}
-\end{align}
-
-
-%\sdive(x, y^n)&: y = 0 \lor (x = \smin \land y = -1) \\
-%\udive(x, y)&: y = 0 \\
-
-\subsubsection*{Bitwise Shift}
-
-\begin{align}
-\shle{x}{y}&: y \geq_u n \\
-\shre{x}{y}&: y \geq_u n
-\end{align}
-
-\subsubsection*{Type Conversion}
-
+We use $(x\ \mathrm{op}\ y)_e$ to denote the predicate under which
+the operation $x\ \mathrm{op}\ y$ is insecure.
+For example, 
+\begin{align*}
+\umule{\cc{arg->num_outputs}}{16}
+\end{align*}
+gives the predicate
+\begin{align*}
+\cc{arg->num_outputs} >_u (2^{32} - 1) / 16,
+\end{align*}
+since the product will overflow if the predicate is true.
 
 \subsection{A Strawman Approach}
 
@@ -66,11 +70,11 @@ and feed into a solver.
 \autoref{f:vmwgfx}.
 multiplication overflow conditions.
 \begin{align*}
-e = \umule{\cc{arg->num_outputs!}}{16}
+e = \umule{\cc{arg->num_outputs}}{16}
 \end{align*}
 path conditions.
 \begin{align*}
-g = \cc{arg->num_outputs!} \neq 0
+g = \cc{arg->num_outputs} \neq 0
 \end{align*}
 
 The predicate for the solver is $e \land g$.
@@ -84,7 +88,8 @@ and a correct one.
 
 \subsection{Challenges}
 
-how to generate constraints?
+NB: equivalence.
+$x \times 16$ is not the same as $x \shl 4$.
 
 type conversion: ppl mix signed/unsigned integers.
 

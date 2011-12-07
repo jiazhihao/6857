@@ -1,0 +1,41 @@
+\section{Integer Semantics}
+\label{s:sema}
+
+If not particularly indicated, $x$ and $y$ are $n$-bit integers.
+$x[i]$ gives the $i$-th significant bit of x.  $x[i:j]$ means the
+extraction of bits $i$ down to $j$.  $x \concat y$ means the
+concatenation of $x$ and $y$.  $x^n$ is the concatenation of $i$
+copies of $x$.
+
+For example, if $x$ is an $n$-bit signed integer, $x[n-1]$ is the
+sign, $\zeros{m}\concat x$ zero-extends $x$ to $m+n$ bits, and
+$x[n-1]^m\concat x$ sign-extends $x$ to $m+n$ bits.
+
+\begin{align}
+\uadde{x}{y}&\coloneqq
+%(\zeros{1}\concat x +_u \zeros{1}\concat{y})[n] \neq 0
+y \leq \ones{n} -_u x
+\\
+%\sadde{x}{y}&\coloneqq
+%x[n-1] = y[n-1] \land (x +_s y)
+%
+\usube{x}{y}&\coloneqq
+x <_u y
+\\
+\umule{x}{y}&\coloneqq
+x \neq 0 \land y >_u \ones{n} / x
+%(\zeros{n}\concat x \times \zeros{n}\concat y)[2n-1:n] \neq \zeros{n}
+\\
+\sdive{x}{y}&\coloneqq
+y = 0 \lor (x = \ones{1}\concat\zeros{n-1} \land y = \ones{n})
+\\
+\udive{x}{y}&\coloneqq
+y = 0
+\\
+\shle{x}{y}&\coloneqq
+y \geq_u n
+\\
+\shre{x}{y}&\coloneqq
+y \geq_u n
+\end{align}
+
