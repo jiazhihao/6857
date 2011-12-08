@@ -5,13 +5,14 @@ This section gives an overview of \sys's goals and challenges.
 
 \subsection{Integer Security}
 
-\sys adopts the CERT C secure coding
-standard~\cite[Ch.~5]{seacord:secure-c} as a basis for detecting
-insecure integer operations, summarized as follows (see \autoref{s:sema}
-for a formal definition).
+\sys adopts the notion of integer security from the CERT C secure
+coding standard~\cite[Ch.~5]{seacord:secure-c}.  The goal of \sys
+is to warn insecure integer operations that violate the coding standard.
+We summarize them as follows (see \autoref{s:sema} for a formal
+definition).
 
 \sys assumes two's complement~\cite[Ch.~4.2.1]{intel:vol1}, a de
-facto standard integer representation on most modern architectures.
+facto standard integer representation on modern architectures.
 $n$ bits are used to represent either unsigned integers in the range
 $0$ to $2^n-1$, or signed integers in the range $-2^{n-1}$ to
 $2^{n-1}-1$, with the most significant bit indicating the sign.  If
@@ -20,13 +21,13 @@ this subsection.
 
 \noindent
 {\it Addition \& subtraction}.
-Extend $x$ and $y$ to $n+1$ bits and perform the addition / subtraction.
+Perform the addition / subtraction as $(n+1)$-bit integers.
 The operation is insecure if the result does not fall into the range of
 $n$-bit integers.  For example, ...
 
 \noindent
 {\it Multiplication}.
-Extend $x$ and $y$ to $2n$ bits and perform the multiplication.
+Perform the multiplication as $2n$-bit integers.
 The operation is insecure if the result does not fall
 into the range of $n$-bit integers.
 
@@ -38,7 +39,7 @@ because the result $2^{n-1}$ cannot be represented by an $n$-bit
 signed integer.
 
 \noindent
-{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq n$,
+{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq_u n$,
 because oversized shifts are undefined in C.  For example, $(1 \shl
 32)$ may yield 0 or 1 for 32-bit integers, depending on the underlying
 architecture.
@@ -51,29 +52,25 @@ if the value of $x$ does not fall into the range of $t$.  For example,
 
 \subsection{A Strawman Approach}
 
-We use $(x\ \mathrm{op}\ y)_e$ to denote the predicate under which
-the operation $x\ \mathrm{op}\ y$ is insecure.
-Take \autoref{f:vmwgfx} for an example.
-\begin{align*}
-\umule{\cc{arg->num_outputs}}{16}
-\end{align*}
-represents the predicate
-\begin{align*}
-\cc{arg->num_outputs} >_u (2^{32} - 1) / 16,
-\end{align*}
-since the product will not fall into the range of 32-bit integers
-if the predicate is true.
+\sys first performs symbolic analysis to compute the insecure condition
+and the corresponding path condition for each integer operation.
+Take $\cc{arg->num_outputs} \times_u 16$ in
+\autoref{f:vmwgfx} for an example.  Its insecure condition is denoted as:
+\begin{equation*}
+\umule{\cc{arg->num_outputs}}{16}.
+\end{equation*}
+From \autoref{s:sema} we can compute that it is equivalent to:
+\begin{equation*}
+\cc{arg->num_outputs} >_u (2^{32} - 1) / 16.
+\end{equation*}
+To reach the multiplication, the corresponding path condition is
+that the previous branching \cc{if (!arg->num_outputs)} fails:
+\begin{equation*}
+\cc{arg->num_outputs} \neq 0.
+\end{equation*}
 
-describe a strawman solution:
-generate path conditions and integer constraints,
-and feed into a solver.
-
-path conditions.
-\begin{align*}
-g = \cc{arg->num_outputs} \neq 0
-\end{align*}
-
-The predicate for the solver is $e \land g$.
+\sys then feeds the logical AND of the two conditions into a
+constraint solver~\cite{boolector}.  The solver gives a solution
 
 consider two patches.
 
