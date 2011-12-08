@@ -55,11 +55,8 @@ if the value of $x$ does not fall into the range of $t$.  For example,
 \sys first performs symbolic analysis to compute the insecure condition
 and the corresponding path condition for each integer operation.
 Take $\cc{arg->num_outputs} \times_u 16$ in
-\autoref{f:vmwgfx} for an example.  Its insecure condition is denoted as:
-\begin{equation*}
-\umule{\cc{arg->num_outputs}}{16}.
-\end{equation*}
-From \autoref{s:sema} we can compute that it is equivalent to:
+\autoref{f:vmwgfx} for an example.
+From \autoref{s:sema} we can compute its insecure condition is:
 \begin{equation*}
 \cc{arg->num_outputs} >_u (2^{32} - 1) / 16.
 \end{equation*}
