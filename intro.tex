@@ -2,11 +2,13 @@
 \label{s:intro}
 
 Integers are fundamental data types in systems code.  Unlike
-mathematical integers, they use a fixed number of bits to represent
-integral values bounded by a predefined range.  An operation producing
-a value that does not fall into the range may cause lost or
-misinterpreted data.  It may introduce logic errors and security
-vulnerabilities if the consequence is unexpected.
+arbitrary-precision mathematical integers, they use a fixed number
+of bits to represent integral values bounded by a predefined range.
+An integer operation may produce a numeric value that does not fall
+into the range, which could cause lost or misinterpreted data, referred
+as \emph{integer errors} in this paper.  Integer errors may introduce
+further logic problems and security vulnerabilities if the consequence
+is unexpected.
 
 \autoref{f:vmwgfx} shows an example of integer errors in a Linux
 kernel driver.  The size for allocating \cc{rects} is computed from

@@ -5,69 +5,76 @@ This section gives an overview of \sys's goals and challenges.
 
 \subsection{Integer Security}
 
-\sys adopts the notion of integer security from the CERT C secure
-coding standard~\cite[Ch.~5]{seacord:secure-c}.  The goal of \sys
-is to warn insecure integer operations that violate the coding standard.
-We summarize them as follows (see \autoref{s:sema} for a formal
+\sys adopts the CERT C secure coding standard for integer
+operations~\cite[Ch.~5]{seacord:secure-c} as a basis and considers
+operations that violate the coding standard as integer errors.  We
+will summarize them below (see \autoref{s:sema} for a formal
 definition).
 
 \sys assumes two's complement~\cite[Ch.~4.2.1]{intel:vol1}, a de
-facto standard integer representation on modern architectures.
-$n$ bits are used to represent either unsigned integers in the range
-$0$ to $2^n-1$, or signed integers in the range $-2^{n-1}$ to
-$2^{n-1}-1$, with the most significant bit indicating the sign.  If
-not particularly indicated, $x$ and $y$ are $n$-bit integers in
-this subsection.
+facto standard integer representation on modern architectures.  An
+$n$-bit unsigned integer is in the range $0$ to $2^n-1$, while an
+$n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
+with the most significant bit indicating the sign.  If not particularly
+indicated, $x$ and $y$ below are $n$-bit integers.
 
 \noindent
-{\it Addition \& subtraction}.
-Perform the addition / subtraction as $(n+1)$-bit integers.
-The operation is insecure if the result does not fall into the range of
-$n$-bit integers.  For example, ...
-
-\noindent
-{\it Multiplication}.
-Perform the multiplication as $2n$-bit integers.
-The operation is insecure if the result does not fall
-into the range of $n$-bit integers.
+{\it Addition \& subtraction \& multiplication}.
+$x\ \textrm{op}\ y$ is considered insecure if the result of the
+corresponding arbitrary-precision mathematical operation may fall
+out of the predefined range.  For example, $\cc{arg->num_outputs}\times
+16$ in \autoref{f:vmwgfx} is insecure because mathematically
+$\cc{0xf0000000} \times 16 = 2^{32}\times 3\times 5$, which is out
+of the predefined range of $32$-bit unsigned integers ($0$ to $2^{32}
+- 1$).
 
 \noindent
 {\it Division}.
-The operation is insecure if the divisor is 0, Additionally, signed
-division $x\ /_s\ y$ is insecure if $x = -2^{n-1}$ and $y = -1$,
-because the result $2^{n-1}$ cannot be represented by an $n$-bit
-signed integer.
+A division operation is insecure if the divisor is 0.  Additionally,
+signed division $x\ /_s\ y$ is insecure if $x = -2^{n-1}$ and $y =
+-1$, because the mathematical result $2^{n-1}$ is not in the range
+of $n$-bit signed integers ($-2^{n-1}$ to $2^{n-1}-1$).
 
 \noindent
-{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq_u n$,
-because oversized shifts are undefined in C.  For example, $(1 \shl
-32)$ may yield 0 or 1 for 32-bit integers, depending on the underlying
+{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq_u
+n$, aka oversized shifts, which are undefined according to the C
+standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or 1
+(e.g., ppc) for 32-bit integers, depending on the underlying
 architecture.
 
 \noindent
 {\it Conversion}.
-If $x$ is converted from type $s$ to $t$, the conversion is insecure
-if the value of $x$ does not fall into the range of $t$.  For example,
-...
+If $x$ is converted from integer type $s$ to $t$, the conversion
+is insecure if the value of $x$ does not fall into the range of
+$t$.  For example, $x \geq_s 0$ should hold if a signed integer $x$
+is converted to unsigned, otherwise the conversion is considered
+insecure.
 
 \subsection{A Strawman Approach}
 
-\sys first performs symbolic analysis to compute the insecure condition
-and the corresponding path condition for each integer operation.
-Take $\cc{arg->num_outputs} \times_u 16$ in
-\autoref{f:vmwgfx} for an example.
-From \autoref{s:sema} we can compute its insecure condition is:
+We outline a naive implementation of \sys and see how it works
+for the example shown in \autoref{f:vmwgfx}.
+
+\sys performs symbolic analysis to compute the error condition and
+the corresponding path condition for each integer operation.  As
+for $\cc{arg->num_outputs} \times_u 16$, based on \autoref{s:sema}
+we can compute its error condition is:
 \begin{equation*}
 \cc{arg->num_outputs} >_u (2^{32} - 1) / 16.
 \end{equation*}
-To reach the multiplication, the corresponding path condition is
-that the previous branching \cc{if (!arg->num_outputs)} fails:
+To reach the multiplication, the test of the branching statement
+\cc{if (!arg->num_outputs)} should fail.  So the corresponding path
+condition is:
 \begin{equation*}
 \cc{arg->num_outputs} \neq 0.
 \end{equation*}
 
 \sys then feeds the logical AND of the two conditions into a
-constraint solver~\cite{boolector}.  The solver gives a solution
+constraint solver~\cite{boolector}.  The solver computes a possible
+error case.
+\begin{equation*}
+...
+\end{equation*}
 
 consider two patches.
 
