@@ -1,5 +1,8 @@
-if (maxnum > PAGE_SIZE / sizeof(struct __fdb_entry))
-    maxnum = PAGE_SIZE / sizeof(struct __fdb_entry);
-size = maxnum * sizeof(struct __fdb_entry);
+maxnum0 = ...; /* read from userspace */ 
+if (maxnum0 > PAGE_SIZE / sizeof(struct __fdb_entry))
+    maxnum1 = PAGE_SIZE / sizeof(struct __fdb_entry);
+else
+    maxnum1 = maxnum;
+size = maxnum1 * sizeof(struct __fdb_entry);
 buf = kmalloc(size, GFP_USER);
 ...

@@ -59,23 +59,34 @@ for the example shown in \autoref{f:bridge}.
 the corresponding path condition for each integer operation.  As
 for $\cc{maxnum} \times_u 16$, based on \autoref{s:sema}
 we can compute its error condition is:
-\begin{equation}\label{eq:bridge-ec}
+\begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
-\end{equation}
+\end{equation*}
 Since the multiplication is always reachable, the corresponding
 path condition is simply true.
 
 \sys then feeds the logical AND of the two conditions into a
 constraint solver~\cite{boolector}.  The solver computes a possible
-error input.
-\begin{equation*}
-...
-\end{equation*}
+input, e.g., \cc{0xf0000000}, for \cc{maxnum}.
 
-Now consider the patched code that correctly limits \cc{maxnum} to 256,
-shown as follows.
+Now let's consider the patched code that correctly limits \cc{maxnum}
+to 256, shown as follows (\cc{maxnum} is numbered for clarification
+purpose).
 \input{code/bridge-p}
-The error condition is unchanged, the same as~\eqref{eq:bridge-ec}.
+This time the error condition is:
+\begin{equation*}
+\cc{maxnum}_1 >_u (2^{32} - 1) / 16.
+\end{equation*}
+The corresponding path condition is:
+\begin{align*}
+& ((\cc{maxnum}_0 > 256) \land (\cc{maxnum}_1 = 256)) \\
+\lor
+& (\neg (\cc{maxnum}_0 > 256) \land (\cc{maxnum}_1 = \cc{maxnum}_0)).
+\end{align*}
+Again \sys takes the logical AND of the two conditions to the
+constraint solver, which will conclude that these conditions can
+never be satisfied.  This means that the integer error has been
+fixed.
 
 \subsection{Challenges}
 
