@@ -17,12 +17,14 @@ $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while an
 $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.  If not particularly
 indicated, $x$ and $y$ below are $n$-bit integers.
+A subscript $s$ or $u$ may be pinned to an operation to specify
+it operates on signed or unsigned integers.
 
 \noindent
 {\it Addition \& subtraction \& multiplication}.
 $x\ \textrm{op}\ y$ is considered insecure if the result of the
 corresponding arbitrary-precision mathematical operation may fall
-out of the predefined range.  For example, $\cc{maxnum}\times
+out of the predefined range.  For example, $\cc{maxnum}\times_u
 16$ in \autoref{f:bridge} is insecure because mathematically
 $\cc{0xf0000000} \times 16 = 2^{32}\times 3\times 5$, which is out
 of the predefined range of $32$-bit unsigned integers ($0$ to $2^{32}
@@ -79,9 +81,9 @@ This time the error condition is:
 \end{equation*}
 The corresponding path condition is:
 \begin{align*}
-& ((\cc{maxnum}_0 > 256) \land (\cc{maxnum}_1 = 256)) \\
+& ((\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = 256)) \\
 \lor
-& (\neg (\cc{maxnum}_0 > 256) \land (\cc{maxnum}_1 = \cc{maxnum}_0)).
+& (\neg (\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = \cc{maxnum}_0)).
 \end{align*}
 Again \sys takes the logical AND of the two conditions to the
 constraint solver, which will conclude that these conditions can
