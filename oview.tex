@@ -60,7 +60,7 @@ for the example shown in \autoref{f:bridge}.
 \sys performs symbolic analysis to compute the error condition and
 the corresponding path condition for each integer operation.  As
 for $\cc{maxnum} \times_u 16$, based on \autoref{s:sema}
-we can compute its error condition is:
+\sys computes its error condition as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
@@ -75,7 +75,7 @@ Now let's consider the patched code that correctly limits \cc{maxnum}
 to 256, shown as follows (\cc{maxnum} is numbered for clarification
 purpose).
 \input{code/bridge-p}
-This time the error condition is:
+This time the error condition remains unchanged.
 \begin{equation*}
 \cc{maxnum}_1 >_u (2^{32} - 1) / 16.
 \end{equation*}
