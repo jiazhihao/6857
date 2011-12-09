@@ -22,8 +22,8 @@ indicated, $x$ and $y$ below are $n$-bit integers.
 {\it Addition \& subtraction \& multiplication}.
 $x\ \textrm{op}\ y$ is considered insecure if the result of the
 corresponding arbitrary-precision mathematical operation may fall
-out of the predefined range.  For example, $\cc{arg->num_outputs}\times
-16$ in \autoref{f:vmwgfx} is insecure because mathematically
+out of the predefined range.  For example, $\cc{maxnum}\times
+16$ in \autoref{f:bridge} is insecure because mathematically
 $\cc{0xf0000000} \times 16 = 2^{32}\times 3\times 5$, which is out
 of the predefined range of $32$-bit unsigned integers ($0$ to $2^{32}
 - 1$).
@@ -53,35 +53,29 @@ insecure.
 \subsection{A Strawman Approach}
 
 We outline a naive implementation of \sys and see how it works
-for the example shown in \autoref{f:vmwgfx}.
+for the example shown in \autoref{f:bridge}.
 
 \sys performs symbolic analysis to compute the error condition and
 the corresponding path condition for each integer operation.  As
-for $\cc{arg->num_outputs} \times_u 16$, based on \autoref{s:sema}
+for $\cc{maxnum} \times_u 16$, based on \autoref{s:sema}
 we can compute its error condition is:
-\begin{equation*}
-\cc{arg->num_outputs} >_u (2^{32} - 1) / 16.
-\end{equation*}
-To reach the multiplication, the test of the branching statement
-\cc{if (!arg->num_outputs)} should fail.  So the corresponding path
-condition is:
-\begin{equation*}
-\cc{arg->num_outputs} \neq 0.
-\end{equation*}
+\begin{equation}\label{eq:bridge-ec}
+\cc{maxnum} >_u (2^{32} - 1) / 16.
+\end{equation}
+Since the multiplication is always reachable, the corresponding
+path condition is simply true.
 
 \sys then feeds the logical AND of the two conditions into a
 constraint solver~\cite{boolector}.  The solver computes a possible
-error case.
+error input.
 \begin{equation*}
 ...
 \end{equation*}
 
-consider two patches.
-
-a bad one.
-$x * y < x$.
-
-and a correct one.
+Now consider the patched code that correctly limits \cc{maxnum} to 256,
+shown as follows.
+\input{code/bridge-p}
+The error condition is unchanged, the same as~\eqref{eq:bridge-ec}.
 
 \subsection{Challenges}
 

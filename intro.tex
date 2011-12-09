@@ -10,25 +10,29 @@ as \emph{integer errors} in this paper.  Integer errors may introduce
 further logic problems and security vulnerabilities if the consequence
 is unexpected.
 
-\autoref{f:vmwgfx} shows an example of integer errors in a Linux
-kernel driver.  The size for allocating \cc{rects} is computed from
-the multiplication of \cc{arg->num_outputs}, a variable controlled
-by userspace, and \cc{sizeof(struct drm_vmw_rect)}, the constant
-$16$.  Since both \cc{arg->num_outputs} and \cc{rects} are 32-bit
-integers, their values are within the range from 0 to $2^{32} - 1$.
+\autoref{f:bridge} shows an example of integer errors in the Linux
+kernel.  The size for allocating \cc{buf} is computed from the
+multiplication of \cc{maxnum}, a variable controlled by userspace,
+and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
+32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
+integers, ranging from 0 to $2^{32} - 1$.
+The developer's intention is to limit the maximum values of 
+\cc{maxnum} and \cc{size} to 256 and 4096, respectively.
 
-If a malicious user supplies a big integer, say \cc{0xf0000000},
-for the variable \cc{arg->num_outputs}, the multiplication would
-overflow the 32-bit integer range and wrap to \cc{0xf0000000 * 16
-= 0} for the allocation size.  Then \cc{rects} is a zero-length
-array, and the access \cc{rects[i]} is out of bounds, which may
-cause a kernel panic.
+If an adversary supplies a large \cc{maxnum}, say \cc{0xf0000000},
+the multiplication $\cc{maxnum} \times 16$ would overflow the 32-bit
+unsigned integer range and result in 0.  Subsequently, the sanity
+check will be bypassed and the value of \cc{maxnum} is not limited.
+Now \cc{buf} is allocated as a zero-length buffer, and any further
+access into \cc{buf} is out of bounds and may cause a kernel panic.
+The adversary may even execute arbitrary code and gain root privilege
+with carefully crafted input~\cite[CVE-2006-5751]{cve}.
 
 [[[they are serious.]
 [[[more security impacts --- buffer overflow, information leak,
 privilege escalation]]]
 Integer errors have emerged as a threat to system security.  A 2007
-study of the CVE list~\cite{christey:vuln} suggests that they ``are
+study~\cite{christey:vuln} of the CVE list~\cite{cve} suggests that they ``are
 number 2 for OS vendor advisories''.  A recent survey~\cite{chen:kbugs}
 confirms the finding, where integer errors account for more than
 one third of the reported Linux kernel vulnerabilities from 2010
@@ -43,8 +47,9 @@ on abnormal input or rarely executed code --- testing is hard.
 --- precise bit-level reasoning of bounds required.
 
 \begin{figure}
-\input{code/vmwgfx}
-\caption{An integer error (simplified) in the VMware graphics driver
-for the Linux kernel that would result in out-of-bounds reads.}
-\label{f:vmwgfx}
+\input{code/bridge}
+\caption{CVE-2006-5751, an integer error in the Ethernet bridge subsystem
+of the Linux kernel, which may lead to buffer overflows and allow local users
+to execute arbitrary code via a large \texttt{maxnum}.}
+\label{f:bridge}
 \end{figure}
