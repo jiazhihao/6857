@@ -23,21 +23,28 @@ If an adversary supplies a large \cc{maxnum}, say \cc{0xf0000000},
 the multiplication $\cc{maxnum} \times 16$ would overflow the 32-bit
 unsigned integer range and result in 0.  Subsequently, the sanity
 check will be bypassed and the value of \cc{maxnum} is not limited.
-Now \cc{buf} is allocated as a zero-length buffer, and any further
-access into \cc{buf} is out of bounds and may cause a kernel panic.
-The adversary may even execute arbitrary code and gain root privilege
-with carefully crafted input~\cite[CVE-2006-5751]{cve}.
+In this case \cc{buf} is allocated as a zero-length buffer; any
+further access into \cc{buf} is out of bounds and may cause a kernel
+panic (i.e., denial-of-service).  Furthermore, the adversary
+may control the out-of-bounds writes (i.e., buffer overflow) in a
+more elaborate way with carefully crafted input, so as to execute
+arbitrary code and gain root privilege~\cite[CVE-2006-5751]{cve}.
 
-[[[they are serious.]
-[[[more security impacts --- buffer overflow, information leak,
-privilege escalation]]]
+Integer errors enable a spectrum of attacks.  In addition to
+denial-of-service, buffer overflow, and privilege escalation we
+just mentioned, a problematic integer may lead to information
+leakage, for example, if it is used to determine the number of bytes
+to be copied from kernel to userspace, raising privacy concerns.
+It may cause more subtle logic bugs and defects if used in branching
+conditions.
+
 Integer errors have emerged as a threat to system security.  A 2007
-study~\cite{christey:vuln} of the CVE list~\cite{cve} suggests that they ``are
-number 2 for OS vendor advisories''.  A recent survey~\cite{chen:kbugs}
-confirms the finding, where integer errors account for more than
-one third of the reported Linux kernel vulnerabilities from 2010
-to early 2011 that can be misused to corrupt the kernel and break
-its integrity.
+study~\cite{christey:vuln} of the CVE list~\cite{cve} suggests that
+they ``are number 2 for OS vendor advisories''.  A recent
+survey~\cite{chen:kbugs} confirms the finding, where integer errors
+account for more than one third of the reported Linux kernel
+vulnerabilities from 2010 to early 2011 that can be misused to
+corrupt the kernel and break its integrity.
 
 [[[won't triggered under inputs, but impose a security threat
 on abnormal input or rarely executed code --- testing is hard.
