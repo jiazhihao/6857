@@ -4,21 +4,22 @@
 This section gives an overview of \sys's goals and challenges.
 
 \subsection{Integer Security}
+\label{s:goal}
 
 \sys adopts the CERT C secure coding standard for integer
-operations~\cite[Ch.~5]{seacord:secure-c} as a basis and considers
-operations that violate the coding standard as integer errors.  We
-will summarize them below (see \autoref{s:sema} for a formal
-definition).
+operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
+and considers operations that violate the coding standard as integer
+errors.  We will summarize them below (see \autoref{s:sema} for a
+formal definition).
 
-\sys assumes two's complement~\cite[Ch.~4.2.1]{intel:vol1}, a de
-facto standard integer representation on modern architectures.  An
-$n$-bit unsigned integer is in the range $0$ to $2^n-1$, while an
-$n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
+\sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
+a de facto standard integer representation on modern architectures.
+An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
+an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.  If not particularly
-indicated, $x$ and $y$ below are $n$-bit integers.
-A subscript $s$ or $u$ may be pinned to an operation to specify
-it operates on signed or unsigned integers.
+indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
+or $u$ may be pinned to an operation to specify it operates on
+signed or unsigned integers.
 
 \noindent
 {\it Addition \& subtraction \& multiplication}.
@@ -52,6 +53,15 @@ $t$.  For example, $x \geq_s 0$ should hold if a signed integer $x$
 is converted to unsigned, otherwise the conversion is considered
 insecure.
 
+It is worth noting that using the security semantics two functionally
+equivalent operations may have different error conditions.  It is
+assumed that developers have chosen the appropriate operations to
+match their intention.  For example, $\cc{maxnum}\times_u 16$ may
+be insecure if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
+considered always secure.  Any compiler optimization that performs
+such code transformations would destroy the security semantics.
+Therefore, it implies that \sys must work on pre-optimized code.
+
 \subsection{A Strawman Approach}
 
 We outline a naive implementation of \sys and see how it works
@@ -72,14 +82,16 @@ constraint solver~\cite{boolector}.  The solver computes a possible
 input, e.g., \cc{0xf0000000}, for \cc{maxnum}.
 
 Now let's consider the patched code that correctly limits \cc{maxnum}
-to 256, shown as follows (\cc{maxnum} is numbered for clarification
+to 256, shown as follows (\cc{maxnum} is
+numbered~\cite[\chapterautorefname~8.11]{whale} for clarification
 purpose).
 \input{code/bridge-p}
 This time the error condition remains unchanged.
 \begin{equation*}
 \cc{maxnum}_1 >_u (2^{32} - 1) / 16.
 \end{equation*}
-The corresponding path condition is:
+The corresponding path condition is that \cc{maxnum} is reset to 256
+if it is larger than 256, or remains the old value otherwise.
 \begin{align*}
 & ((\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = 256)) \\
 \lor
@@ -91,16 +103,26 @@ never be satisfied.  This means that the integer error has been
 fixed.
 
 \subsection{Challenges}
+\label{s:chal}
 
-NB: equivalence.
-$x \times 16$ is not the same as $x \shl 4$.
+There are several challenges that face \sys when applying the
+security semantics described in \autoref{s:goal} to real-world
+systems code.
+
+\subsubsection*{Benign Integer Errors}
 
 type conversion: ppl mix signed/unsigned integers.
 
-pointer arithmetic.
-
 overflow checking idioms.
+
+\subsubsection*{Complex Program Constructs}
 
 loops.
 
-solver performance.
+pointer arithmetic.
+
+\subsubsection*{Constraint Solving Performance}
+
+generate constraints wisely?
+
+intra-procedurally?
