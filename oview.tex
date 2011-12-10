@@ -23,41 +23,42 @@ signed or unsigned integers.
 
 \noindent
 {\it Addition \& subtraction \& multiplication}.
-$x\ \textrm{op}\ y$ is considered insecure if the result of the
-corresponding arbitrary-precision mathematical operation may fall
-out of the predefined range.  For example, $\cc{maxnum}\times_u
-16$ in \autoref{f:bridge} is insecure because mathematically
+$x\ \textrm{op}\ y$ may lead to an integer error if the result of
+the corresponding arbitrary-precision mathematical operation may
+fall out of the predefined range.  For example, $\cc{maxnum}\times_u
+16$ (without any other constraint) is erroneous because mathematically
 $\cc{0xf0000000} \times 16 = 2^{32}\times 3\times 5$, which is out
 of the predefined range of $32$-bit unsigned integers ($0$ to $2^{32}
 - 1$).
 
 \noindent
 {\it Division}.
-A division operation is insecure if the divisor is 0.  Additionally,
-signed division $x\ /_s\ y$ is insecure if $x = -2^{n-1}$ and $y =
--1$, because the mathematical result $2^{n-1}$ is not in the range
-of $n$-bit signed integers ($-2^{n-1}$ to $2^{n-1}-1$).
+A division operation is erroneous if the divisor is 0.  Additionally,
+signed division $x\ /_s\ y$ may lead to an integer error if $x =
+-2^{n-1}$ and $y = -1$, because the mathematical result $2^{n-1}$
+is not in the range of $n$-bit signed integers ($-2^{n-1}$ to
+$2^{n-1}-1$).
 
 \noindent
-{\it Shift}. $x \shl y$ and $x \shr y$ are insecure if $y \geq_u
-n$, aka oversized shifts, which are undefined according to the C
-standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or 1
-(e.g., ppc) for 32-bit integers, depending on the underlying
-architecture.
+{\it Shift}. $x \shl y$ and $x \shr y$ are considered as integer
+errors if $y \geq_u n$, aka oversized shifts, which are undefined
+according to the C standard.  For example, $(1 \shl 32)$ may yield
+0 (e.g., x86) or 1 (e.g., ppc) for 32-bit integers, depending on
+the underlying architecture.
 
 \noindent
 {\it Conversion}.
 If $x$ is converted from integer type $s$ to $t$, the conversion
-is insecure if the value of $x$ does not fall into the range of
-$t$.  For example, $x \geq_s 0$ should hold if a signed integer $x$
-is converted to unsigned, otherwise the conversion is considered
-insecure.
+may lead to an integer error if the value of $x$ does not fall into
+the range of $t$.  For example, $x \geq_s 0$ should hold if a signed
+integer $x$ is converted to unsigned, otherwise the conversion is
+considered erroneous.
 
 It is worth noting that using the security semantics two functionally
 equivalent operations may have different error conditions.  It is
 assumed that developers have chosen the appropriate operations to
 match their intention.  For example, $\cc{maxnum}\times_u 16$ may
-be insecure if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
+be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
 considered always secure.  Any compiler optimization that performs
 such code transformations would destroy the security semantics.
 Therefore, it implies that \sys must work on pre-optimized code.
