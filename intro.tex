@@ -55,8 +55,9 @@ on abnormal input or rarely executed code --- testing is hard.
 
 \begin{figure}
 \input{code/bridge}
-\caption{CVE-2006-5751, an integer error in the Ethernet bridge subsystem
-of the Linux kernel, which may lead to buffer overflows and allow local users
-to execute arbitrary code via a large \texttt{maxnum}.}
+\caption{An integer error~\cite[CVE-2006-5751]{cve} in the Ethernet
+bridge subsystem of the Linux kernel, which may lead to buffer
+overflows and allow local users to execute arbitrary code via a
+large \texttt{maxnum} from userspace.}
 \label{f:bridge}
 \end{figure}
