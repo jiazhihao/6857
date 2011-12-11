@@ -20,34 +20,21 @@ malloc $\to$ calloc
 
 type promotion
 
-The grsecurity~\cite{grsecurity} patch, which aims to enhance the
-security of the Linux kernel, addresses the integer overflow issue
+The grsecurity~\cite{grsecurity} patch, aiming to enhance the
+security of the Linux kernel, addresses the integer error issue
 in \cc{kmalloc} calls by defining a macro of the same name.
 %
-\begin{Verbatim}
-#define kmalloc(x, y)                           \
-({                                              \
-    void *___retval;                            \
-    intoverflow_t ___x = (intoverflow_t)x;      \
-    if (WARN(___x > ULONG_MAX, "overflow\n"))   \
-        ___retval = NULL;                       \
-    else                                        \
-        ___retval = kmalloc((size_t)___x, (y)); \
-    ___retval;                                  \
-})
-\end{Verbatim}
+\input{code/grsecurity-kmalloc}
 %
 Here \cc{intoverflow_t} is defined as the 128-bit unsigned integer
 type.  The trick is that, assuming the developer often writes code
 like \cc{kmalloc(n * sizeof(...))}, with the macro of the same name
-the C preprocessor will silently change the call to:
-\begin{Verbatim}
-	kmalloc((intoverflow_t)n * sizeof(...))
-\end{Verbatim}
-where \cc{n} is promoted to 128 bits first for the computation.
-This should be large enough to detect most integer errors.  However,
-it does not work if the allocation size is computed before being
-passed to \cc{kmalloc}, such as in \autoref{f:bridge}.
+the C preprocessor will silently change the call to
+\cc{kmalloc((intoverflow_t)n * sizeof(...))}, where \cc{n} is first
+promoted to 128 bits for the computation.  This should be large
+enough to detect most integer errors.  However, it does not work
+if the allocation size is already computed before being passed to
+\cc{kmalloc}, such as in \autoref{f:bridge}.
 
 when writing your own allocator, don't repeat the mistake that
 happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
