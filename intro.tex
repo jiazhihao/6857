@@ -29,6 +29,8 @@ panic (i.e., denial-of-service).  Furthermore, the adversary
 may control the out-of-bounds writes (i.e., buffer overflow) in a
 more elaborate way with carefully crafted input, so as to execute
 arbitrary code and gain root privilege~\cite[CVE-2006-5751]{cve}.
+In practice, a similar integer error was used to untether the iOS
+jailbreak~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation we
@@ -46,12 +48,18 @@ account for more than one third of the reported Linux kernel
 vulnerabilities from 2010 to early 2011 that can be misused to
 corrupt the kernel and break its integrity.
 
-[[[won't triggered under inputs, but impose a security threat
-on abnormal input or rarely executed code --- testing is hard.
-]]]
+Detecting integer errors at run time is difficult since they may
+only manifest themselves with abnormal input, which are not seen
+by typical users but can be exploited by adversaries.  Besides, a
+module are not even loaded if some specific hardware is not available
+or a particular configuration switch is not turned on, making it
+harder to eliminate integer errors in testing environments.
 
 [[[non-trivial to make the code right. patches may be incorrect.]]]
 --- precise bit-level reasoning of bounds required.
+
+This paper presents \sys, a static analysis tool that detects integer
+errors at compile time.
 
 \begin{figure}
 \input{code/bridge}
