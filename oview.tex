@@ -54,13 +54,13 @@ the range of $t$.  For example, $x \geq_s 0$ should hold if a signed
 integer $x$ is converted to unsigned, otherwise the conversion is
 considered erroneous.
 
-It is worth noting that using the security semantics two functionally
+It is worth noting that with the integer error semantics two functionally
 equivalent operations may have different error conditions.  It is
 assumed that developers have chosen the appropriate operations to
 match their intention.  For example, $\cc{maxnum}\times_u 16$ may
 be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
 considered always secure.  Any compiler optimization that performs
-such code transformations would destroy the security semantics.
+such code transformations would destroy the integer error semantics.
 Therefore, it implies that \sys must work on pre-optimized code.
 
 \subsection{A Strawman Approach}
@@ -107,7 +107,7 @@ fixed.
 \label{s:chal}
 
 There are several challenges that face \sys when applying the
-security semantics described in \autoref{s:goal} to real-world
+integer error semantics described in \autoref{s:goal} to real-world
 systems code.
 
 \subsubsection*{Benign Integer Errors}
