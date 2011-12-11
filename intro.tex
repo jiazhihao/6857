@@ -58,14 +58,13 @@ including XXX erroneous patches that the developers have committed
 to the mainline Linux kernel.  One of the cases, a two-line check,
 had been fixed three times before we submitted a correct patch.
 
-Compilers such GCC and Clang have provided compilation options like
-\cc{-ftrapv} and \cc{-fcatch-undefined-behavior} to generate runtime
-checks for common integer errors.  However, detecting integer errors
-at run time is difficult since they may manifest themselves with
-abnormal input, which are not seen by typical users but can be
-exploited by adversaries.  Besides, a module may only be loaded
-with some specific hardware or configuration, making it harder to
-eliminate integer errors in that module in testing environments.
+Decent compilers like GCC and Clang have provided compilation
+options such as \cc{-ftrapv} to generate runtime checks for common
+integer errors.  However, integer errors may only manifest themselves
+with abnormal input, which are not seen by typical users but can
+be exploited by adversaries.  Besides, a module may only be loaded
+with some specific hardware or configuration, making it difficult
+to catch integer errors at run time.
 
 This paper presents \sys, a static analysis tool that detects integer
 errors at compile time.  It performs precise bit-level reasoning
