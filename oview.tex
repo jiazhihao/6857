@@ -9,8 +9,10 @@ This section gives an overview of \sys's goals and challenges.
 \sys adopts the CERT C secure coding standard for integer
 operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
 and considers operations that violate the coding standard as integer
-errors.  We will summarize them below (see \autoref{s:sema} for a
-formal definition).
+errors.  They cover a set of integer-based vulnerabilities, sometimes
+referred as integer overflow (underflow, wraparound), division-by-zero,
+oversized shift, and signedness bugs in the literature.  We will
+summarize them below (see \autoref{s:sema} for a formal definition).
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
@@ -41,10 +43,10 @@ $2^{n-1}-1$).
 
 \noindent
 {\it Shift}. $x \shl y$ and $x \shr y$ are considered as integer
-errors if $y \geq_u n$, aka oversized shifts, which are undefined
-according to the C standard.  For example, $(1 \shl 32)$ may yield
-0 (e.g., x86) or 1 (e.g., ppc) for 32-bit integers, depending on
-the underlying architecture.
+errors if $y \geq_u n$, which is undefined according to the C
+standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or 1
+(e.g., ppc) for 32-bit integers, depending on the underlying
+architecture.
 
 \noindent
 {\it Conversion}.
