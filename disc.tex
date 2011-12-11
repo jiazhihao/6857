@@ -40,7 +40,7 @@ in \cc{kmalloc} calls by defining a macro of the same name.
 Here \cc{intoverflow_t} is defined as the 128-bit unsigned integer
 type.  The trick is that, assuming the developer often writes code
 like \cc{kmalloc(n * sizeof(...))}, with the macro of the same name
-the C proprocessor will silently change the call to:
+the C preprocessor will silently change the call to:
 \begin{Verbatim}
 	kmalloc((intoverflow_t)n * sizeof(...))
 \end{Verbatim}
