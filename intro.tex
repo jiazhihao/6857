@@ -48,17 +48,28 @@ account for more than one third of the reported Linux kernel
 vulnerabilities from 2010 to early 2011 that can be misused to
 corrupt the kernel and break its integrity.
 
-Detecting integer errors at run time is difficult since they may
-only manifest themselves with abnormal input, which are not seen
-by typical users but can be exploited by adversaries.  Besides, a
-module may only be loaded with some specific hardware or configuration,
-making it harder to eliminate integer errors in testing environments.
+To avoid integer errors developers need to, for example, perform
+sanity checks on untrusted inputs.  Even with that in mind, writing
+integer-error-free code is often more error-prone than expected.
+In \autoref{f:bridge} though the developers were aware that \cc{size}
+could be too large, they failed to limit the value in a correct
+way.  XXX will show XXX more subtle mistakes we have identified,
+including XXX erroneous patches that the developers have commited
+to the mainline Linux kernel.  One of the cases, a two-line check,
+had been fixed three times before we submitted a correct patch.
 
-[[[non-trivial to make the code right. patches may be incorrect.]]]
---- precise bit-level reasoning of bounds required.
+Compilers such GCC and Clang have provided compilation options like
+\cc{-ftrapv} and \cc{-fcatch-undefined-behavior} to generate runtime
+checks for common integer errors.  However, detecting integer errors
+at run time is difficult since they may manifest themselves with
+abnormal input, which are not seen by typical users but can be
+exploited by adversaries.  Besides, a module may only be loaded
+with some specific hardware or configuration, making it harder to
+eliminate integer errors in that module in testing environments.
 
 This paper presents \sys, a static analysis tool that detects integer
-errors at compile time.
+errors at compile time.  It performs precise bit-level reasoning
+of integers and warns possible integer errors.
 
 \begin{figure}
 \input{code/bridge}
