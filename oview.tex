@@ -12,7 +12,7 @@ and considers operations that violate the coding standard as integer
 errors.  They cover a set of integer-based vulnerabilities, sometimes
 referred as arithmetic overflow (underflow, wraparound), division-by-zero,
 oversized shift, and signedness bugs in the literature.  We will
-summarize them below (see \autoref{s:sema} for a formal definition).
+summarize them below.
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
@@ -23,39 +23,35 @@ indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
 or $u$ may be pinned to an operation to specify it operates on
 signed or unsigned integers.
 
-\noindent
-{\it Addition \& subtraction \& multiplication}.
-$x\ \textrm{op}\ y$ may lead to an integer error if the result of
-the corresponding arbitrary-precision mathematical operation may
-fall out of the predefined range.  For example, $\cc{maxnum}\times_u
-16$ (without any other constraint) is erroneous because mathematically
-$\cc{0xf0000000} \times 16 = 2^{32}\times 3\times 5$, which is out
-of the predefined range of $32$-bit unsigned integers ($0$ to $2^{32}
-- 1$).
+\paragraph{Addition \& subtraction \& multiplication.}
+Such an operation may lead to an integer error if the result of the
+corresponding arbitrary-precision mathematical operation falls out
+of the predefined range.  For example, $\cc{maxnum}\times_u 16$
+causes an integer error if $\cc{maxnum} = \cc{0xf0000000}$, because
+the mathematical product $\cc{0xf0000000} \times 16 = 2^{32}\times
+3\times 5$ is out of the range of $32$-bit unsigned integers ($0$
+to $2^{32} - 1$).
 
-\noindent
-{\it Division}.
-A division operation is erroneous if the divisor is 0.  Additionally,
-signed division $x\ /_s\ y$ may lead to an integer error if $x =
--2^{n-1}$ and $y = -1$, because the mathematical result $2^{n-1}$
-is not in the range of $n$-bit signed integers ($-2^{n-1}$ to
-$2^{n-1}-1$).
+\paragraph{Division.}
+A division operation causes an integer error if the divisor is 0.
+Additionally, signed division $x\ /_s\ y$ may lead to an integer
+error if $x = -2^{n-1}$ and $y = -1$, because the mathematical
+result $2^{n-1}$ is not in the range of $n$-bit signed integers
+($-2^{n-1}$ to $2^{n-1}-1$).
 
-\noindent
-{\it Shift}. $x \shl y$ and $x \shr y$ are considered as integer
-errors if $y \geq_u n$, which is undefined according to the C
-standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or 1
-(e.g., ppc) for 32-bit integers, depending on the underlying
+\paragraph{Shift.}
+The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
+integer errors if $y \geq_u n$, which is undefined according to the
+C standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or
+1 (e.g., PowerPC) for 32-bit integers, depending on the underlying
 architecture.
 
-\noindent
-{\it Conversion}.
+\paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
-the range of $t$.  For example, $x \geq_s 0$ should hold if a signed
-integer $x$ is converted to unsigned, otherwise the conversion is
-considered erroneous.
+the range of $t$.
 
+\paragraph{}
 It is worth noting that with the integer error semantics two functionally
 equivalent operations may have different error conditions.  It is
 assumed that developers have chosen the appropriate operations to
@@ -72,8 +68,8 @@ for the example shown in \autoref{f:bridge}.
 
 \sys performs symbolic analysis to compute the error condition and
 the corresponding path condition for each integer operation.  As
-for $\cc{maxnum} \times_u 16$, based on \autoref{s:sema}
-\sys computes its error condition as:
+for $\cc{maxnum} \times_u 16$, \sys computes its error condition
+as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
@@ -112,21 +108,36 @@ There are several challenges that face \sys when applying the
 integer error semantics described in \autoref{s:goal} to real-world
 systems code.
 
-\subsubsection*{Benign Integer Errors}
+\subsubsection{Benign Integer Errors}
 
-type conversion: ppl mix signed/unsigned integers.
+\paragraph{Signedness.}
+C programmers often mix the uses of signed and unsigned integers,
+e.g., passing an \cc{int} as a function parameter of type \cc{unsigned
+int}, and vice versa.  Though the conversion may not be conforming
+to the integer error semantics, it generally works well because the
+two types share the same binary representation.  \sys should not
+issue warnings for such cases.
 
-overflow checking idioms.
+\paragraph{Chained operations.}
+$x +_u 2 -_u 1$ with $x \geq_u 1$
 
-\subsubsection*{Complex Program Constructs}
+\paragraph{Checking idioms.}
+$\cc{UINT_MAX} - x > y$
+vs.
+$x +_u y <_u x$
 
-loops.
+\subsubsection{Complex Program Constructs}
 
-pointer arithmetic.
+Loops.
 
-\subsubsection*{Constraint Solving Performance}
+Pointer arithmetic.
 
-generate constraints wisely?
+\subsubsection{Constraint Solving Performance.}
+
+We notice that some operations like division significantly slow down
+the performance of the constraint solver~\cite{brummayer:perf},
+which may never return.
+
+recognize overflow checking idioms.
 
 intra-procedurally?
-

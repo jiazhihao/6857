@@ -1,8 +1,9 @@
-personal_ws-1.1 en 26 
+personal_ws-1.1 en 28 
 CVE
 GCC
 LLVM
 PREfix
+PowerPC
 VMware
 allocator
 bitwise
@@ -24,4 +25,5 @@ strawman
 untether
 untrusted
 userspace
+versa
 workflow
