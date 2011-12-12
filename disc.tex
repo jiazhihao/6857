@@ -10,9 +10,14 @@ CA-1996-22,
 Apache,
 lighttpd's new bug
 
-
 bad overflow checks: $x \times y < x$, 
 \autoref{f:bridge}
+
+index checks:
+miss (i < 0) or should declare i as unsigned
+
+return values: (ret < 0)
+should declare ret as signed.
 
 \subsection{Mitigation Strategies}
 
