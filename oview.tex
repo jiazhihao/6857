@@ -49,17 +49,27 @@ architecture.
 \paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
-the range of $t$.
+the range of $t$.  Types $s$ and $t$ do not have to be of different
+sizes; even a signedness conversion between two types of the same
+size may cause an integer error.  Below is an example that \sys has
+identified in the Linux kernel, where a
+wrong type is used for error checking.
+\\
+TODO
 
 \paragraph{}
-It is worth noting that with the integer error semantics two functionally
-equivalent operations may have different error conditions.  It is
-assumed that developers have chosen the appropriate operations to
-match their intention.  For example, $\cc{maxnum}\times_u 16$ may
-be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
-considered always secure.  Any compiler optimization that performs
-such code transformations would destroy the integer error semantics.
-Therefore, it implies that \sys must work on pre-optimized code.
+It is worth noting that with the integer error semantics two
+functionally equivalent operations may have different error conditions.
+It is assumed that developers have chosen the appropriate operations
+to match their intention.  For example, $\cc{maxnum}\times_u 16$
+may be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl
+4$ is considered always secure.  Any compiler optimization that
+performs such code transformations would destroy the integer error
+semantics.  Besides, decent C compilers may completely optimize
+away invalid integer error checks like $(x + 1) < x$ for signed
+integer $x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
+compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
+Therefore, \sys should work on pre-optimized code.
 
 \subsection{A Strawman Approach}
 
@@ -110,6 +120,9 @@ systems code.
 
 \subsubsection{Benign Integer Errors}
 
+While violating the integer error semantics, some commonly-used C
+idioms will not cause any defects.  We recognize them as follows.
+
 \paragraph{Signedness.}
 C programmers often mix the uses of signed and unsigned integers,
 e.g., passing an \cc{int} as a function parameter of type \cc{unsigned
@@ -119,12 +132,32 @@ two types share the same binary representation.  \sys should not
 issue warnings for such cases.
 
 \paragraph{Chained operations.}
-$x +_u 2 -_u 1$ with $x \geq_u 1$
+$(x +_u 2) -_u 1$ will not cause any integer error is with $x \geq_u
+1$, since it is equivalent to $x +_u -1$.  However the first part
+$(x +_u 2)$ would be considered an error with the integer error
+semantics.  \sys should avoid to warn such ``partial'' violations.
 
-\paragraph{Checking idioms.}
-$\cc{UINT_MAX} - x > y$
-vs.
-$x +_u y <_u x$
+\paragraph{Error-before-use.}
+Sometimes an integer error check comes after the overflowed
+computation, but before any use of the overflowed result.  Below
+is such an example.
+\input{code/error-before-use}
+\sys should avoid to warn $x \times_u y$.
+
+\paragraph{Overflowed checking idioms.}
+Some developers prefer to use an overflowed result to do integer
+error checks for $x +_u y$:
+\begin{align}
+x +_u y <_u x.
+\end{align}
+This is equivalent to a ``sane'' check
+$\cc{UINT_MAX} - x >_u y$.
+\sys should avoid warn such integer error checking idioms.
+
+Note that using overflowed result to check multiplication is trickier.
+In general $x \times_u y <_u x$ is not a valid integer error check
+but a bug.  A correct way would be $(x \times_u y) /_u y \neq x$
+or a sane check, $\cc{UINT_MAX} /_u x > y$.
 
 \subsubsection{Complex Program Constructs}
 
@@ -132,7 +165,7 @@ Loops.
 
 Pointer arithmetic.
 
-\subsubsection{Constraint Solving Performance.}
+\subsubsection{Constraint Solving Performance}
 
 We notice that some operations like division significantly slow down
 the performance of the constraint solver~\cite{brummayer:perf},
