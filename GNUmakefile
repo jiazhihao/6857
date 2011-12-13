@@ -24,7 +24,7 @@ clean:
 
 distclean:
 	$(LATEXMK) -C
-	rm -f code/*.tex
+	rm -f $(patsubst %.c,%.tex,$(wildcard code/*.c))
 
 spell:
 	@ for i in *.tex; do aspell -t $(ASPELL_CMDS) -p ./aspell.words -c $$i; done
