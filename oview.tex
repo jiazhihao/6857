@@ -151,26 +151,25 @@ In general $x \times_u y <_u x$ is not a valid integer error check
 but a bug.  A correct way would be $(x \times_u y) /_u y \neq x$
 or a sane check, $\cc{UINT_MAX} /_u x > y$.
 
-\subsubsection{Complex Program Constructs}
-
-Loops.
-
-Pointer arithmetic.
-
 \subsubsection{Constraint Solving Performance}
 
 Although \sys uses a highly-optimized constraint solver,
 constraints generated unwisely would still hurt its performance,
 sometimes even making it run forever.
 
-\paragraph{Bounded constraints.}
+\paragraph{Bounded constraint size.}
 It is not a good idea to naively analyze and generate constraints
 interprocedurally, for example,  across the whole Linux kernel.
 The size of the path condition would grow exponentially, which is
 unnecessary and hard to solve.  To achieve scalability, \sys should
 choose an appropriate program granularity.
 
-\paragraph{Idioms for faster constraint solving.}
+\sys also needs to handle complex program constructs such as loops
+and pointer arithmetic appropriately.  The generated constraints
+should be able to catch common integer errors while being solvable
+in a reasonable amount of time.
+
+\paragraph{Idioms for faster solving.}
 We notice that some operations like division significantly slow
 down the constraint solver~\cite{brummayer:perf}, most of which are
 used in integer error checks like $\cc{UINT_MAX} /_u x > y$.  \sys
