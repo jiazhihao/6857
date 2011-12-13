@@ -6,12 +6,12 @@
 	},
 	line/.style={draw, thick, ->},
 	]
-	\matrix[row sep=1mm, column sep=5mm] {
-		& \node [block] (ec) {Error condition}; & \\
+	\matrix[row sep=1mm, column sep=6mm] {
+		& \node [block] (ec) {Error constraint}; & \\
 		\node [block] (op) {Integer operation}; &
 		&
-		\node [block] (and) {Solver}; \\
-		& \node [block] (pc) {Path condition}; & \\
+		\node [block] (and) {AND}; \\
+		& \node [block] (pc) {Path constraint}; & \\
 	};
 	
 	\path [line] (op) |- (ec);

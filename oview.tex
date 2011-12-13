@@ -53,7 +53,7 @@ the range of $t$.
 
 \paragraph{}
 It is worth noting that with the secure integer standard two
-functionally equivalent operations may have different error conditions.
+functionally equivalent operations may have different error constraints.
 It is assumed that developers have chosen the appropriate operations
 to match their intention.  For example, $\cc{maxnum}\times_u 16$
 may be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl
@@ -63,20 +63,20 @@ Besides, decent C compilers may completely optimize away invalid
 integer error checks like $(x + 1) < x$ for signed integer
 $x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special compile
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
-\sys should work on pre-optimized code.
+\sys should work on unoptimized code.
 
 \subsection{A Strawman Approach}
 
 \autoref{f:flow} shows the workflow of a naive \sys implementation.
-\sys first performs symbolic analysis to compute the error condition
-and the corresponding path condition for each integer operation.
+\sys first performs symbolic analysis to compute the error constraint
+and the corresponding path constraint for each integer operation.
 As for $\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes
-its error condition as:
+its error constraint as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
 Since the multiplication is always reachable, the corresponding
-path condition is simply true.
+path constraint is simply true.
 
 \begin{figure}
 \centering
@@ -85,7 +85,7 @@ path condition is simply true.
 \label{f:flow}
 \end{figure}
 
-\sys then feeds the logical AND of the two conditions into a
+\sys then feeds the logical AND of the two constraints into a
 constraint solver~\cite{boolector}.  The solver computes a possible
 input, e.g., \cc{0xf0000000}, for \cc{maxnum}.
 
@@ -94,19 +94,19 @@ to 256, shown as follows (\cc{maxnum} is
 numbered~\cite[\chapterautorefname~8.11]{whale} for clarification
 purpose).
 \input{code/bridge-p}
-This time the error condition remains unchanged.
+This time the error constraint remains unchanged.
 \begin{equation*}
 \cc{maxnum}_1 >_u (2^{32} - 1) / 16.
 \end{equation*}
-The corresponding path condition is that \cc{maxnum} is reset to 256
+The corresponding path constraint is that \cc{maxnum} is reset to 256
 if it is larger than 256, or remains the old value otherwise.
 \begin{align*}
 & ((\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = 256)) \\
 \lor
 & (\neg (\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = \cc{maxnum}_0)).
 \end{align*}
-Again \sys takes the logical AND of the two conditions to the
-constraint solver, which will conclude that these conditions can
+Again \sys takes the logical AND of the two constraints to the
+constraint solver, which will conclude that these constraints can
 never be satisfied.  This means that the integer error has been
 fixed.
 
@@ -165,7 +165,7 @@ sometimes even making it run forever.
 \paragraph{Bounded constraint size.}
 It is not a good idea to naively analyze and generate constraints
 interprocedurally, for example,  across the whole Linux kernel.
-The size of the path condition would grow exponentially, which is
+The size of the path constraint would grow exponentially, which is
 unnecessary and hard to solve.  To achieve scalability, \sys should
 choose an appropriate program granularity.
 
