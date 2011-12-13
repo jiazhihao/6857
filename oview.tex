@@ -49,27 +49,21 @@ architecture.
 \paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
-the range of $t$.  Types $s$ and $t$ do not have to be of different
-sizes; even a signedness conversion between two types of the same
-size may cause an integer error.  Below is an example that \sys has
-identified in the Linux kernel, where a
-wrong type is used for error checking.
-\\
-TODO
+the range of $t$.
 
 \paragraph{}
-It is worth noting that with the integer error semantics two
+It is worth noting that with the secure integer standard two
 functionally equivalent operations may have different error conditions.
 It is assumed that developers have chosen the appropriate operations
 to match their intention.  For example, $\cc{maxnum}\times_u 16$
 may be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl
 4$ is considered always secure.  Any compiler optimization that
-performs such code transformations would destroy the integer error
-semantics.  Besides, decent C compilers may completely optimize
-away invalid integer error checks like $(x + 1) < x$ for signed
-integer $x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
-compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
-Therefore, \sys should work on pre-optimized code.
+performs such code transformations would destroy the semantics.
+Besides, decent C compilers may completely optimize away invalid
+integer error checks like $(x + 1) < x$ for signed integer
+$x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special compile
+option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
+\sys should work on pre-optimized code.
 
 \subsection{A Strawman Approach}
 
@@ -115,38 +109,36 @@ fixed.
 \label{s:chal}
 
 There are several challenges that face \sys when applying the
-integer error semantics described in \autoref{s:goal} to real-world
+secure integer standard described in \autoref{s:goal} to real-world
 systems code.
 
 \subsubsection{Benign Integer Errors}
 
-While violating the integer error semantics, some commonly-used C
+While violating the secure integer standard, some commonly-used C
 idioms will not cause any defects.  We recognize them as follows.
 
-\paragraph{Signedness.}
-C programmers often mix the uses of signed and unsigned integers,
-e.g., passing an \cc{int} as a function parameter of type \cc{unsigned
-int}, and vice versa.  Though the conversion may not be conforming
-to the integer error semantics, it generally works well because the
-two types share the same binary representation.  \sys should not
-issue warnings for such cases.
-
-\paragraph{Chained operations.}
-$(x +_u 2) -_u 1$ will not cause any integer error is with $x \geq_u
-1$, since it is equivalent to $x +_u -1$.  However the first part
-$(x +_u 2)$ would be considered an error with the integer error
-semantics.  \sys should avoid to warn such ``partial'' violations.
+\paragraph{Partial violation.}
+Consider $(x +_u 1) -_u 2$ with $x \geq_u 1$.  The expression would
+be considered as an integer error since the first part $(x +_u 1)$
+may be insecure, though the whole expression is equivalent to $x
+-_u 1$ and will not cause any integer error.  Another example is
+that signed and unsigned integers are often used interchangably in
+C code.  In a conversion like \cc{(int)((unsigned)x)} for a signed
+$x <_s 0$, the part \cc{(unsigned)x} may violate the secure integer
+standard while the whole expressioin does not.  \sys should avoid
+to warn such ``partial'' violations.
 
 \paragraph{Error-before-use.}
 Sometimes an integer error check comes after the overflowed
 computation, but before any use of the overflowed result.  Below
 is such an example.
 \input{code/error-before-use}
-\sys should avoid to warn $x \times_u y$.
+\sys should avoid to warn $x \times_u y$ since the product is not
+used before the check.
 
-\paragraph{Overflowed checking idioms.}
-Some developers prefer to use an overflowed result to do integer
-error checks for $x +_u y$:
+\paragraph{Overflowed checking idiom.}
+It is commonly seen in practice to use an overflowed result to do
+the integer error check for $x +_u y$:
 \begin{align}
 x +_u y <_u x.
 \end{align}
