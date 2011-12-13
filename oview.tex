@@ -159,15 +159,20 @@ Pointer arithmetic.
 
 \subsubsection{Constraint Solving Performance}
 
-Although the constraint solver that \sys uses is highly optimized,
-constraints generated unwisely would still hurt its performance.
+Although \sys uses a highly-optimized constraint solver,
+constraints generated unwisely would still hurt its performance,
+sometimes even making it run forever.
 
-First, the size of the constraints should be bounded.  It is not a
-good idea, for example, to naively analyze and generate constraints
-across the whole Linux kernel.  To achieve scalability, \sys
-should choose an appropriate program granularity.
+\paragraph{Bounded constraints.}
+It is not a good idea to naively analyze and generate constraints
+interprocedurally, for example,  across the whole Linux kernel.
+The size of the path condition would grow exponentially, which is
+unnecessary and hard to solve.  To achieve scalability, \sys should
+choose an appropriate program granularity.
 
-Besides, we notice that some operations like division significantly slow down
-the constraint solver, most of which are used in integer error checks
-like $\cc{UINT_MAX} /_u x > y$.  \sys should recognize these
-idioms and generate constraints that are easier to solve.
+\paragraph{Idioms for faster constraint solving.}
+We notice that some operations like division significantly slow
+down the constraint solver~\cite{brummayer:perf}, most of which are
+used in integer error checks like $\cc{UINT_MAX} /_u x > y$.  \sys
+should recognize these idioms and generate constraints that are
+easier to solve.

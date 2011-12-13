@@ -48,7 +48,7 @@ account for more than one third of the reported Linux kernel
 vulnerabilities from 2010 to early 2011 that can be misused to
 corrupt the kernel and break its integrity.
 
-To avoid integer errors developers need to, for example, perform
+To avoid integer errors developers need, for example, to perform
 sanity checks on untrusted inputs.  Even with that in mind, writing
 integer-error-free code is often more error-prone than expected.
 In \autoref{f:bridge} though the developers were aware that \cc{size}
@@ -58,13 +58,14 @@ including XXX erroneous patches that the developers have committed
 to the mainline Linux kernel.  One of the cases, a two-line check,
 had been fixed three times before we submitted a correct patch.
 
-Decent compilers like GCC and Clang have provided compilation
-options such as \cc{-ftrapv} to generate runtime checks for common
-integer errors.  However, integer errors may only manifest themselves
-with abnormal input, which are not seen by typical users but can
-be exploited by adversaries.  Besides, a module may only be loaded
+Decent compilers like GCC and Clang have provided compilation options
+such as \cc{-ftrapv} to generate runtime checks for common integer
+errors.  Since doing so hurts performance, the options are only
+turned on in testing environment.  However, integer errors may only
+manifest themselves with abnormal input, which are not seen by
+typical users during testing.  Besides, a module may only be loaded
 with some specific hardware or configuration, making it difficult
-to catch integer errors at run time.
+to catch integer errors at run time in testing environment.
 
 This paper presents \sys, a static analysis tool that detects integer
 errors at compile time.  It performs precise bit-level reasoning
