@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+	block/.style={
+		rectangle, rounded corners,
+		draw=black, thick,
+		text width=5em, minimum height=3em, text centered
+	},
+	line/.style={draw, thick, ->},
+	]
+	\matrix[row sep=1mm, column sep=5mm] {
+		& \node [block] (ec) {Error condition}; & \\
+		\node [block] (op) {Integer operation}; &
+		&
+		\node [block] (and) {Solver}; \\
+		& \node [block] (pc) {Path condition}; & \\
+	};
+	
+	\path [line] (op) |- (ec);
+	\path [line] (op) |- (pc);
+	\path [line] (ec) -| (and);
+	\path [line] (pc) -| (and);
+\end{tikzpicture}

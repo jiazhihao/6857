@@ -67,18 +67,23 @@ option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 
 \subsection{A Strawman Approach}
 
-We outline a naive implementation of \sys and see how it works
-for the example shown in \autoref{f:bridge}.
-
-\sys performs symbolic analysis to compute the error condition and
-the corresponding path condition for each integer operation.  As
-for $\cc{maxnum} \times_u 16$, \sys computes its error condition
-as:
+\autoref{f:flow} shows the workflow of a naive \sys implementation.
+\sys first performs symbolic analysis to compute the error condition
+and the corresponding path condition for each integer operation.
+As for $\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes
+its error condition as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
 Since the multiplication is always reachable, the corresponding
 path condition is simply true.
+
+\begin{figure}
+\centering
+\input{figs/flow}
+\caption{A simple workflow of how \sys analyzes integer errors.}
+\label{f:flow}
+\end{figure}
 
 \sys then feeds the logical AND of the two conditions into a
 constraint solver~\cite{boolector}.  The solver computes a possible
