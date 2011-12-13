@@ -122,10 +122,10 @@ Consider $(x +_u 1) -_u 2$ with $x \geq_u 1$.  The expression would
 be considered as an integer error since the first part $(x +_u 1)$
 may be insecure, though the whole expression is equivalent to $x
 -_u 1$ and will not cause any integer error.  Another example is
-that signed and unsigned integers are often used interchangably in
+that signed and unsigned integers are often used interchangeably in
 C code.  In a conversion like \cc{(int)((unsigned)x)} for a signed
 $x <_s 0$, the part \cc{(unsigned)x} may violate the secure integer
-standard while the whole expressioin does not.  \sys should avoid
+standard while the whole expression does not.  \sys should avoid
 to warn such ``partial'' violations.
 
 \paragraph{Error-before-use.}
@@ -159,10 +159,15 @@ Pointer arithmetic.
 
 \subsubsection{Constraint Solving Performance}
 
-We notice that some operations like division significantly slow down
-the performance of the constraint solver~\cite{brummayer:perf},
-which may never return.
+Although the constraint solver that \sys uses is highly optimized,
+constraints generated unwisely would still hurt its performance.
 
-recognize overflow checking idioms.
+First, the size of the constraints should be bounded.  It is not a
+good idea, for example, to naively analyze and generate constraints
+across the whole Linux kernel.  To achieve scalability, \sys
+should choose an appropriate program granularity.
 
-intra-procedurally?
+Besides, we notice that some operations like division significantly slow down
+the constraint solver, most of which are used in integer error checks
+like $\cc{UINT_MAX} /_u x > y$.  \sys should recognize these
+idioms and generate constraints that are easier to solve.
