@@ -42,9 +42,9 @@ result $2^{n-1}$ is not in the range of $n$-bit signed integers
 \paragraph{Shift.}
 The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
 integer errors if $y \geq_u n$, which is undefined according to the
-C standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., x86) or
-1 (e.g., PowerPC) for 32-bit integers, depending on the underlying
-architecture.
+C standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., on x86)
+or 1 (e.g., on PowerPC) for 32-bit integers, depending on the
+underlying architecture.
 
 \paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
@@ -67,34 +67,27 @@ option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 
 \subsection{A Strawman Approach}
 
-\autoref{f:flow} shows the workflow of a naive \sys implementation.
-\sys first performs symbolic analysis to compute the error constraint
-and the corresponding path constraint for each integer operation.
-As for $\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes
-its error constraint as:
+We outline the workflow of a na\"ive \sys implementation.  For each
+integer operation it first performs symbolic analysis to compute
+the error constraint and the corresponding path constraint.  As for
+$\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes its
+error constraint as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
-Since the multiplication is always reachable, the corresponding
-path constraint is simply true.
-
-\begin{figure}
-\centering
-\input{figs/flow}
-\caption{A simple workflow of how \sys analyzes integer errors.}
-\label{f:flow}
-\end{figure}
+Since the multiplication is always reachable without any branches,
+the corresponding path constraint is simply true.
 
 \sys then feeds the logical AND of the two constraints into a
 constraint solver~\cite{boolector}.  The solver computes a possible
-input, e.g., \cc{0xf0000000}, for \cc{maxnum}.
+input, e.g., $\cc{maxnum} = \cc{0xf0000000}$.
 
 Now let's consider the patched code that correctly limits \cc{maxnum}
-to 256, shown as follows (\cc{maxnum} is
+to 256, shown as below (\cc{maxnum} is
 numbered~\cite[\chapterautorefname~8.11]{whale} for clarification
 purpose).
 \input{code/bridge-p}
-This time the error constraint remains unchanged.
+The error constraint of the multiplication remains unchanged.
 \begin{equation*}
 \cc{maxnum}_1 >_u (2^{32} - 1) / 16.
 \end{equation*}
