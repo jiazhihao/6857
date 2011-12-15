@@ -2,20 +2,24 @@
 	block/.style={
 		rectangle, rounded corners,
 		draw=black, thick,
-		text width=5em, minimum height=3em, text centered
+		text width=4.5em, minimum height=3em, text centered
 	},
 	line/.style={draw, thick, ->},
 	]
-	\matrix[row sep=1mm, column sep=10mm] {
+	\matrix[row sep=2mm, column sep=15mm] {
 		& \node [block] (ec) {Error constraint}; & \\
-		\node [block] (op) {Integer operation}; &
-		&
-		\node [block] (and) {AND}; \\
-		& \node [block] (pc) {Path constraint}; & \\
+		\node [block] (ir) {LLVM IR};
+		& \node [block] (pc) {Path constraint};
+		& \node [block] (sol) {Solver}; \\
+		\node [block] (anno) {Annotation};
+		& \node [block] (rc) {Range constraint}; & \\
 	};
-	
-	\path [line] (op) |- (ec);
-	\path [line] (op) |- (pc);
-	\path [line] (ec) -| (and);
-	\path [line] (pc) -| (and);
+
+	\path [line] (ir) -- (ec);
+	\path [line] (ir) -- (pc);
+	\path [line] (ir) -- (rc);
+	\path [line,dashed] (anno) -- (rc);
+	\path [line] (ec) -- (sol);
+	\path [line] (pc) -- (sol);
+	\path [line] (rc) -- (sol);
 \end{tikzpicture}
