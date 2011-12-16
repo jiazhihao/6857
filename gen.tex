@@ -42,6 +42,11 @@ Checking idiom recognition.
 
 Load hoisting.
 
+\sys by default does not generate constraints for integer conversions.
+One may simply invoke GCC with \cc{-Wconversion} to inspect possible
+dangerous conversions.
+[[[\sys does something for critical integers, array indices, annotated sizes.]]]
+
 \subsection{Path Constraint Generation}
 
 Error constraint generation.
