@@ -49,7 +49,10 @@ underlying architecture.
 \paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
-the range of $t$.
+the range of $t$.  For example, in \autoref{f:ext4} the call to
+\cc{ext4_split_extent} returns a signed int.  The return value,
+which can be negative, is converted to an unsigned integer,
+leading to a meaningless comparison that is always false.
 
 \paraend
 
@@ -65,6 +68,16 @@ integer error checks like $(x + 1) < x$ for signed integer
 $x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special compile
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 \sys should work on unoptimized code.
+
+\begin{figure}
+\centering
+\input{code/ext4}
+\caption{A signedness bug in the ext4 filesystem of the Linux kernel.
+Since \texttt{allocated} is declared as unsigned int, the test
+$(\texttt{allocated} < 0)$ will always be false, which breaks the
+error handling.}
+\label{f:ext4}
+\end{figure}
 
 \subsection{A Strawman Approach}
 

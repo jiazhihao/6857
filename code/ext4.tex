@@ -1,0 +1,14 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{static} \PY{k+kt}{int} \PY{n}{ext4\PYZus{}split\PYZus{}extent}\PY{p}{(}\PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{)}\PY{p}{;}
+
+\PY{k}{static} \PY{k+kt}{int} \PY{n+nf}{ext4\PYZus{}ext\PYZus{}convert\PYZus{}to\PYZus{}initialized}\PY{p}{(}\PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{)}
+\PY{p}{\PYZob{}}
+	\PY{k+kt}{unsigned} \PY{k+kt}{int} \PY{n}{allocated}\PY{p}{;}
+	\PY{k+kt}{int} \PY{n}{err} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{;}
+	\PY{p}{.}\PY{p}{.}\PY{p}{.}
+	\PY{n}{allocated} \PY{o}{=} \PY{n}{ext4\PYZus{}split\PYZus{}extent}\PY{p}{(}\PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{)}\PY{p}{;}
+	\PY{k}{if} \PY{p}{(}\PY{n}{allocated} \PY{o}{<} \PY{l+m+mi}{0}\PY{p}{)}
+		\PY{n}{err} \PY{o}{=} \PY{n}{allocated}\PY{p}{;}
+	\PY{k}{return} \PY{n}{err} \PY{o}{?} \PY{n}{err} \PY{o}{:} \PY{n}{allocated}\PY{p}{;}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
