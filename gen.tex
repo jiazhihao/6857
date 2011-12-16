@@ -27,9 +27,7 @@ infers the range constraints across the call graph.
 \label{f:flow}
 \end{figure}
 
-\subsection{Error Constraint Generation}
-
-%Size/alloc/index annotation.
+\subsection{Transformations}
 
 Pointer arithmetic simplification.
 - symbolic~\cite{engelen:symbolic}.
@@ -42,18 +40,22 @@ Checking idiom recognition.
 How to determine the values from two load instructions
 are the same? Load hoisting, unsound aliasing rules.
 
+\subsection{Error Constraint Generation}
+
 \paragraph{Conversion constraint.}
 \sys by default does not generate constraints for checking integer
 conversions.  One may simply invoke GCC with \cc{-Wconversion} to
 inspect potentially dangerous conversions.
 [[[\sys does something for critical integers, array indices, annotated sizes.]]]
 
+\paragraph{In-loop constraint.}
+Move in-loop constraints out.
+
 \subsection{Path Constraint Generation}
 
-Error constraint generation.
-- Loop constraint generation.
-
 Path constraint generation.
+
+unroll loops once.
 
 \subsection{Value Range Inference}
 
