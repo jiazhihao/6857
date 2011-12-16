@@ -1,5 +1,4 @@
 static int ext4_split_extent(...);
-
 static int ext4_ext_convert_to_initialized(...)
 {
 	unsigned int allocated;

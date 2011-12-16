@@ -50,8 +50,8 @@ underlying architecture.
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
 the range of $t$.  For example, in \autoref{f:ext4} the call to
-\cc{ext4_split_extent} returns a signed int.  The return value,
-which can be negative, is converted to an unsigned integer,
+\cc{ext4_split_extent} returns a signed int, which will be negative
+on error.  However, the value is converted to an unsigned integer,
 leading to a meaningless comparison that is always false.
 
 \paraend
