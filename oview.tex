@@ -116,15 +116,15 @@ While violating the secure integer standard, some commonly-used C
 idioms will not cause any defects.  We recognize them as follows.
 
 \paragraph{Partial violation.}
-Consider $(x +_u 1) -_u 2$ with $x \geq_u 1$.  The expression would
-be considered as an integer error since the first part $(x +_u 1)$
-may be insecure, though the whole expression is equivalent to $x
--_u 1$ and will not cause any integer error.  Another example is
-that signed and unsigned integers are often used interchangeably in
-C code.  In a conversion like \cc{(int)((unsigned)x)} for a signed
-$x <_s 0$, the part \cc{(unsigned)x} may violate the secure integer
-standard while the whole expression does not.  \sys should avoid
-to warn such ``partial'' violations.
+Take $(x +_u 1) -_u 2$ with $x \geq_u 1$ for an example.  The
+expression would be considered as an integer error since the first
+part $(x +_u 1)$ may be insecure, though the whole expression is
+equivalent to $x -_u 1$ and will not cause any integer error.
+Another example is that signed and unsigned integers are often used
+interchangeably in C code.  In a conversion like \cc{(int)((unsigned)x)}
+for a signed $x <_s 0$, the part \cc{(unsigned)x} may violate the
+secure integer standard while the whole expression does not.  \sys
+should avoid to warn such ``partial'' violations.
 
 \paragraph{Error-before-use.}
 Sometimes an integer error check comes after the overflowed
