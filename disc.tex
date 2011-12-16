@@ -3,7 +3,7 @@
 
 \subsection{Common Pitfalls}
 
-miss sanitation
+miss sanity checks.
 
 char$\to$int: 
 CA-1996-22,
@@ -21,9 +21,15 @@ should declare ret as signed.
 
 \subsection{Mitigation Strategies}
 
+What developers can do?
+
 malloc $\to$ calloc
 
-type promotion
+choose the right type (and sign).
+
+use the correct check.
+
+type promotion.
 
 The grsecurity~\cite{grsecurity} patch, aiming to enhance the
 security of the Linux kernel, addresses the integer error issue
@@ -46,9 +52,28 @@ happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
 
 separate error code with bad values
 
-using a library? language support?
+using a library?
 
-compiler support: warn common error patterns,
-path validation.
+\subsection{Language Design}
 
-range annotations? use bit fields to limit the value?
+type-safe languages: not so exploitable, DoS more likely
+
+bignum vs. fixed-width integers.
+
+sign or not?
+
+compiler support: warn common error patterns.
+
+range annotations?  something like?
+\begin{Verbatim}
+#define RANGE(lo, hi) __attribute__((range(lo, hi)))
+#define MAX_ELTS 1024
+
+struct X {
+	unsigned int nelts RANGE(1, MAX_ELTS);
+	struct Y *elts;
+};
+\end{Verbatim}
+Then you can do instrumentation on stores of nelts.
+Better runtime checks \& good for static analysis.
+
