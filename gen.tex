@@ -1,19 +1,22 @@
 \section{Design}
 \label{s:gen}
 
-This section describes how \sys generates constraints for the solver.
+This section describes \sys's design for constraint generation and
+solving.
 
 \subsection{Basic Architecture}
 
-\sys is implemented as a set of compiler passes in the
-LLVM~\cite{lattner:llvm} framework, shown as \autoref{f:flow}.
+\sys's constraint generator is implemented as a set of compiler
+passes in the LLVM~\cite{lattner:llvm} framework.  The workflow is
+shown in \autoref{f:flow}.  The error and path constraint generation
+passes work on LLVM intermediate representations, which are compiled
+from source code with all optimizations turned off.  They inspect
+one function at a time, so as to bound the size of constraints.
 
-The constraint generation passes inspect one function at a time,
-so as to bound the size of constraints.  To improve the accuracy,
-\sys allows users to annotate the ranges of variables, such as
-function parameters and structure fields, as additional constraints
-It also employs a whole-program pass that infers the range constraints
-across functions.
+To improve the accuracy, \sys allows users to annotate the ranges
+of variables, such as function parameters and structure fields, as
+additional constraints. It also employs a whole-program pass that
+infers the range constraints across the call graph.
 
 \begin{figure}
 \centering
