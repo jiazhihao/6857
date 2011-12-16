@@ -186,13 +186,13 @@
 \def\endabstract{\if@twocolumn\else\endquotation\fi}
 
 \def\keywords{\if@twocolumn
-\paragraph*{Keywords:}
+\section*{Keywords}
 \else \small
 \quotation
 \fi}
 
 \def\terms{\if@twocolumn
-\paragraph*{General Terms:}
+\section*{General Terms}
 \else \small
 \quotation
 \fi}
@@ -203,7 +203,7 @@
 
 \def\category#1#2#3{%
 \ifnum\catcount=1
-\paragraph*{Categories and Subject Descriptors:}
+\section*{Categories and Subject Descriptors}
 \advance\catcount by 1\else{\unskip; }\fi
     \@ifnextchar [{\@category{#1}{#2}{#3}}{\@category{#1}{#2}{#3}[]}%
 }
@@ -291,7 +291,7 @@ prior specific permission and/or a fee.}
 \global\def\section{\@startsection {section}{1}{\z@}%
                                    {-1.5ex \@plus -1.5ex \@minus -.1ex}%
                                    {1ex \@plus.2ex}%
-                                   {\normalfont\bfseries\scshape\fontsize{12}{14}\selectfont}}
+                                   {\normalfont\bfseries\fontsize{12}{14}\selectfont}}
 \global\def\subsection{\@startsection{subsection}{2}{\z@}%
                                      {-1.2ex\@plus -1.2ex \@minus -.1ex}%
                                      {0.6ex \@plus .2ex}%
@@ -299,11 +299,11 @@ prior specific permission and/or a fee.}
 \global\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
                                      {-1.5ex\@plus -1.5ex \@minus -.1ex}%
                                      {1ex \@plus .2ex}%
-                                     {\normalfont\itshape\fontsize{11}{12}\selectfont}}
+                                     {\normalfont\bfseries\fontsize{11}{12}\selectfont}}
 \global\def\paragraph{\@startsection{paragraph}{4}{\z@}%
                                      {1.5ex\@plus 1.5ex \@minus .1ex}%
-                                     {-\parindent}%
-                                     {\normalfont\bfseries\selectfont}}
+                                     {-1.2ex}%
+                                     {\normalfont\itshape\selectfont}}
 
 \global\def\@maketitle{%
   \newpage
