@@ -31,8 +31,6 @@ infers the range constraints across the call graph.
 
 %Size/alloc/index annotation.
 
-Constant folding.
-
 Pointer arithmetic simplification.
 - symbolic~\cite{engelen:symbolic}.
 
@@ -40,11 +38,14 @@ Integer operation sinking.
 
 Checking idiom recognition.
 
-Load hoisting.
+\paragraph{Value equality testing.}
+How to determine the values from two load instructions
+are the same? Load hoisting, unsound aliasing rules.
 
-\sys by default does not generate constraints for integer conversions.
-One may simply invoke GCC with \cc{-Wconversion} to inspect possible
-dangerous conversions.
+\paragraph{Conversion constraint.}
+\sys by default does not generate constraints for checking integer
+conversions.  One may simply invoke GCC with \cc{-Wconversion} to
+inspect potentially dangerous conversions.
 [[[\sys does something for critical integers, array indices, annotated sizes.]]]
 
 \subsection{Path Constraint Generation}
