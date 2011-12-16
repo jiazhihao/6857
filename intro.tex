@@ -63,10 +63,10 @@ They may only manifest themselves with abnormal input, which are
 not seen in typical usages.  Besides, a buggy module that contains
 integer errors may only be loaded with some specific hardware or
 configuration, which is unlikely to be fully explored in development
-and testing environment.  Decent compilers like GCC and Clang have
-provided code generation options such as \cc{-ftrapv} to insert
-runtime checks for catching common integer errors.  Since doing so
-hurts performance, these options are usually turned off in product
+and testing environment.  Decent compilers like GCC have provided
+code generation options such as \cc{-ftrapv} to insert runtime
+checks for catching common integer errors.  Since doing so hurts
+performance, these options are usually turned off in product
 environment.
 
 This paper presents \sys, a static analysis tool that detects integer

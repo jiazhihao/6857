@@ -169,8 +169,8 @@ should be able to catch common integer errors while being solvable
 in a reasonable amount of time.
 
 \paragraph{Idioms for faster solving.}
-We notice that some operations like division significantly slow
-down the constraint solver~\cite{brummayer:perf}, most of which are
-used in integer error checks like $\cc{UINT_MAX} /_u x > y$.  \sys
-should recognize these idioms and generate constraints that are
-easier to solve.
+We notice that some operations like division would significantly
+slow down the constraint solver~\cite{brummayer:perf}, most of which
+are used in integer error checks like $\cc{UINT_MAX} /_u x > y$.
+\sys should recognize these idioms and generate constraints that
+are easier to solve.
