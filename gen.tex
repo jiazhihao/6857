@@ -4,37 +4,11 @@
 This section describes \sys's design for constraint generation and
 solving.
 
-\subsection{Basic Architecture}
-
-\sys's constraint generator is implemented as a set of compiler
-passes in the LLVM~\cite{lattner:llvm} framework.  The workflow is
-shown in \autoref{f:flow}.  The error and path constraint generation
-passes work on LLVM intermediate representations, which are compiled
-from source code with all optimizations turned off.  They inspect
-one function at a time, so as to bound the size of constraints.
-
-To improve the accuracy, \sys allows users to annotate the ranges
-of variables, such as function parameters and structure fields, as
-additional constraints. It also employs a whole-program pass that
-infers the range constraints across the call graph.
-
-\begin{figure}
-\centering
-\resizebox{0.9\linewidth}{!}{
-\input{figs/flow}
-}
-\caption{\sys's workflow.}
-\label{f:flow}
-\end{figure}
-
 \subsection{Transformations}
 
-Pointer arithmetic simplification.
-- symbolic~\cite{engelen:symbolic}.
-
-Integer operation sinking.
-
-Checking idiom recognition.
+\sys performs a series of code transformations for better constraint
+generation.  As discussed in \autoref{s:goal}, these transformations
+should not destroy the semantics of integer security.
 
 \paragraph{Value equality testing.}
 How to determine the values from two load instructions
@@ -43,14 +17,25 @@ are the same? Load hoisting, unsound aliasing rules.
 \autoref{f:hoist} shows in the hoisting algorithm.
 
 \begin{figure}
+\footnotesize
 \input{algo/hoist}
 \caption{The hoisting algorithm to move a load instruction to the
-earliest possible point in a control-flow graph.  It repeats the
-two phases: first try to move the instruction to the beginning of
-its basic block; if successful, try to move it into the common
-ancestor of the block's predecessors.}
+earliest possible point within a function.  It repeats the two
+phases: first try to move the instruction to the beginning of its
+basic block; if successful, try to move it into the common ancestor
+of the block's predecessors.}
 \label{f:hoist}
 \end{figure}
+
+\paragraph{Overflow-before-check.}
+\sys invokes LLVM to push every integer operation to the latest
+possible point, so that the result is computed only when it is
+needed.
+
+\paragraph{Checking idiom recognition.}
+
+\paragraph{Pointer arithmetic simplification.}
+- symbolic~\cite{engelen:symbolic}.
 
 \subsection{Error Constraint Generation}
 
