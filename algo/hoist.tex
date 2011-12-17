@@ -1,5 +1,5 @@
 \begin{algorithmic}
-\Procedure{LoadHoist}{$I$}\Comment{$I$ is a load instruction}
+\Function{LoadHoist}{$I$}\Comment{$I$ is a load instruction}
 \State $\mathit{loc} \gets I$'s memory location to load from
 \Loop
 \If{\textbf{not} \Call{LoadHoistInBlock}{$I$, $\mathit{loc}$}}
@@ -11,8 +11,10 @@
 \EndIf
 \State Move $I$ to the end of $blk$
 \EndLoop
-\EndProcedure
-\\
+\EndFunction
+
+\Statex
+
 \Function{LoadHoistInBlock}{$I$, $\mathit{loc}$}
 \Loop
 \State $\mathit{prev} \gets I$'s previous instruction in current block
@@ -20,14 +22,17 @@
 	\Comment{Moved to beginning of the block?}
 	\State \Return \textbf{true}
 \EndIf
-\If{$\mathit{prev}$ may modify $\mathit{loc}$ \textbf{or} \\
-\hspace{3.6em} \textbf{not} $\mathit{loc}$ dominates $\mathit{prev}$}
+\If{$\mathit{prev}$ may modify $\mathit{loc}$ \textbf{or} %\\
+%\hspace{3.6em}
+\textbf{not} $\mathit{loc}$ dominates $\mathit{prev}$}
 	\State \Return \textbf{false}
 \EndIf
 \State Move $I$ before $\mathit{prev}$
 \EndLoop
 \EndFunction
-\\
+
+\Statex
+
 \Function{ChooseTargetBlock}{$I$, $\mathit{loc}$}
 \State $\mathit{blk} \gets I$'s block
 \State $\mathit{anc} \gets$ the common ancestor of $\mathit{blk}$'s predecessor(s)
@@ -40,7 +45,9 @@
 \EndIf
 \State \Return $\mathit{anc}$
 \EndFunction
-\\
+
+\Statex
+
 \Function{CanBlocksModify}{$\mathit{loc}$, $\mathit{blk}$, $\mathit{blkset}$}
 \ForAll{$b \in \mathit{blk}$'s predecessor(s)}
 	\If{$b \notin \mathit{blkset}$}
