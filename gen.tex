@@ -2,7 +2,7 @@
 \label{s:gen}
 
 This section describes \sys's design for constraint generation and
-solving.  The archive scalability, \sys chooses function an appropriate
+solving.  The achieve scalability, \sys chooses function an appropriate
 granularity for constraint generation.  The constraint generation
 algorithms are designed to inspect one function at a time, so as
 to bound the size of constraints.
@@ -48,7 +48,7 @@ multiplication $x \times_u y$ overflows, the product \cc{size} is
 not used before the check.
 \input{code/error-before-use}
 
-To avoid warning against such caees, \sys invokes LLVM to push every
+To avoid warning against such cases, \sys invokes LLVM to push every
 integer operation down to the latest possible point along the control
 flow, so that the result is computed only when it is needed.  The
 detail of the algorithm is omitted since it is similar to load
