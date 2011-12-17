@@ -27,6 +27,8 @@ are the same? Load hoisting, unsound aliasing rules.
 
 \autoref{f:hoist} shows in the hoisting algorithm.
 
+aliasing assumption~\cite{livshits:ipssa}.
+
 \begin{figure}
 \footnotesize
 \input{algo/hoist}
@@ -66,12 +68,17 @@ x +_u y <_u x.
 \end{align}
 This is equivalent to a ``sane'' check
 $\cc{UINT_MAX} - x >_u y$.
-
+\if 0
 Note that using overflowed result to check multiplication is trickier.
 In general $x \times_u y <_u x$ is not a valid integer error check
-but a bug.  [[[XXX: use the running example?]]]
+but a bug.
+For example, in \autoref{f:bridge} if one uses the check
+$\cc{maxnum} <_u \cc{maxnum} \times 16$,
+an adversary could supply $\cc{maxnum} = XXX$, which will
+bypass the check and still lead to memory corruption.
 A correct way would be $(x \times_u y) /_u y \neq x$
 or a sane check, $\cc{UINT_MAX} /_u x > y$.
+\fi
 
 \sys recognizes XXX integer error checking idioms...
 
