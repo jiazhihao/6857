@@ -2,13 +2,24 @@
 \label{s:gen}
 
 This section describes \sys's design for constraint generation and
-solving.
+solving.  The archive scalability, \sys chooses function an appropriate
+granularity for constraint generation.  The constraint generation
+algorithms are designed to inspect one function at a time, so as
+to bound the size of constraints.
+
+To improve accuracy, \sys allows users to annotate the ranges of
+variables, such as function parameters and structure fields, as
+additional constraints. It also employs a whole-program pass that
+infers the range constraints across the call graph.
 
 \subsection{Transformations}
 
 \sys performs a series of code transformations for better constraint
 generation.  As discussed in \autoref{s:goal}, these transformations
 should not destroy the semantics of integer security.
+
+\paragraph{Pointer arithmetic simplification.}
+- symbolic~\cite{engelen:symbolic}.
 
 \paragraph{Value equality testing.}
 How to determine the values from two load instructions
@@ -28,14 +39,39 @@ of the block's predecessors.}
 \end{figure}
 
 \paragraph{Overflow-before-check.}
+An integer error check may come after the overflowed computation,
+but before any use of the result.  In that case, the overflowed
+computation is benign.  Below is such an example.  Even the
+multiplication $x \times_u y$ overflows, the product \cc{size} is
+not used before the check.
+\input{code/error-before-use}
+
+To avoid warning against such caees,
 \sys invokes LLVM to push every integer operation to the latest
 possible point, so that the result is computed only when it is
-needed.
+needed. [[[XXX: a few words to describe it briefly.]]]
 
-\paragraph{Checking idiom recognition.}
+In the above example, \sys will move the integer operation $x
+\times_u y$ down to right after the \cc{if} branch and before the
+\cc{malloc} call, where its result \cc{size} is first used.
 
-\paragraph{Pointer arithmetic simplification.}
-- symbolic~\cite{engelen:symbolic}.
+\paragraph{Overflowed checking idiom.}
+It is commonly seen in practice to use an overflowed result to do
+the integer error check for $x +_u y$, where $x$ and $y$ are
+of type \cc{unsigned int}, as follows.
+\begin{align}
+x +_u y <_u x.
+\end{align}
+This is equivalent to a ``sane'' check
+$\cc{UINT_MAX} - x >_u y$.
+
+Note that using overflowed result to check multiplication is trickier.
+In general $x \times_u y <_u x$ is not a valid integer error check
+but a bug.  [[[XXX: use the running example?]]]
+A correct way would be $(x \times_u y) /_u y \neq x$
+or a sane check, $\cc{UINT_MAX} /_u x > y$.
+
+\sys recognizes XXX integer error checking idioms...
 
 \subsection{Error Constraint Generation}
 
