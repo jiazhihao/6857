@@ -38,7 +38,7 @@ of the block's predecessors.}
 \label{f:hoist}
 \end{figure}
 
-\paragraph{Overflow-before-check.}
+\paragraph{Error-before-check.}
 An integer error check may come after the overflowed computation,
 but before any use of the result.  In that case, the overflowed
 computation is benign.  Below is such an example.  Even the
@@ -46,10 +46,12 @@ multiplication $x \times_u y$ overflows, the product \cc{size} is
 not used before the check.
 \input{code/error-before-use}
 
-To avoid warning against such caees,
-\sys invokes LLVM to push every integer operation to the latest
-possible point, so that the result is computed only when it is
-needed. [[[XXX: a few words to describe it briefly.]]]
+To avoid warning against such caees, \sys invokes LLVM to push every
+integer operation down to the latest possible point along the control
+flow, so that the result is computed only when it is needed.  The
+detail of the algorithm is omitted since it is similar to load
+hoisting, except that it runs towards the opposite direction, and
+does not need to consider memory loads and stores.
 
 In the above example, \sys will move the integer operation $x
 \times_u y$ down to right after the \cc{if} branch and before the

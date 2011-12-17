@@ -1,8 +1,8 @@
 \begin{algorithmic}
-\Procedure{Hoist}{$I$}\Comment{$I$ is a load instruction}
+\Procedure{LoadHoist}{$I$}\Comment{$I$ is a load instruction}
 \State $\mathit{loc} \gets I$'s memory location to load from
 \Loop
-\If{\textbf{not} \Call{HoistInBlock}{$I$, $\mathit{loc}$}}
+\If{\textbf{not} \Call{LoadHoistInBlock}{$I$, $\mathit{loc}$}}
 	\State \Return
 \EndIf
 \State $\mathit{blk} \gets$ \Call{ChooseTargetBlock}{$I$, $\mathit{loc}$}
@@ -13,7 +13,7 @@
 \EndLoop
 \EndProcedure
 \\
-\Function{HoistInBlock}{$I$, $\mathit{loc}$}
+\Function{LoadHoistInBlock}{$I$, $\mathit{loc}$}
 \Loop
 \State $\mathit{prev} \gets I$'s previous instruction in current block
 \If{$\mathit{prev} = \textbf{nil}$}
