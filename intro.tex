@@ -69,17 +69,6 @@ checks for catching common integer errors.  Since doing so hurts
 performance, these options are usually turned off in product
 environment.
 
-This paper presents \sys, a static analysis tool that detects integer
-errors at compile time.  It performs precise bit-level reasoning
-of integer operations and warns possible integer errors...
-
-We have applied \sys to XXX.  XXX patches have been upstreamed..
-
-The rest of this paper is organized as follows. \autoref{s:oview}
-gives an overview of \sys.  \autoref{s:gen} presents how \sys
-generates constraints...  We related \sys to previous work in
-\autoref{s:relwk}, and conclude in \autoref{s:concl}.
-
 \begin{figure}
 \input{code/bridge}
 \caption{An integer error~\cite[CVE-2006-5751]{cve} in the Ethernet
@@ -88,3 +77,38 @@ overflows and allow local users to execute arbitrary code via a
 large \texttt{maxnum} from userspace.}
 \label{f:bridge}
 \end{figure}
+
+This paper presents \sys, a static analysis tool that detects integer
+errors at compile time.  It performs precise bit-level reasoning
+of each integer operation, and extracts the constraint under which
+the operation would lead to an error.  \sys then queries a constraint
+solver~\cite{boolector} to determine whether the constraint can be
+satisfied and warns against possible integer errors.
+
+The key challenge facing \sys is to filter out false errors and
+locate true bugs.  False errors could be caused by the inherent
+imprecision of static analysis.  Commonly-used code idioms may also
+contain benign integer errors that will not cause any software
+defects; \sys should recognize them and generate constraints
+accordingly.
+
+Another challenge is to apply \sys to large-scale systems code like
+the Linux kernel.  The size of constraints may grow exponentially
+with a large number of function calls and loops present.  Besides,
+integer operations such as division~\cite{brummayer:perf} will slow
+down the solver significantly.  Constraints generated unwisely will
+make it impossible to finish the solving in a reasonably amount
+of time even with a highly-optimized constraint solver.
+
+\sys addresses these challenges with a set of constraint generation
+algorithms tailored for integer errors.  They effectively reduce
+false errors and make the generated constraints to be solved
+efficiently.  \sys also introduces practical criteria for ranking
+integer errors by estimating their security impacts.
+
+We have applied \sys to XXX.  XXX patches have been upstreamed..
+
+The rest of this paper is organized as follows. \autoref{s:oview}
+gives an overview of \sys.  \autoref{s:gen} presents how \sys
+generates constraints...  We related \sys to previous work in
+\autoref{s:relwk}, and conclude in \autoref{s:concl}.
