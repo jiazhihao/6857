@@ -1,0 +1,63 @@
+\begin{algorithmic}
+\footnotesize
+\Procedure{Hoist}{$I$}\Comment{$I$ is a load instruction}
+\State $\mathit{loc} \gets I$'s memory location to load from
+\Loop
+\If{\textbf{not} \Call{HoistInBlock}{$I$, $\mathit{loc}$}}
+	\State \Return
+\EndIf
+\State $\mathit{blk} \gets$ \Call{ChooseTargetBlock}{$I$, $\mathit{loc}$}
+\If{$\mathit{blk} = \textbf{nil}$}
+	\State \Return
+\EndIf
+\State Move $I$ to the end of $blk$
+\EndLoop
+\EndProcedure
+\\
+\Function{HoistInBlock}{$I$, $\mathit{loc}$}
+\Loop
+\State $\mathit{prev} \gets I$'s previous instruction in current block
+\If{$\mathit{prev} = \textbf{nil}$}
+	\Comment{Moved to beginning of the block?}
+	\State \Return \textbf{true}
+\EndIf
+\If{$\mathit{prev}$ may modify $\mathit{loc}$ \textbf{or} \\
+\hspace{3.6em} \textbf{not} $\mathit{loc}$ dominates $\mathit{prev}$}
+	\State \Return \textbf{false}
+\EndIf
+\State Move $I$ before $\mathit{prev}$
+\EndLoop
+\EndFunction
+\\
+\Function{ChooseTargetBlock}{$I$, $\mathit{loc}$}
+\State $\mathit{blk} \gets I$'s block
+\State $\mathit{anc} \gets$ the common ancestor of $\mathit{blk}$'s predecessor(s)
+\If{$\mathit{anc} = \mathit{blk}$ \textbf{or} \textbf{not} $\mathit{loc}$ dominates $\mathit{anc}$}
+	\State \Return \textbf{nil}
+\EndIf
+\State $\mathit{blkset} \gets \{\mathit{anc}\}$
+\If{\Call{CanBlocksModify}{$\mathit{loc}$, $blk$, $\mathit{blkset}$}}
+	\State \Return \textbf{nil}
+\EndIf
+\State \Return $\mathit{anc}$
+\EndFunction
+\\
+\Function{CanBlocksModify}{$\mathit{loc}$, $\mathit{blk}$, $\mathit{blkset}$}
+\ForAll{$b \in \mathit{blk}$'s predecessor(s)}
+	\If{$b \notin \mathit{blkset}$}
+		\State $\mathit{blkset} \gets \mathit{blkset} \cup \{b\}$
+		\ForAll{$\mathit{instr} \in b$}
+			\Comment{Can $b$ modify $\mathit{loc}$?}
+			\If{$\mathit{instr}$ may modify $\mathit{loc}$}
+				\State \Return \textbf{true}
+			\EndIf
+		\EndFor
+		\If{\Call{CanBlocksModify}{$\mathit{loc}$, $b$, $\mathit{blkset}$}}
+			\State \Return \textbf{true}
+		\EndIf
+	\EndIf
+\EndFor
+\State \Return \textbf{false}
+\EndFunction
+
+\end{algorithmic}

@@ -40,6 +40,18 @@ Checking idiom recognition.
 How to determine the values from two load instructions
 are the same? Load hoisting, unsound aliasing rules.
 
+\autoref{f:hoist} shows in the hoisting algorithm.
+
+\begin{figure}
+\input{algo/hoist}
+\caption{The hoisting algorithm to move a load instruction to the
+earliest possible point in a control-flow graph.  It repeats the
+two phases: first try to move the instruction to the beginning of
+its basic block; if successful, try to move it into the common
+ancestor of the block's predecessors.}
+\label{f:hoist}
+\end{figure}
+
 \subsection{Error Constraint Generation}
 
 \paragraph{Conversion constraint.}
