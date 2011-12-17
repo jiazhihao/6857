@@ -1,18 +1,11 @@
 \section{Overview}
 \label{s:oview}
 
-This section gives an overview of \sys's goals and challenges.
+This section gives an overview of the definition of integer errors
+and the analysis architecture.
 
 \subsection{Integer Security}
 \label{s:goal}
-
-\sys adopts the CERT C secure coding standard for integer
-operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
-and considers operations that violate the coding standard as integer
-errors.  They cover a set of integer-based vulnerabilities, sometimes
-referred as arithmetic overflow (underflow, wraparound), division-by-zero,
-oversized shift, and signedness bugs in the literature.  We will
-summarize them below.
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
@@ -22,6 +15,14 @@ with the most significant bit indicating the sign.  If not particularly
 indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
 or $u$ may be pinned to an operation to specify it operates on
 signed or unsigned integers.
+
+\sys adopts the CERT C secure coding standard for integer
+operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
+and considers operations that violate the coding standard as integer
+errors.  They cover a set of integer-based vulnerabilities, sometimes
+referred as arithmetic overflow (underflow, wraparound), division-by-zero,
+oversized shift, and signedness bugs in the literature.  We will
+summarize them below.
 
 \paragraph{Addition \& subtraction \& multiplication.}
 Such an operation may lead to an integer error if the result of the
@@ -79,18 +80,23 @@ error handling.}
 \label{f:ext4}
 \end{figure}
 
-\subsection{A Strawman Approach}
+\subsection{A Strawman Analysis}
 
-We outline the workflow of a na\"ive \sys implementation.  For each
-integer operation it first performs symbolic analysis to compute
-the error constraint and the corresponding path constraint.  As for
-$\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes its
-error constraint as:
+\sys is implemented as a set of compiler passes in the
+LLVM~\cite{lattner:llvm} framework, as shown in \autoref{f:flow}.
+For each integer operation it first performs symbolic analysis to
+compute the error constraint and the corresponding path constraint
+(ignore range constraint for now).  These passes work on the
+intermediate representation (IR), which is compiled from source
+code with all optimizations turned off.
+
+As for $\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes
+its error constraint as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
-Since the multiplication is always reachable without any branches,
-the corresponding path constraint is simply true.
+Since the multiplication is always reachable without any branches
+in that function, the corresponding path constraint is simply true.
 
 \sys then feeds the logical AND of the two constraints into a
 constraint solver~\cite{boolector}.  The solver computes a possible
@@ -117,6 +123,17 @@ constraint solver, which will conclude that these constraints can
 never be satisfied.  This means that the integer error has been
 fixed.
 
+\begin{figure}
+\centering
+\resizebox{0.9\linewidth}{!}{
+\input{figs/flow}
+}
+\caption{\sys's workflow.}
+\label{f:flow}
+\end{figure}
+
+\if 0
+
 \subsection{Challenges}
 \label{s:chal}
 
@@ -138,15 +155,18 @@ Another example is that signed and unsigned integers are often used
 interchangeably in C code.  In a conversion like \cc{(int)((unsigned)x)}
 for a signed $x <_s 0$, the part \cc{(unsigned)x} may violate the
 secure integer standard while the whole expression does not.  \sys
-should avoid to warn such ``partial'' violations.
+should avoid to warn against such ``partial'' violations.
 
 \paragraph{Error-before-use.}
-Sometimes an integer error check comes after the overflowed
-computation, but before any use of the overflowed result.  Below
-is such an example.
+An integer error check may come after the overflowed computation,
+but before any use of the result.  In that case, the overflowed
+computation is benign.  Below is such an example.
 \input{code/error-before-use}
-\sys should avoid to warn $x \times_u y$ since the product is not
-used before the check.
+Even the multiplication $x \times_u y$ overflows, the product
+\cc{size} is not used before the check.  \sys will move the integer
+operation $x \times_u y$ down to the latest possible point, i.e.,
+right after the \cc{if} branch and before the \cc{malloc} call, so
+as to avoid warning against the multiplication.
 
 \paragraph{Overflowed checking idiom.}
 It is commonly seen in practice to use an overflowed result to do
@@ -156,7 +176,8 @@ x +_u y <_u x.
 \end{align}
 This is equivalent to a ``sane'' check
 $\cc{UINT_MAX} - x >_u y$.
-\sys should avoid warn such integer error checking idioms.
+\sys should recognize such integer error checking idioms and avoid
+to warn against them.
 
 Note that using overflowed result to check multiplication is trickier.
 In general $x \times_u y <_u x$ is not a valid integer error check
@@ -187,3 +208,5 @@ slow down the constraint solver~\cite{brummayer:perf}, most of which
 are used in integer error checks like $\cc{UINT_MAX} /_u x > y$.
 \sys should recognize these idioms and generate constraints that
 are easier to solve.
+
+\fi
