@@ -1,0 +1,14 @@
+\begin{algorithmic}
+\Function{PathConstraint}{$\mathit{blk}$}
+\State $g \gets \textbf{false}$
+\ForAll{$\mathit{pred} \in \mathit{blk}$'s predecessors(s)}
+\State $e \gets (\mathit{pred},\mathit{blk})$
+\If{$e$ is not a back edge}
+	\State $\mathit{br} \gets e$'s branching condition
+	\State $\mathit{as} \gets \bigwedge_i(x_i = y_i)$ for all assignments along $e$
+	\State $g \gets g \lor (\Call{PathConstraint}{\mathit{pred}} \land \mathit{br} \land \mathit{as})$
+\EndIf
+\EndFor
+\State \Return{$g$}
+\EndFunction
+\end{algorithmic}
