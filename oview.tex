@@ -76,7 +76,7 @@ option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 \caption{A signedness bug in the ext4 filesystem of the Linux kernel.
 Since \texttt{allocated} is declared as unsigned int, the test
 $(\texttt{allocated} < 0)$ will always be false, which breaks the
-error handling.}
+error handling logic.}
 \label{f:ext4}
 \end{figure}
 

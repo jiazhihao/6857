@@ -4,3 +4,13 @@
 Patch validation.
 
 Run the tool over OS kernels.  Userspace apps?
+
+What do patches look like?
+
+simple sanity check.
+- return -EINVAL or silently limit the value (e.g., timeout).
+
+interface change (e.g., CVE-2009-2909)
+sometimes infeasbile if the interface is exposed to userspace.
+
+misread specification (CAN bits).
