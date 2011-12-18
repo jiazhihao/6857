@@ -28,6 +28,9 @@ are the same? Load hoisting, unsound aliasing rules.
 \autoref{f:hoist} shows in the hoisting algorithm.
 
 aliasing assumption~\cite{livshits:ipssa}.
+\sys assumes that a pointer passed as a function parameter or a
+global variable points is distinct from any other memory location.
+
 
 \begin{figure}
 \small
@@ -68,17 +71,26 @@ x +_u y <_u x.
 \end{align}
 This is equivalent to a ``sane'' check
 $\cc{UINT_MAX} - x >_u y$.
-\if 0
+
 Note that using overflowed result to check multiplication is trickier.
-In general $x \times_u y <_u x$ is not a valid integer error check
-but a bug.
-For example, in \autoref{f:bridge} if one uses the check
-$\cc{maxnum} <_u \cc{maxnum} \times 16$,
-an adversary could supply $\cc{maxnum} = XXX$, which will
-bypass the check and still lead to memory corruption.
-A correct way would be $(x \times_u y) /_u y \neq x$
-or a sane check, $\cc{UINT_MAX} /_u x > y$.
-\fi
+In general $x \times_u y <_u x$ is not a valid integer error check.
+For example, given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum}
+\times_u 16$ gives a larger value $\cc{0xfffffff0}$, which both
+overflows and bypasses the check.  A correct check is $(x \times_u
+y) /_u y \neq x$ or a sane form, $\cc{UINT_MAX} /_u x > y$.
+
+Whether the imperfect check will lead to a security vulnerability
+depends on the context.  In the example above, \cc{maxnum} has to
+be at least $2^{28}$ to overflow $\cc{maxnum} \times 16$, and the
+product must be greater than or equal to that to bypass the check
+$\cc{maxnum} \times_u 16 <_u \cc{maxnum}$.  Allocating $2^{28}$
+bytes (i.e., 256~MB) is possible in a userspace application, but
+unlikely to succeed in the Linux kernel with \cc{kmalloc}, which
+imposes a relatively small limit~\cite[\chapterautorefname~8]{ldd3}.
+Nevertheless, the check becomes dangerous where the allocation
+function used is \cc{vmalloc} that has a bigger limit, the
+multiplication is $\cc{maxnum} \times_u 1024$, or the \cc{kmalloc}
+limit is raised in the future.
 
 \sys recognizes XXX integer error checking idioms...
 
