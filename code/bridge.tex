@@ -5,14 +5,14 @@
 \PY{k+kt}{size\PYZus{}t} \PY{n}{size} \PY{o}{=} \PY{n}{maxnum} \PY{o}{*} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{\PYZus{}\PYZus{}fdb\PYZus{}entry}\PY{p}{)}\PY{p}{;}
 \PY{c+cm}{/* PAGE\PYZus{}SIZE = 4096 */}
 \PY{k}{if} \PY{p}{(}\PY{n}{size} \PY{o}{>} \PY{n}{PAGE\PYZus{}SIZE}\PY{p}{)} \PY{p}{\PYZob{}}
-	\PY{c+cm}{/* limit to 4096 */}
-	\PY{n}{size} \PY{o}{=} \PY{n}{PAGE\PYZus{}SIZE}\PY{p}{;}
-	\PY{c+cm}{/* limit to 256 = 4096 / 16 */}
-	\PY{n}{maxnum} \PY{o}{=} \PY{n}{PAGE\PYZus{}SIZE} \PY{o}{/} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{\PYZus{}\PYZus{}fdb\PYZus{}entry}\PY{p}{)}\PY{p}{;}
+    \PY{c+cm}{/* limit to 4096 */}
+    \PY{n}{size} \PY{o}{=} \PY{n}{PAGE\PYZus{}SIZE}\PY{p}{;}
+    \PY{c+cm}{/* limit to 256 = 4096 / 16 */}
+    \PY{n}{maxnum} \PY{o}{=} \PY{n}{PAGE\PYZus{}SIZE} \PY{o}{/} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{\PYZus{}\PYZus{}fdb\PYZus{}entry}\PY{p}{)}\PY{p}{;}
 \PY{p}{\PYZcb{}}
 \PY{n}{buf} \PY{o}{=} \PY{n}{kmalloc}\PY{p}{(}\PY{n}{size}\PY{p}{,} \PY{n}{GFP\PYZus{}USER}\PY{p}{)}\PY{p}{;}
 \PY{k}{if} \PY{p}{(}\PY{o}{!}\PY{n}{buf}\PY{p}{)}
-	\PY{k}{return} \PY{o}{-}\PY{n}{ENOMEM}\PY{p}{;}
+    \PY{k}{return} \PY{o}{-}\PY{n}{ENOMEM}\PY{p}{;}
 \PY{c+cm}{/* write to buf[0..maxmum-1] */}
 \PY{p}{.}\PY{p}{.}\PY{p}{.}
 \end{Verbatim}
