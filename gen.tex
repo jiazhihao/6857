@@ -88,9 +88,9 @@ bytes (i.e., 256~MB) is possible in a userspace application, but
 unlikely to succeed in the Linux kernel with \cc{kmalloc}, which
 imposes a relatively small limit~\cite[\chapterautorefname~8]{ldd3}.
 Nevertheless, the check becomes dangerous where the allocation
-function used is \cc{vmalloc} that has a bigger limit, the
-multiplication is $\cc{maxnum} \times_u 1024$, or the \cc{kmalloc}
-limit is raised in the future.
+function used has a bigger limit (e.g., \cc{vmalloc}), the
+multiplication is $\cc{maxnum} \times_u 1024$ (i.e., allocating
+4~MB), or the \cc{kmalloc} limit is raised in the future.
 
 \sys recognizes XXX integer error checking idioms...
 
