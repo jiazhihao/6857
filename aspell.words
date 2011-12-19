@@ -1,7 +1,8 @@
-personal_ws-1.1 en 32 
+personal_ws-1.1 en 36 
 CVE
 GCC
 LLVM
+MITRE
 PREfix
 PowerPC
 VMware
@@ -18,13 +19,16 @@ interprocedurally
 kint
 libc
 lighttpd
+lossy
 malloc
 oversized
+parallelized
 preprocessor
 runtime
 scalability
 signedness
 strawman
+truncations
 untether
 untrusted
 upstreamed

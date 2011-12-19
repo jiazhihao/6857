@@ -87,15 +87,15 @@ large \cc{maxnum} from userspace.}
 
 This paper presents \sys, a static analysis tool that scans C-language
 source code for integer errors.  It aims to aid developers detecting
-and fixing integer errors at compile time.  The main advantage is
-that it provides better code coverage without requiring to set up
-a testing environment, install hardware devices, nor prepare input
-data.
+and fixing integer errors at compile time.  Compared to run-time
+checking, the main advantage of \sys is that it provides better
+code coverage without requiring to set up a testing environment,
+install hardware devices, nor prepare input data.
 
 The key challenge facing \sys is knowing what are actual integer
 errors.  Conceptually, any integer operation that produces a result
 different from the infinitely ranged mathematical counterpart flags
-a potentential integer error~\cite{air}.  However, lossy truncations
+a penitential integer error~\cite{air}.  However, lossy truncations
 and sign conversions are commonly seen in C code, most of which are
 not damaging; overflow check idioms such as $x + y < x$ intentionally
 use overflowed results to prevent integer errors.  \sys needs a
@@ -105,26 +105,33 @@ under which an integer operation will go wrong.
 A second challenge is to precisely reason about integer operations
 on every code path.  Given the error precondition of an integer
 operation, \sys needs to determine whether the control flow can
-reach the operation while satisfying the precondition.  As for
-\autoref{f:bridge}, \sys needs to conclude that the overflowed
-product \cc{size} will bypass the check and reach the \cc{kmalloc}
-call.
+reach that operation while simultaneously satisfying the precondition.
+As for the example in \autoref{f:bridge}, \sys should conclude that
+an overflowed product \cc{size} will bypass the sanity check and
+reach the \cc{kmalloc} call.
 
-The final challenge is to apply \sys to large-scale systems code like
-the Linux kernel.  The size of constraints may grow exponentially
-with a large number of function calls and loops present.  Besides,
-integer operations such as division~\cite{brummayer:perf} will slow
-down the solver significantly.  Constraints generated unwisely will
-make it impossible to finish the solving in a reasonably amount
-of time even with a highly optimized constraint solver.
+The final challenge is to apply \sys to large-scale systems code
+such as the Linux kernel.  \sys needs to finish the analysis in a
+reasonable amount of time.  To achieve better scalability \sys
+should be easily parallelized to take advantage of multiple processors.
+Besides, \sys should rank reported integer errors and screen out
+unlikely ones if the bug list is long.
 
-\sys addresses these challenges with a set of constraint generation
-algorithms tailored for integer errors.  They effectively reduce
-false errors and make the generated constraints to be solved
-efficiently.  \sys also introduces practical criteria for ranking
-integer errors by estimating their security impacts.
+\sys addresses these challenges with three ideas.  First, to balance
+precision and scalability \sys consists of two analysis engines:
+it performs precise bit-level analysis of integer constraints on a
+per-function basis, to extract the error and path preconditions of
+every integer operation, while infers coarse-grained integer ranges
+across functions.  Second, \sys introduces a set of pragmatic
+constraint generation algorithms tailored for integer errors.  They
+are designed to effectively filter out false errors and make the
+generated constraints to be solved efficiently.  Besides, \sys also
+introduces practical criteria for ranking integer errors by estimating
+their security impacts.
 
 We have applied \sys to XXX.  XXX patches have been upstreamed..
+
+The contributions of this work are: XXX.
 
 The rest of this paper is organized as follows. \autoref{s:oview}
 gives an overview of \sys.  \autoref{s:gen} presents how \sys
