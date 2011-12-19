@@ -93,9 +93,9 @@ code coverage without requiring to set up a testing environment,
 install hardware devices, nor prepare input data.
 
 The key challenge facing \sys is knowing what are actual integer
-errors.  Conceptually, any integer operation that produces a result
+errors.  Conceptually, any integer operation that may produce a result
 different from the infinitely ranged mathematical counterpart flags
-a penitential integer error~\cite{air}.  However, lossy truncations
+a potential integer error~\cite{air}.  However, lossy truncations
 and sign conversions are commonly seen in C code, most of which are
 not damaging; overflow check idioms such as $x + y < x$ intentionally
 use overflowed results to prevent integer errors.  \sys needs a
@@ -134,7 +134,7 @@ We have applied \sys to XXX.  XXX patches have been upstreamed..
 
 The contributions of this work are: XXX.
 
-The rest of this paper is organized as follows. \autoref{s:oview}
-gives an overview of \sys.  \autoref{s:gen} presents how \sys
-generates constraints...  We related \sys to previous work in
-\autoref{s:relwk}, and conclude in \autoref{s:concl}.
+The rest of this paper is organized as follows. \autoref{s:model}
+defines an integer model.  \autoref{s:gen} presents how \sys generates
+constraints...  We related \sys to previous work in \autoref{s:relwk},
+and conclude in \autoref{s:concl}.

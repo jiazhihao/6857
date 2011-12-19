@@ -1,11 +1,9 @@
-\section{Overview}
-\label{s:oview}
+\section{Integer Model}
+\label{s:model}
 
-This section gives an overview of the definition of integer errors
-and the analysis architecture.
-
-\subsection{Integer Security}
-\label{s:goal}
+This section presents an integer model and applies it to
+\autoref{f:bridge} to demostrate how it is used to catch integer
+errors.
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
@@ -13,21 +11,23 @@ An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.  If not particularly
 indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
-or $u$ may be pinned to an operation to specify it operates on
-signed or unsigned integers.
+or $u$ may be pinned to an operation to indicate it operates on
+signed or unsigned integers, repsectively.
 
-AIR~\cite{air}.
-\sys adopts the CERT C secure coding standard for integer
+\subsection{Integer Error Precondition}
+\label{s:precondition}
+
+\sys adopts the CERT C secure coding guidelines for integer
 operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
-and considers operations that violate the coding standard as integer
-errors.  They cover a set of integer-based vulnerabilities, sometimes
+and considers violations of the guidelines as integer errors.  These
+violations cover a set of integer-based vulnerabilities, sometimes
 referred as arithmetic overflow (underflow, wraparound), division-by-zero,
-oversized shift, and signedness bugs in the literature.  We will
-summarize them below.
+oversized shift, and signedness bugs in the literature.  We summarize
+them below.
 
 \paragraph{Addition \& subtraction \& multiplication.}
 Such an operation may lead to an integer error if the result of the
-corresponding arbitrary-precision mathematical operation falls out
+corresponding infinitely ranged mathematical operation falls out
 of the predefined range.  For example, $\cc{maxnum}\times_u 16$
 causes an integer error if $\cc{maxnum} = \cc{0xf0000000}$, because
 the mathematical product $\cc{0xf0000000} \times 16 = 2^{32}\times
@@ -51,13 +51,23 @@ underlying architecture.
 \paragraph{Conversion.}
 If $x$ is converted from integer type $s$ to $t$, the conversion
 may lead to an integer error if the value of $x$ does not fall into
-the range of $t$.  For example, in \autoref{f:ext4} the call to
-\cc{ext4_split_extent} returns a signed int, which will be negative
-on error.  However, the value is converted to an unsigned integer,
-leading to a meaningless comparison that is always false.
+the range of $t$, e.g., converting a possibly negative signed integer
+into unsigned.
 
-\paraend
+\autoref{f:ax25-sign} shows such a conversion bug.  The
+userspace-controlled signed integer \cc{optlen} is silently converted
+to unsigned to be compared with \cc{sizeof(int)}.  The conversion
+is regarded as an integer error since \cc{optlen} can go negative,
+say -1, which will be misinterpreted as the positive value $2^{32}-1$
+and bypass the sanity check $\cc{optlen} < \cc{sizeof(int)}$.
 
+
+%in \autoref{f:ext4} the call to
+%\cc{ext4_split_extent} returns a signed int, which will be negative
+%on error.  However, the value is converted to an unsigned integer,
+%leading to a meaningless comparison that is always false.
+
+\if 0
 It is worth noting that with the secure integer standard two
 functionally equivalent operations may have different error constraints.
 It is assumed that developers have chosen the appropriate operations
@@ -70,7 +80,20 @@ integer error checks like $(x + 1) < x$ for signed integer
 $x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special compile
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 \sys should work on unoptimized code.
+\fi
 
+\begin{figure}
+\centering
+\input{code/ax25-sign}
+\vspace{-1em}
+\caption{A signedness bug~\cite[CVE-2009-2909]{cve} in the AX.25
+network protocol implementation of the Linux kernel.  A negative
+\cc{optlen} will bypass the sanity check \cc{optlen < sizeof(int)}
+and trigger an kernel oops in the subsequent \cc{copy_from_user}
+call.}
+\label{f:ax25-sign}
+\end{figure}
+\if 0
 \begin{figure}
 \centering
 \input{code/ext4}
@@ -81,6 +104,7 @@ $(\cc{allocated} < 0)$ will always be false, which breaks the
 error handling logic.}
 \label{f:ext4}
 \end{figure}
+\fi
 
 \subsection{A Strawman Analysis}
 
