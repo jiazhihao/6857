@@ -27,7 +27,12 @@ constraints for integer operations.  As discussed in \autoref{s:imply},
 these transformations should not destroy the error preconditions
 of integer operations.
 
-\paragraph{Pointer arithmetic simplification.}
+\paragraph{Pointer arithmetic.}
+In general \sys considers the result of a pointer arithmetic as a
+black box, which can be any integral value within its range.
+
+pointer subtraction is commonly used.
+
 - symbolic~\cite{engelen:symbolic}.
 
 \paragraph{Value equality testing.}
@@ -118,6 +123,8 @@ Move in-loop constraints out.
 Path constraint generation.
 
 unroll loops once.
+
+handle comparison like \cc{p == NULL}.
 
 \begin{figure}
 \input{algo/path}

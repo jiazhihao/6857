@@ -2,7 +2,7 @@
 \label{s:model}
 
 This section presents an integer model and applies it to
-\autoref{f:bridge} to demostrate how it is used to catch integer
+\autoref{f:bridge} to demonstrate how it is used to catch integer
 errors.
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
@@ -12,7 +12,7 @@ an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.  If not particularly
 indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
 or $u$ may be pinned to an operation to indicate it operates on
-signed or unsigned integers, repsectively.
+signed or unsigned integers, respectively.
 
 \subsection{Integer Error Precondition}
 \label{s:precondition}
@@ -93,19 +93,10 @@ error handling logic.}
 
 \subsection{A Strawman Analysis}
 
-\if 0
-\sys is implemented as a set of compiler passes in the
-LLVM~\cite{lattner:llvm} framework, as shown in \autoref{f:flow}.
-For each integer operation it first performs symbolic analysis to
-compute the error constraint and the corresponding path constraint
-(ignore range constraint for now).  These passes work on the
-intermediate representation (IR), which is compiled from source
-code with all optimizations turned off.
-\fi
-
-Consider a na\"ive analysis that generates constraints from both
-the error and path preconditions.  As for $\cc{maxnum} \times_u 16$
-in \autoref{f:bridge}, \sys computes its error precondition as:
+Consider a \naive analysis that generates constraints from both the
+error and path preconditions.  As for the multiplication $\cc{maxnum}
+\times_u 16$ in \autoref{f:bridge}, \sys computes its error
+precondition as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
@@ -145,7 +136,7 @@ With the guidelines for integer operations described in
 is that two functionally equivalent operations may have different
 error preconditions.  For example, $\cc{maxnum}\times_u 16$ may be
 erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
-considered always secure as long as \cc{maxinum} is wider than than
+considered always secure as long as \cc{maxinum} is wider than
 4 bits.  The guidelines assume that the developer has chosen the
 appropriate integer operation to match their intention.
 
