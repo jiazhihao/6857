@@ -12,6 +12,15 @@ variables, such as function parameters and structure fields, as
 additional constraints. It also employs a whole-program pass that
 infers the range constraints across the call graph.
 
+\begin{figure}
+\centering
+\resizebox{0.9\linewidth}{!}{
+\input{figs/flow}
+}
+\caption{\sys's workflow.}
+\label{f:flow}
+\end{figure}
+
 \subsection{Transformations}
 
 \sys performs a series of code transformations for better constraint

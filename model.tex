@@ -108,6 +108,7 @@ error handling logic.}
 
 \subsection{A Strawman Analysis}
 
+\if 0
 \sys is implemented as a set of compiler passes in the
 LLVM~\cite{lattner:llvm} framework, as shown in \autoref{f:flow}.
 For each integer operation it first performs symbolic analysis to
@@ -115,16 +116,18 @@ compute the error constraint and the corresponding path constraint
 (ignore range constraint for now).  These passes work on the
 intermediate representation (IR), which is compiled from source
 code with all optimizations turned off.
+\fi
 
-As for $\cc{maxnum} \times_u 16$ in \autoref{f:bridge}, \sys computes
-its error constraint as:
+Consider a na\"ive analysis that generates constraints from both
+the error and path preconditions.  As for $\cc{maxnum} \times_u 16$
+in \autoref{f:bridge}, \sys computes its error precondition as:
 \begin{equation*}
 \cc{maxnum} >_u (2^{32} - 1) / 16.
 \end{equation*}
 Since the multiplication is always reachable without any branches
-in that function, the corresponding path constraint is simply true.
+in that function, the corresponding path precondition is simply true.
 
-\sys then feeds the logical AND of the two constraints into a
+\sys then feeds the logical AND of the two preconditions into a
 constraint solver~\cite{boolector}.  The solver computes a possible
 input, e.g., $\cc{maxnum} = \cc{0xf0000000}$.
 
@@ -133,30 +136,21 @@ to 256, shown as below (\cc{maxnum} is
 numbered~\cite[\chapterautorefname~8.11]{whale} for clarification
 purpose).
 \input{code/bridge-p}
-The error constraint of the multiplication remains unchanged.
+The error precondition of the multiplication remains unchanged.
 \begin{equation*}
 \cc{maxnum}_1 >_u (2^{32} - 1) / 16.
 \end{equation*}
-The corresponding path constraint is that \cc{maxnum} is reset to 256
+The corresponding path precondition is that \cc{maxnum} is reset to 256
 if it is larger than 256, or remains the old value otherwise.
 \begin{align*}
 & ((\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = 256)) \\
 \lor
 & (\neg (\cc{maxnum}_0 >_u 256) \land (\cc{maxnum}_1 = \cc{maxnum}_0)).
 \end{align*}
-Again \sys takes the logical AND of the two constraints to the
+Again \sys takes the logical AND of the two preconditions to the
 constraint solver, which will conclude that these constraints can
 never be satisfied.  This means that the integer error has been
 fixed.
-
-\begin{figure}
-\centering
-\resizebox{0.9\linewidth}{!}{
-\input{figs/flow}
-}
-\caption{\sys's workflow.}
-\label{f:flow}
-\end{figure}
 
 \if 0
 
