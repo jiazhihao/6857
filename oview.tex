@@ -74,7 +74,7 @@ option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 \begin{figure}
 \centering
 \input{code/ext4}
-\vspace{-0.5em}
+\vspace{-1em}
 \caption{A signedness bug in the ext4 filesystem of the Linux kernel.
 Since \cc{allocated} is declared as unsigned int, the test
 $(\cc{allocated} < 0)$ will always be false, which breaks the
