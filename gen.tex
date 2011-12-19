@@ -2,15 +2,13 @@
 \label{s:gen}
 
 This section describes \sys's design for constraint generation and
-solving.  The achieve scalability, \sys chooses function an appropriate
-granularity for constraint generation.  The constraint generation
-algorithms are designed to inspect one function at a time, so as
-to bound the size of constraints.
+solving, as shown in \autoref{f:flow}.
 
-To improve accuracy, \sys allows users to annotate the ranges of
-variables, such as function parameters and structure fields, as
-additional constraints. It also employs a whole-program pass that
-infers the range constraints across the call graph.
+\sys generates three categories of constraints for integer errors.
+It inspects one function at a time to extract error and path
+constraints, and infers range constraints across the call graph.
+\sys also allows users to annotate the ranges of function parameters
+and structure fields to improve accuracy.
 
 \begin{figure}
 \centering
@@ -23,9 +21,11 @@ infers the range constraints across the call graph.
 
 \subsection{Transformations}
 
-\sys performs a series of code transformations for better constraint
-generation.  As discussed in \autoref{s:goal}, these transformations
-should not destroy the semantics of integer security.
+In addition to standard optimizations like constant propagation,
+\sys performs a series of code transformations to generate better
+constraints for integer operations.  As discussed in \autoref{s:imply},
+these transformations should not destroy the error preconditions
+of integer operations.
 
 \paragraph{Pointer arithmetic simplification.}
 - symbolic~\cite{engelen:symbolic}.
@@ -125,7 +125,7 @@ unroll loops once.
 \label{f:path-cstr}
 \end{figure}
 
-\subsection{Value Range Inference}
+\subsection{Range Constraint Generation}
 
 Range constraint \& annotations?
 

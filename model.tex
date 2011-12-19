@@ -67,21 +67,6 @@ and bypass the sanity check $\cc{optlen} < \cc{sizeof(int)}$.
 %on error.  However, the value is converted to an unsigned integer,
 %leading to a meaningless comparison that is always false.
 
-\if 0
-It is worth noting that with the secure integer standard two
-functionally equivalent operations may have different error constraints.
-It is assumed that developers have chosen the appropriate operations
-to match their intention.  For example, $\cc{maxnum}\times_u 16$
-may be erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl
-4$ is considered always secure.  Any compiler optimization that
-performs such code transformations would destroy the semantics.
-Besides, decent C compilers may completely optimize away invalid
-integer error checks like $(x + 1) < x$ for signed integer
-$x$~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special compile
-option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
-\sys should work on unoptimized code.
-\fi
-
 \begin{figure}
 \centering
 \input{code/ax25-sign}
@@ -151,6 +136,27 @@ Again \sys takes the logical AND of the two preconditions to the
 constraint solver, which will conclude that these constraints can
 never be satisfied.  This means that the integer error has been
 fixed.
+
+\subsection{Implication}
+\label{s:imply}
+
+With the guidelines for integer operations described in
+\autoref{s:precondition}, a possibly counter-intuitive implication
+is that two functionally equivalent operations may have different
+error preconditions.  For example, $\cc{maxnum}\times_u 16$ may be
+erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
+considered always secure as long as \cc{maxinum} is wider than than
+4 bits.  The guidelines assume that the developer has chosen the
+appropriate integer operation to match their intention.
+
+Therefore, any compiler optimization that performs code transformations
+like rewriting $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$
+would destroy the precondition semantics.  Even worse, decent C
+compilers may completely optimize away checks like $(x + 1) < x$
+for signed integer $x$~\cite{gcc:signed-overflow,us-cert:gcc},
+unless a special compile option \cc{-fwrapv} or \cc{-fno-strict-overflow}
+is given.  To generate error constraints that best match the
+developer's intention, \sys runs before these optimizations.
 
 \if 0
 
