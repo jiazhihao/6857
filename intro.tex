@@ -42,13 +42,14 @@ It may cause more subtle logic bugs if the value is used in decision
 making, such as misleading the kernel to kill an innocent
 process~\cite[CVE-2011-4097]{cve}.
 
-Integer errors have emerged as a threat to system security.  A 2007
-study~\cite{christey:vuln} of the CVE list~\cite{cve} suggests that
-they ``are number 2 for OS vendor advisories''.  A recent
-survey~\cite{chen:kbugs} confirms the finding, where integer errors
-account for more than one third of the reported Linux kernel
-vulnerabilities from 2010 to early 2011 that can be misused to
-corrupt the kernel and break its integrity.
+Integer errors have emerged as a threat to systems security.  A
+2007 MITRE study~\cite{christey:vuln} suggests that they are already
+``number 2 for OS vendor advisories'', only after buffer overflows.
+A recent survey~\cite{chen:kbugs} reviews the reported Linux kernel
+vulnerabilities in the CVE list~\cite{cve} from 2010 to early 2011,
+and confirms the finding that integer errors account for more than
+one third of the vulnerabilities that can be misused to corrupt the
+kernel.
 
 To avoid integer errors developers need, for example, to perform
 sanity checks on untrusted inputs.  Even with that in mind, writing
