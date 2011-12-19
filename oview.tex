@@ -16,6 +16,7 @@ indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
 or $u$ may be pinned to an operation to specify it operates on
 signed or unsigned integers.
 
+AIR~\cite{air}.
 \sys adopts the CERT C secure coding standard for integer
 operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
 and considers operations that violate the coding standard as integer
@@ -74,8 +75,8 @@ option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.  Therefore,
 \centering
 \input{code/ext4}
 \caption{A signedness bug in the ext4 filesystem of the Linux kernel.
-Since \texttt{allocated} is declared as unsigned int, the test
-$(\texttt{allocated} < 0)$ will always be false, which breaks the
+Since \cc{allocated} is declared as unsigned int, the test
+$(\cc{allocated} < 0)$ will always be false, which breaks the
 error handling logic.}
 \label{f:ext4}
 \end{figure}
