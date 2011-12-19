@@ -13,4 +13,3 @@ buf = kmalloc(size, GFP_USER);
 if (!buf)
 	return -ENOMEM;
 /* write to buf[0..maxmum-1] */
-...
