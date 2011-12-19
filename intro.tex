@@ -117,17 +117,18 @@ should be easily parallelized to take advantage of multiple processors.
 Besides, \sys should rank reported integer errors and screen out
 unlikely ones if the bug list is long.
 
-\sys addresses these challenges with three ideas.  First, to balance
-precision and scalability \sys consists of two analysis engines:
-it performs precise bit-level analysis of integer constraints on a
-per-function basis, to extract the error and path preconditions of
-every integer operation, while infers coarse-grained integer ranges
-across functions.  Second, \sys introduces a set of pragmatic
-constraint generation algorithms tailored for integer errors.  They
-are designed to effectively filter out false errors and make the
-generated constraints to be solved efficiently.  Besides, \sys also
-introduces practical criteria for ranking integer errors by estimating
-their security impacts.
+\sys addresses these challenges with three ideas.  First, \sys
+employs two analysis phases to balance precision and scalability.
+It keeps track of precise bit-level integer constraints on a
+per-function basis, which are generated from both the error and
+path preconditions of each integer operation, while propagates
+coarse-grained integer ranges across functions.  Second, \sys
+proposes a set of pragmatic constraint generation algorithms tailored
+for integer errors.  They are designed to effectively filter out
+false errors and make the generated constraints to be solved
+efficiently.  Besides, \sys introduces practical criteria for ranking
+integer errors by estimating their security impacts on the control
+flow and data integrity.
 
 We have applied \sys to XXX.  XXX patches have been upstreamed..
 
