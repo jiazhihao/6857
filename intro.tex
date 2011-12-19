@@ -19,19 +19,19 @@ integers, ranging from 0 to $2^{32} - 1$.
 The developer's intention is to limit the values of 
 \cc{maxnum} and \cc{size} to 256 and 4096, respectively.
 
-If an adversary supplies a large \cc{maxnum}, say \cc{0xf0000000},
-the multiplication $\cc{maxnum} \times 16$ would overflow the 32-bit
-unsigned integer range and result in \cc{size} being set to 0.
-Subsequently, the sanity check $\cc{size} > 4096$ will be bypassed,
-so that the values of \cc{size} and \cc{maxnum} are not correctly
-limited.  In this case \cc{buf} is allocated as a zero-length buffer;
-any further access into \cc{buf} is out of bounds and may cause a
-kernel panic (i.e., denial-of-service).  Furthermore, the adversary
-may control the out-of-bounds writes (i.e., buffer overflow) in a
-more elaborate way with carefully crafted input, so as to execute
-arbitrary code and gain root privilege~\cite[CVE-2006-5751]{cve}.
-In practice, a similar integer error was used to untether the iOS
-jailbreak~\cite{esser:ios}.
+However, if an adversary supplies a large \cc{maxnum}, say
+\cc{0xf0000000}, the multiplication $\cc{maxnum} \times 16$ would
+overflow the 32-bit unsigned integer range and result in \cc{size}
+being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
+will be bypassed, so that the values of \cc{size} and \cc{maxnum}
+are not correctly limited.  In this case \cc{buf} is allocated as
+a zero-length buffer; any further access into \cc{buf} is out of
+bounds and may cause a kernel panic (i.e., denial-of-service).
+Furthermore, the adversary may control the out-of-bounds writes
+(i.e., buffer overflow) in a more elaborate way with carefully
+crafted input, so as to execute arbitrary code and gain root
+privilege~\cite[CVE-2006-5751]{cve}.  In practice, a similar integer
+error was used to untether the iOS jailbreak~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation we
@@ -51,6 +51,7 @@ and confirms the finding that integer errors account for more than
 one third of the vulnerabilities that can be misused to corrupt the
 kernel.
 
+\if 0
 To avoid integer errors developers need, for example, to perform
 sanity checks on untrusted inputs.  Even with that in mind, writing
 integer-error-free code is often more error-prone than expected.
@@ -71,31 +72,54 @@ code generation options such as \cc{-ftrapv} to insert runtime
 checks for catching common integer errors.  Since doing so hurts
 performance, these options are usually turned off in product
 environment.
+\fi
 
-\begin{figure}
-\input{code/bridge}
+\begin{figure}[t]
+\centering
+\begin{subfigure}{\linewidth}
+	\input{code/bridge}
+	\caption{The buggy code.}
+	\label{f:bridge:orig}
+\end{subfigure}
+\begin{subfigure}{\linewidth}
+	\vspace{2pt}
+	\input{code/bridge-p}
+	\caption{The patch (\cc{maxnum} is numbered for clarification).}
+	\label{f:bridge:patch}
+\end{subfigure}
 \caption{An integer error~\cite[CVE-2006-5751]{cve} in the Ethernet
 bridge subsystem of the Linux kernel, which may lead to buffer
 overflows and allow local users to execute arbitrary code via a
-large \texttt{maxnum} from userspace.}
+large \cc{maxnum} from userspace.}
 \label{f:bridge}
 \end{figure}
 
-This paper presents \sys, a static analysis tool that detects integer
-errors at compile time.  It performs precise bit-level reasoning
-of each integer operation, and extracts the constraint under which
-the operation would lead to an error.  \sys then queries a constraint
-solver~\cite{boolector} to determine whether the constraint can be
-satisfied and warns against possible integer errors.
+This paper presents \sys, a static analysis tool that scans C-language
+source code for integer errors.  It aims to aid developers detecting
+and fixing integer errors at compile time.  The main advantage is
+that it provides better code coverage without requiring to set up
+a testing environment, install hardware devices, nor prepare input
+data.
 
-The key challenge facing \sys is to filter out false errors and
-locate true bugs.  False errors could be caused by the inherent
-imprecision of static analysis.  Commonly used code idioms may also
-contain benign integer errors that will not cause any software
-defects; \sys should recognize them and generate constraints
-accordingly.
+The key challenge facing \sys is knowing what are actual integer
+errors.  Conceptually, any integer operation that produces a result
+different from the infinitely ranged mathematical counterpart flags
+a potentential integer error~\cite{air}.  However, lossy truncations
+and sign conversions are commonly seen in C code, most of which are
+not damaging; overflow check idioms such as $x + y < x$ intentionally
+use overflowed results to prevent integer errors.  \sys needs a
+practical model to define integer errors, i.e., the precondition
+under which an integer operation will go wrong.
 
-Another challenge is to apply \sys to large-scale systems code like
+A second challenge is to precisely reason about integer operations
+on every code path.  Given the error precondition of an integer
+operation, \sys needs to determine whether the control flow can
+reach the operation while satisfying the precondition.  As for
+\autoref{f:bridge}, \sys needs to conclude that the overflowed
+product \cc{size} will bypass the check and reach the \cc{kmalloc}
+call.
+
+The final challenge is to apply \sys to large-scale systems code like
 the Linux kernel.  The size of constraints may grow exponentially
 with a large number of function calls and loops present.  Besides,
 integer operations such as division~\cite{brummayer:perf} will slow
