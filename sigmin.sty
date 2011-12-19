@@ -326,25 +326,6 @@ prior specific permission and/or a fee.}
   \par
   \vskip 1.9em}
 
-% captions
-\makeatletter
-\ifx\abovecaptionskip\@undefined
-  \newskip\abovecaptionskip
-  \newskip\belowcaptionskip
-\fi
-\abovecaptionskip=0.5\baselineskip
-\belowcaptionskip=-0.5\baselineskip
-\long\def\@makecaption#1#2{%
-  \vskip\abovecaptionskip
-  \sbox\@tempboxa{{\footnotesize{\bfseries #1}: #2}}%
-  \ifdim \wd\@tempboxa >\hsize
-    {\begin{footnotesize}{\bfseries #1}: #2\par\end{footnotesize}}
-  \else
-    \global \@minipagefalse
-    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
-  \fi
-  \vskip\belowcaptionskip}
-
 % Compact itemize and enumerate.  Note that they use the same counters and
 % symbols as the usual itemize and enumerate environments.
 \def\compactify{\itemsep=3pt plus3pt \topsep=3pt plus3pt \partopsep=0pt
