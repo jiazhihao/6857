@@ -78,14 +78,17 @@ environment.
 \centering
 \begin{subfigure}{\linewidth}
 	\input{code/bridge}
+	\vspace{-1.2em}
 	\caption{The buggy code.}
 	\label{f:bridge:orig}
 \end{subfigure}
 \begin{subfigure}{\linewidth}
-	\vspace{2pt}
+	\vspace{1em}
 	\input{code/bridge-p}
+	\vspace{-1.2em}
 	\caption{The patch (\cc{maxnum} is numbered for clarification).}
 	\label{f:bridge:patch}
+	\vspace{0.8em}
 \end{subfigure}
 \caption{An integer error~\cite[CVE-2006-5751]{cve} in the Ethernet
 bridge subsystem of the Linux kernel, which may lead to buffer
