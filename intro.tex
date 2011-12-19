@@ -2,7 +2,7 @@
 \label{s:intro}
 
 Integers are fundamental data types in systems code.  Unlike
-arbitrary-precision mathematical integers, they use a fixed number
+infinitely ranged mathematical integers, they use a fixed number
 of bits to represent integral values bounded by a predefined range.
 An integer operation may produce a numeric value that does not fall
 into the range, which could cause lost or misinterpreted data, referred
@@ -16,16 +16,17 @@ multiplication of \cc{maxnum}, a variable controlled by userspace,
 and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
 32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
 integers, ranging from 0 to $2^{32} - 1$.
-The developer's intention is to limit the maximum values of 
+The developer's intention is to limit the values of 
 \cc{maxnum} and \cc{size} to 256 and 4096, respectively.
 
 If an adversary supplies a large \cc{maxnum}, say \cc{0xf0000000},
 the multiplication $\cc{maxnum} \times 16$ would overflow the 32-bit
-unsigned integer range and result in 0.  Subsequently, the sanity
-check will be bypassed and the value of \cc{maxnum} is not limited.
-In this case \cc{buf} is allocated as a zero-length buffer; any
-further access into \cc{buf} is out of bounds and may cause a kernel
-panic (i.e., denial-of-service).  Furthermore, the adversary
+unsigned integer range and result in \cc{size} being set to 0.
+Subsequently, the sanity check $\cc{size} > 4096$ will be bypassed,
+so that the values of \cc{size} and \cc{maxnum} are not correctly
+limited.  In this case \cc{buf} is allocated as a zero-length buffer;
+any further access into \cc{buf} is out of bounds and may cause a
+kernel panic (i.e., denial-of-service).  Furthermore, the adversary
 may control the out-of-bounds writes (i.e., buffer overflow) in a
 more elaborate way with carefully crafted input, so as to execute
 arbitrary code and gain root privilege~\cite[CVE-2006-5751]{cve}.
@@ -35,10 +36,11 @@ jailbreak~\cite{esser:ios}.
 Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation we
 just mentioned, a problematic integer may lead to information
-leakage, for example, if it is used to determine the number of bytes
+leakage, for example, if it is used to determine the number of data
 to be copied from kernel to userspace, raising privacy concerns.
-It may cause more subtle logic bugs and defects if used in branching
-conditions.
+It may cause more subtle logic bugs if the value is used in decision
+making, such as misleading the kernel to kill an innocent
+process~\cite[CVE-2011-4097]{cve}.
 
 Integer errors have emerged as a threat to system security.  A 2007
 study~\cite{christey:vuln} of the CVE list~\cite{cve} suggests that
@@ -87,7 +89,7 @@ satisfied and warns against possible integer errors.
 
 The key challenge facing \sys is to filter out false errors and
 locate true bugs.  False errors could be caused by the inherent
-imprecision of static analysis.  Commonly-used code idioms may also
+imprecision of static analysis.  Commonly used code idioms may also
 contain benign integer errors that will not cause any software
 defects; \sys should recognize them and generate constraints
 accordingly.
@@ -98,7 +100,7 @@ with a large number of function calls and loops present.  Besides,
 integer operations such as division~\cite{brummayer:perf} will slow
 down the solver significantly.  Constraints generated unwisely will
 make it impossible to finish the solving in a reasonably amount
-of time even with a highly-optimized constraint solver.
+of time even with a highly optimized constraint solver.
 
 \sys addresses these challenges with a set of constraint generation
 algorithms tailored for integer errors.  They effectively reduce
