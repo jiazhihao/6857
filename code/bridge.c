@@ -12,4 +12,4 @@ if (size > PAGE_SIZE) {
 buf = kmalloc(size, GFP_USER);
 if (!buf)
 	return -ENOMEM;
-/* write to buf[0..maxmum-1] */
+/* write to buf[0..maxnum-1] */
