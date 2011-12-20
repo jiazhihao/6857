@@ -122,7 +122,7 @@ unlikely ones if the bug list is long.
 On a per-function basis \sys generates precise bit-level integer
 constraints, combined from both the error and path preconditions
 of each integer operation within that function.  A constraint
-solver~\cite{boolector} is consulted to decide the satisfability
+solver~\cite{boolector} is consulted to decide the satisfiability
 of these constraints, i.e., whether the operation can become an
 integer error.  \sys proposes a set of pragmatic constraint generation
 algorithms tailored for integer errors.  They are designed to

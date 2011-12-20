@@ -1,4 +1,4 @@
-personal_ws-1.1 en 37 
+personal_ws-1.1 en 39 
 CVE
 GCC
 LLVM
@@ -15,6 +15,7 @@ filesystem
 glibc
 grsecurity
 iOS
+infeasible
 interprocedurally
 kint
 libc
@@ -26,6 +27,7 @@ oversized
 parallelized
 preprocessor
 runtime
+satisfiability
 scalability
 signedness
 strawman
