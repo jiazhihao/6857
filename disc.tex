@@ -11,7 +11,13 @@ Apache,
 lighttpd new bug
 
 bad overflow checks: $x \times y < x$, 
-\autoref{f:bridge}
+\autoref{f:bridge}.
+
+compilers and arch:
+signed overflow (IntegerLib, etc.),
+oversized shift (Google's Native Client sandboxing),
+ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
+and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
 
 index checks:
 miss (i < 0) or should declare i as unsigned
