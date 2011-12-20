@@ -1,0 +1,12 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k}{struct} \PY{n}{pid\PYZus{}namespace} \PY{p}{\PYZob{}}
+    \PY{k+kt}{int} \PY{n}{kref}\PY{p}{;}
+    \PY{k}{struct} \PY{n}{pidmap} \PY{n}{pidmap}\PY{p}{[}\PY{n}{PIDMAP\PYZus{}ENTRIES}\PY{p}{]}\PY{p}{;}
+    \PY{p}{.}\PY{p}{.}\PY{p}{.}
+\PY{p}{\PYZcb{}}\PY{p}{;}
+\PY{k}{struct} \PY{n}{pid\PYZus{}namespace} \PY{o}{*}\PY{n}{pid\PYZus{}ns} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{k+kt}{unsigned} \PY{k+kt}{int} \PY{n}{last} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{k}{struct} \PY{n}{pidmap} \PY{o}{*}\PY{n}{map} \PY{o}{=}
+    \PY{o}{&}\PY{n}{pid\PYZus{}ns}\PY{o}{-}\PY{o}{>}\PY{n}{pidmap}\PY{p}{[}\PY{p}{(}\PY{n}{last} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{o}{/}\PY{n}{BITS\PYZus{}PER\PYZus{}PAGE}\PY{p}{]}\PY{p}{;}
+\PY{k+kt}{int} \PY{n}{off} \PY{o}{=} \PY{n}{map} \PY{o}{-} \PY{n}{pid\PYZus{}ns}\PY{o}{-}\PY{o}{>}\PY{n}{pidmap}\PY{p}{;}
+\end{Verbatim}
