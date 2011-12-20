@@ -61,7 +61,6 @@ is regarded as an integer error since \cc{optlen} can go negative,
 say -1, which will be misinterpreted as the positive value $2^{32}-1$
 and bypass the sanity check $\cc{optlen} < \cc{sizeof(int)}$.
 
-
 %in \autoref{f:ext4} the call to
 %\cc{ext4_split_extent} returns a signed int, which will be negative
 %on error.  However, the value is converted to an unsigned integer,
@@ -131,14 +130,19 @@ fixed.
 \subsection{Implication}
 \label{s:imply}
 
-With the guidelines for integer operations described in
-\autoref{s:precondition}, a possibly counter-intuitive implication
-is that two functionally equivalent operations may have different
-error preconditions.  For example, $\cc{maxnum}\times_u 16$ may be
-erroneous if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is
-considered always secure as long as \cc{maxinum} is wider than
-4 bits.  The guidelines assume that the developer has chosen the
-appropriate integer operation to match their intention.
+\sys does not directly apply these guidelines described in
+\autoref{s:precondition} to real-world systems code and report every
+violation, because they are over restrictive and will cause too
+many false errors.  See \autoref{s:gen} for the constraint generation
+algorithms that aim to reduce false errors.
+
+Another issue with these guidelines is that two functionally
+equivalent operations may have different error preconditions.  For
+example, $\cc{maxnum}\times_u 16$ may be erroneous if \cc{maxnum}
+is large, while $\cc{maxnum} \shl 4$ is considered always secure
+as long as \cc{maxinum} is wider than 4 bits.  The guidelines assume
+that the developer has chosen the appropriate integer operation to
+match their intention.
 
 Therefore, any compiler optimization that performs code transformations
 like rewriting $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$
