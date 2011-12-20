@@ -11,7 +11,7 @@ ASPELL_CMDS=\
 	--add-tex-command='renewcommand pp' \
 
 all: code/fmt.tex
-	$(LATEXMK) -pdf p
+	$(LATEXMK) -silent -pdf p
 
 code/fmt.tex:
 	pygmentize -f latex -S default > $@~
