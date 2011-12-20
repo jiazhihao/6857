@@ -28,20 +28,18 @@ these transformations should not destroy the error precondition
 of integer operations.
 
 \paragraph{Pointer arithmetic.}
-%In general \sys considers the result of a pointer arithmetic as a
-%black box, which can be any integral value within its range.
-%pointer subtraction is commonly used.
 \sys represents each pointer or memory address as a symbolic
 expression~\cite{engelen:symbolic}, and tries to simplify it if
-possible.  Consider the example below.
+possible.  A pointer expression that \sys fails to simplify will
+be considered as a black-box integer, which can be any value within
+its range.  Consider the code snippet below.
 %
 \input{code/pid-ptrsub}
 %
 The offset of \cc{pidmap} in the structure \cc{pid_namespace} is 4
 bytes, i.e., the size of \cc{kref}, thus \sys represents the address
 \cc{pid_ns->pidmap} as $\cc{pid_ns} + 4$.  Here \cc{pid_ns} is
-considered as a black-box integer that can be any value within its
-range since no further information is available.
+considered as a black box since no further information is available.
 
 In addition, assuming the size of each element of \cc{pidmap} is 8
 bytes, \sys represents the address \cc{\&pid_ns->pidmap[i]} as
