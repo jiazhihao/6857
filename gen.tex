@@ -4,18 +4,21 @@
 This section describes \sys's design for constraint generation and
 solving, as shown in \autoref{f:flow}.
 
-\sys generates three kinds of constraints for integer errors.  It
-inspects one function at a time to extract error and path constraints
-for each integer operation, and propagates range constraints across
-the call graph.  \sys also allows users to supply with range
-annotations to further improve accuracy.
+\sys works on the LLVM intermediate representation~(IR) compiled from
+source code, and generates three kinds of constraints for integer
+errors.  It inspects one function at a time to extract error and
+path constraints for each integer operation, and propagates range
+constraints across the call graph.  \sys also allows users to supply
+with range annotations to further improve accuracy.
 
 \begin{figure}
 \centering
 \resizebox{0.9\linewidth}{!}{
 \input{figs/flow}
 }
-\caption{\sys's workflow.}
+\caption{\sys's workflow.  It generates constraints from the LLVM
+intermediate representation~(IR) and user annotations, and then feeds
+the constraints to a solver for satisfiability testing.}
 \label{f:flow}
 \end{figure}
 
