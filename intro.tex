@@ -1,6 +1,18 @@
 \section{Introduction}
 \label{s:intro}
 
+Integer errors, including arithmetic overflow, division-by-zero,
+oversized shift, lossy truncation, and sign misinterpretation, have
+emerged as a threat to systems security.  A 2007 MITRE
+study~\cite{christey:vuln} suggests that they are already ``number
+2 for OS vendor advisories'', only after buffer overflows.  A recent
+survey~\cite{chen:kbugs} reviews the reported Linux kernel
+vulnerabilities in the CVE list~\cite{cve} from 2010 to early 2011,
+and confirms the finding that integer errors account for more than
+one third of the vulnerabilities that can be misused to corrupt the
+kernel and gain root priviledge.
+
+\if 0
 Integers are fundamental data types in systems code.  Unlike
 infinitely ranged mathematical integers, they use a fixed number
 of bits to represent integral values bounded by a predefined range.
@@ -9,6 +21,7 @@ into the range, which could cause lost or misinterpreted data, referred
 as \emph{integer errors} in this paper.  Integer errors may introduce
 further logic problems and security vulnerabilities if the consequence
 is unexpected.
+\fi
 
 \autoref{f:bridge} shows an example of integer errors in the Linux
 kernel.  The size for allocating \cc{buf} is computed from the
@@ -19,8 +32,8 @@ integers, ranging from 0 to $2^{32} - 1$.
 The developer's intention is to limit the values of 
 \cc{maxnum} and \cc{size} to 256 and 4096, respectively.
 
-However, if an adversary supplies a large \cc{maxnum}, say
-\cc{0xf0000000}, the multiplication $\cc{maxnum} \times 16$ would
+If an adversary supplies a large \cc{maxnum}, say
+\cc{0xf0000000}, however, the multiplication $\cc{maxnum} \times 16$ would
 overflow the 32-bit unsigned integer range and result in \cc{size}
 being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
@@ -42,14 +55,6 @@ It may cause more subtle logic bugs if the value is used in decision
 making, such as misleading the kernel to kill an innocent
 process~\cite[CVE-2011-4097]{cve}.
 
-Integer errors have emerged as a threat to systems security.  A
-2007 MITRE study~\cite{christey:vuln} suggests that they are already
-``number 2 for OS vendor advisories'', only after buffer overflows.
-A recent survey~\cite{chen:kbugs} reviews the reported Linux kernel
-vulnerabilities in the CVE list~\cite{cve} from 2010 to early 2011,
-and confirms the finding that integer errors account for more than
-one third of the vulnerabilities that can be misused to corrupt the
-kernel.
 
 \if 0
 To avoid integer errors developers need, for example, to perform
@@ -85,64 +90,70 @@ large \cc{maxnum} from userspace.}
 \label{f:bridge}
 \end{figure}
 
-This paper presents \sys, a static analysis tool that scans C-language
-source code for integer errors.  It aims to aid developers detecting
+This paper presents \sys, a compile-time tool that scans C-language
+source code for integer errors.
+\if 0
+It aims to aid developers detecting
 and fixing integer errors at compile time.  Compared to run-time
 checking, the main advantage of \sys is that it provides better
 code coverage without requiring to set up a testing environment,
 install hardware devices, nor prepare input data.
-
+\fi
 The key challenge facing \sys is knowing what are actual integer
-errors.  Conceptually, any integer operation that may produce a result
-different from the infinitely ranged mathematical counterpart flags
-a potential integer error~\cite{air}.  However, lossy truncations
-and sign conversions are commonly seen in C code, most of which are
-not damaging; overflow check idioms such as $x + y < x$ intentionally
-use overflowed results to prevent integer errors.  \sys needs a
-practical model to define integer errors, i.e., the precondition
-under which an integer operation will go wrong.
+errors.  Conceptually, any integer operation that may produce a
+result different from the infinitely ranged mathematical counterpart
+flags a potential integer error~\cite{air}.  However, truncations
+and sign conversions are commonly seen in C code; overflow check
+idioms such as $x + y < x$ intentionally use overflowed results to
+prevent integer errors.  \sys needs an integer semantics that
+recognizes commonly used code patterns while still effectively
+catches integer errors.
 
 A second challenge is to precisely reason about integer operations
-on every code path.  Given the error precondition of an integer
-operation, \sys needs to determine whether the control flow can
-reach that operation while simultaneously satisfying the precondition.
-As for the example in \autoref{f:bridge}, \sys should conclude that
-an overflowed product \cc{size} will bypass the sanity check and
-reach the \cc{kmalloc} call.
+on every code path.  Given the semantics of an integer operation,
+\sys needs to determine whether the control flow can reach that
+operation while simultaneously violating the semantics.  As for the
+example in \autoref{f:bridge}, \sys should conclude that an overflowed
+product \cc{size} will bypass the sanity check and reach the
+\cc{kmalloc} call.
 
-The final challenge is to apply \sys to large-scale systems code
-such as the Linux kernel.  \sys needs to finish the analysis in a
-reasonable amount of time.  To achieve better scalability \sys
-should be easily parallelized to take advantage of multiple processors.
-Besides, \sys should rank reported integer errors and screen out
-unlikely ones if the bug list is long.
+The final challenge is to apply \sys to large systems such as the
+Linux kernel.  \sys needs to finish scanning the source code in a
+reasonable amount of time.  \sys also should rank reported integer
+errors and screen out unlikely ones for human inspection if the bug
+list is long.
 
-\sys addresses these challenges with a two-phase design.
-%
+\sys addresses these challenges with a three ideas: a practical
+integer semantics, a precise analysis algorithm that performs
+bit-level reasoning per function, and a set of ranking criterias
+that estimate the security impacts of possible integer errors.
+\if 0
 On a per-function basis \sys generates precise bit-level integer
-constraints, combined from both the error and path preconditions
-of each integer operation within that function.  A constraint
-solver~\cite{boolector} is consulted to decide the satisfiability
+constraints and consults a standard constraint
+solver~\cite{boolector} to decide the satisfiability
 of these constraints, i.e., whether the operation can become an
-integer error.  \sys proposes a set of pragmatic constraint generation
-algorithms tailored for integer errors.  They are designed to
-effectively filter out false errors and make the generated constraints
-to be solved efficiently.
+integer error. 
+%\sys proposes a set of pragmatic constraint generation
+%algorithms tailored for integer errors.  They are designed to
+%effectively filter out false errors and make the generated constraints
+%to be solved efficiently.
 %
 On a whole-program basis \sys infers and propagates coarse-grained
 integer ranges across functions for better performance.
 %
-Besides, \sys introduces practical criteria for ranking integer
+\sys introduces practical criteria for ranking integer
 errors by estimating their security impacts on the control flow and
 data integrity.
-
+\fi
+%
 We implement \sys in the LLVM compiler framework~\cite{lattner:llvm}
-and apply it to XXX.  XXX patches have been upstreamed..
+with the Boolector constraint solver~\cite{boolector}.
+Applying \sys to XXX result in XXX patches that get upstream.
 
-The main contributions of this work are: a set of pragmatic constraint
-generation algorithms for integer errors, and XXX patches.
+%The main contributions of this work are: a set of pragmatic constraint
+%generation algorithms for integer errors, and XXX patches.
 
 The rest of this paper is organized as follows. \autoref{s:model}
-defines an integer model.  \autoref{s:gen} presents how \sys generates
+defines the integer semantics.  \autoref{s:gen} presents how \sys generates
 constraints...  We related \sys to previous work in \autoref{s:relwk},
 and conclude in \autoref{s:concl}.
