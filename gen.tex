@@ -29,6 +29,23 @@ the constraints to a solver for satisfiability testing.}
 \label{f:flow}
 \end{figure}
 
+\subsection{Error Constraint Generation}
+
+One may implement the error constraints defined in \autoref{s:sema:constr}
+as Boolean circuits for deciding satisfiability.  For example, given
+two $n$-bit unsigned integers, the multiplication error constraint
+could be implemented using a $2n$-bit binary multiplier, which flags
+an overflow error if any of the most significant $n$ bits of the
+product is 1.
+
+The Boolector constraint solver provides several highly optimized
+circuits to implement these error constraints.  As for the
+multiplication error constraint, Boolector's overflow detection
+circuit does not even need to compute the $2n$-bit product first
+and can be solved more
+efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
+reuses them to generate error constraints for better performance.
+
 \subsection{Path Constraint Generation}
 
 use \autoref{f:ax25-sign} as an example.

@@ -150,7 +150,7 @@ ${1 \shl n}$ is undefined in C; its value will never be 0 on
 architectures like x86, which fails the check.
 
 Whether the imperfect check will lead to a security vulnerability
-depends on the context.  In the muliplication example above,
+depends on the context.  In the multiplication example above,
 \cc{maxnum} has to be at least $2^{28}$ to overflow $\cc{maxnum}
 \times 16$, and the product must be greater than or equal to that
 to bypass the check $\cc{maxnum} \times_u 16 <_u \cc{maxnum}$.
@@ -177,21 +177,6 @@ $(x \times_u y) /_u y \neq x$ & $x >_u \cc{UINT_MAX} /_u y$   \\
 \caption{Whitelist.}
 \label{f:whitelist}
 \end{figure}
-
-\subsection{Circuit Implementation}
-
-A constraint solver implements these error constraints of integer
-operations as Boolean circuits for deciding satisfiability.  For
-example, a multiplication error detector for two $n$-bit unsigned
-integers could be implemented using a $2n$-bit binary multiplier,
-which flags an overflow error if any of the most significant $n$
-bits of the product is 1.
-
-The Boolector constraint solver~\cite{boolector} constructs more
-efficient circuits internally.  For example, its multiplication
-error detector does not even need to compute the product first to
-detect overflow~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
-reuses them for better performance.
 
 \if 0
 
