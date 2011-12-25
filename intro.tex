@@ -123,10 +123,13 @@ reasonable amount of time.  \sys also should rank reported integer
 errors and screen out unlikely ones for human inspection if the bug
 list is long.
 
-\sys addresses these challenges with a three ideas: a practical
-integer semantics, a precise analysis algorithm that performs
-bit-level reasoning per function, and a set of ranking criteria
-that estimate the security impacts of possible integer errors.
+\sys addresses these challenges with three ideas: a practical integer
+semantics that defines integer errors, a precise analysis algorithm
+that performs bit-level reasoning per function, and a set of ranking
+criteria that estimate the security impacts of possible integer
+errors.  \sys accepts C source code as input, and inspects each
+integer operation for possible integer errors.
+%
 \if 0
 On a per-function basis \sys generates precise bit-level integer
 constraints and consults a standard constraint
@@ -146,8 +149,9 @@ errors by estimating their security impacts on the control flow and
 data integrity.
 \fi
 %
-We implement \sys in the LLVM compiler framework~\cite{lattner:llvm}
+It is implemented in the LLVM compiler framework~\cite{lattner:llvm}
 with the Boolector constraint solver~\cite{boolector}.
+
 Applying \sys to XXX result in XXX patches that get upstream.
 
 %The main contributions of this work are: a set of pragmatic constraint
