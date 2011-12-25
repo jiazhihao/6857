@@ -1,15 +1,22 @@
 \section{Design}
 \label{s:gen}
 
-This section describes \sys's design for constraint generation and
-solving, as shown in \autoref{f:flow}.
+\autoref{f:flow} shows \sys's workflow.  Based on the LLVM intermediate
+representation~(IR) compiled from source code, \sys generates a set
+of constraints for each integer operation, and feed them into the
+constraint solver.
 
-\sys works on the LLVM intermediate representation~(IR) compiled from
-source code, and generates three kinds of constraints for integer
-errors.  It inspects one function at a time to extract error and
-path constraints for each integer operation, and propagates range
-constraints across the call graph.  \sys also allows users to supply
-with range annotations to further improve accuracy.
+Particularly, \sys generates three types of constraints.
+%
+Given an integer operation, \sys generates its error constraint
+directly from the definition.
+%
+\sys also calculates the path constraint, the predicate satisfying
+which the operation is reachable from the start of that function.
+%
+To further improve accuracy, \sys infers additional integral ranges
+of function parameters and structure fields across the call graph,
+and also allows users to provide range annotations.
 
 \begin{figure}
 \centering
@@ -24,7 +31,7 @@ the constraints to a solver for satisfiability testing.}
 
 \subsection{Path Constraint Generation}
 
-Path constraint generation.
+use \autoref{f:ax25-sign} as an example.
 
 unroll loops once.
 
