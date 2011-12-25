@@ -1,14 +1,14 @@
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
 \PY{c+cp}{\PYZsh{}}\PY{c+cp}{define IFNAMSIZ 16}
 \PY{k}{static} \PY{k+kt}{int} \PY{n+nf}{ax25\PYZus{}setsockopt}\PY{p}{(}\PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{,}
     \PY{k+kt}{char} \PY{n}{\PYZus{}\PYZus{}user} \PY{o}{*}\PY{n}{optval}\PY{p}{,} \PY{k+kt}{int} \PY{n}{optlen}\PY{p}{)}
 \PY{p}{\PYZob{}}
     \PY{k+kt}{char} \PY{n}{devname}\PY{p}{[}\PY{n}{IFNAMSIZ}\PY{p}{]}\PY{p}{;}
     \PY{p}{.}\PY{p}{.}\PY{p}{.}
-    \PY{c+cm}{/* optlen will be silently converted to unsigned */}
+    \PY{c+cm}{/* optlen is treated as unsigned: $2^{32}-1$ */}
     \PY{k}{if} \PY{p}{(}\PY{n}{optlen} \PY{o}{<} \PY{k}{sizeof}\PY{p}{(}\PY{k+kt}{int}\PY{p}{)}\PY{p}{)}
         \PY{k}{return} \PY{o}{-}\PY{n}{EINVAL}\PY{p}{;}
-    \PY{c+cm}{/* optlen is treated as signed here */}
+    \PY{c+cm}{/* optlen is treated as signed: $-1$ */}
     \PY{k}{if} \PY{p}{(}\PY{n}{optlen} \PY{o}{>} \PY{n}{IFNAMSIZ}\PY{p}{)}
         \PY{n}{optlen} \PY{o}{=} \PY{n}{IFNAMSIZ}\PY{p}{;}
     \PY{n}{copy\PYZus{}from\PYZus{}user}\PY{p}{(}\PY{n}{devname}\PY{p}{,} \PY{n}{optval}\PY{p}{,} \PY{n}{optlen}\PY{p}{)}\PY{p}{;}
