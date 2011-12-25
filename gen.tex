@@ -22,13 +22,32 @@ the constraints to a solver for satisfiability testing.}
 \label{f:flow}
 \end{figure}
 
-\subsection{Transformations}
+\subsection{Path Constraint Generation}
 
-In addition to standard optimizations like constant propagation,
-\sys performs a series of code transformations to generate better
-constraints for integer operations.  As discussed in \autoref{s:imply},
-these transformations should not destroy the error precondition
-of integer operations.
+Path constraint generation.
+
+unroll loops once.
+
+Move in-loop constraints out.
+
+handle comparison like \cc{p == NULL}.
+
+\begin{figure}
+\input{algo/path}
+\caption{Algorithm for path constraint generation.}
+\label{f:path-cstr}
+\end{figure}
+
+\subsection{Range Constraint Generation}
+
+Range constraint \& annotations?
+
+handle sysctl interface.
+
+
+\subsection{Optimization}
+
+false error \& performance.
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
@@ -92,67 +111,8 @@ In the above example, \sys will move the integer operation $x
 \cc{malloc} call, where its result \cc{size} is first used.
 
 \paragraph{Overflowed checking idiom.}
-It is commonly seen in practice to use an overflowed result to do
-the integer error check for $x +_u y$, where $x$ and $y$ are
-of type \cc{unsigned int}, as follows.
-\begin{align}
-x +_u y <_u x.
-\end{align}
-This is equivalent to a ``sane'' check
-$\cc{UINT_MAX} - x >_u y$.
-
-Note that using overflowed result to check multiplication is trickier.
-In general $x \times_u y <_u x$ is not a valid integer error check.
-For example, given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum}
-\times_u 16$ gives a larger value $\cc{0xfffffff0}$, which both
-overflows and bypasses the check.  A correct check is $(x \times_u
-y) /_u y \neq x$ or a sane form, $\cc{UINT_MAX} /_u x > y$.
-
-Whether the imperfect check will lead to a security vulnerability
-depends on the context.  In the example above, \cc{maxnum} has to
-be at least $2^{28}$ to overflow $\cc{maxnum} \times 16$, and the
-product must be greater than or equal to that to bypass the check
-$\cc{maxnum} \times_u 16 <_u \cc{maxnum}$.  Allocating $2^{28}$
-bytes (i.e., 256~MB) is possible in a userspace application, but
-unlikely to succeed in the Linux kernel with \cc{kmalloc}, which
-imposes a relatively small limit~\cite[\chapterautorefname~8]{ldd3}.
-Nevertheless, the check becomes dangerous where the allocation
-function used has a bigger limit (e.g., \cc{vmalloc}), the
-multiplication is $\cc{maxnum} \times_u 1024$ (i.e., allocating
-4~MB), or the \cc{kmalloc} limit is raised in the future.
 
 \sys recognizes XXX integer error checking idioms...
-
-\subsection{Error Constraint Generation}
-
-\paragraph{Conversion constraint.}
-\sys by default does not generate constraints for checking integer
-conversions.  One may simply invoke GCC with \cc{-Wconversion} to
-inspect potentially dangerous conversions.
-[[[\sys does something for critical integers, array indices, annotated sizes.]]]
-
-\paragraph{In-loop constraint.}
-Move in-loop constraints out.
-
-\subsection{Path Constraint Generation}
-
-Path constraint generation.
-
-unroll loops once.
-
-handle comparison like \cc{p == NULL}.
-
-\begin{figure}
-\input{algo/path}
-\caption{Algorithm for path constraint generation.}
-\label{f:path-cstr}
-\end{figure}
-
-\subsection{Range Constraint Generation}
-
-Range constraint \& annotations?
-
-handle sysctl interface.
 
 \subsection{Limitations}
 
