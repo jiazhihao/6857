@@ -1,22 +1,23 @@
-\section{Integer Model}
-\label{s:model}
+\section{Integer Semantics}
+\label{s:sema}
 
-This section presents an integer model and applies it to
-\autoref{f:bridge} to demonstrate how it is used to catch integer
-errors.
+We define \sys's integer semantics via error constraints.  The error
+constraint of an integer operation is a Boolean predicate if satisifed
+implies an integer error, unless the operation is in the whitelist
+consisting of code patterns that \sys explicitly allows.
+
+\subsection{Error Constraint}
+\label{s:sema:constr}
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
 An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.  If not particularly
-indicated, $x$ and $y$ below are $n$-bit integers.  A subscript $s$
+with the most significant bit indicating the sign.  A subscript $s$
 or $u$ may be pinned to an operation to indicate it operates on
 signed or unsigned integers, respectively.
 
-\subsection{Integer Error Precondition}
-\label{s:precondition}
-
+\if 0
 \sys adopts the CERT C secure coding guidelines for integer
 operations~\cite[\chapterautorefname~5]{seacord:secure-c} as a basis
 and considers violations of the guidelines as integer errors.  These
@@ -24,15 +25,16 @@ violations cover a set of integer-based vulnerabilities, sometimes
 referred as arithmetic overflow (underflow, wraparound), division-by-zero,
 oversized shift, and signedness bugs in the literature.  We summarize
 them below.
+\fi
 
 \paragraph{Addition \& subtraction \& multiplication.}
-Such an operation may lead to an integer error if the result of the
-corresponding infinitely ranged mathematical operation falls out
-of the predefined range.  For example, $\cc{maxnum}\times_u 16$
-causes an integer error if $\cc{maxnum} = \cc{0xf0000000}$, because
-the mathematical product $\cc{0xf0000000} \times 16 = 2^{32}\times
-3\times 5$ is out of the range of $32$-bit unsigned integers ($0$
-to $2^{32} - 1$).
+An additive or multiplicative operation may lead to an integer error
+if the result of the corresponding infinitely ranged mathematical
+operation falls out of the predefined range.  For example,
+$\cc{maxnum}\times_u 16$ causes an integer error if $\cc{maxnum} =
+\cc{0xf0000000}$, because the mathematical product $\cc{0xf0000000}
+\times 16 = 2^{32}\times 3\times 5$ is out of the range of $32$-bit
+unsigned integers ($0$ to $2^{32} - 1$).
 
 \paragraph{Division.}
 A division operation causes an integer error if the divisor is 0.
@@ -44,22 +46,31 @@ result $2^{n-1}$ is not in the range of $n$-bit signed integers
 \paragraph{Shift.}
 The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
 integer errors if $y \geq_u n$, which is undefined according to the
-C standard.  For example, $(1 \shl 32)$ may yield 0 (e.g., on x86)
-or 1 (e.g., on PowerPC) for 32-bit integers, depending on the
+C standard.  For example, $(1 \shl 32)$ may yield 1 (e.g., on x86)
+or 0 (e.g., on PowerPC) for 32-bit integers, depending on the
 underlying architecture.
 
 \paragraph{Conversion.}
-If $x$ is converted from integer type $s$ to $t$, the conversion
-may lead to an integer error if the value of $x$ does not fall into
-the range of $t$, e.g., converting a possibly negative signed integer
-into unsigned.
+Lossy truncations and sign conversions are often seen in systems
+code, though one may find them by invoking GCC with \cc{-Wconversion}
+to inspect potentially dangerous ones.  In general \sys does not
+such a conversion as an integer error, unless its result is used
+in one of the following cases: \begin{itemize}
+\item
+a comparison that is always true or false,
+\item
+an array index that may be negative, and
+\item
+a ``size'' parameter in an external call that may be negative, e.g.,
+the size in a call to \cc{copy_from_user}.
+\end{itemize}
 
-\autoref{f:ax25-sign} shows such a conversion bug.  The
-userspace-controlled signed integer \cc{optlen} is silently converted
-to unsigned to be compared with \cc{sizeof(int)}.  The conversion
-is regarded as an integer error since \cc{optlen} can go negative,
-say -1, which will be misinterpreted as the positive value $2^{32}-1$
-and bypass the sanity check $\cc{optlen} < \cc{sizeof(int)}$.
+\autoref{f:ax25-sign} shows such a signedness bug in the Linux
+kernel.  An adversary could supply $-1$ for \cc{optlen} from user
+space, which will bypass both checks because it is interpreted as
+unsigned in the first comparison and signed in the second.  It is
+later used in the call to \cc{copy_from_user} as the size parameter,
+which flags an integer error.
 
 %in \autoref{f:ext4} the call to
 %\cc{ext4_split_extent} returns a signed int, which will be negative
@@ -72,9 +83,9 @@ and bypass the sanity check $\cc{optlen} < \cc{sizeof(int)}$.
 \vspace{-1em}
 \caption{A signedness bug~\cite[CVE-2009-2909]{cve} in the AX.25
 network protocol implementation of the Linux kernel.  A negative
-\cc{optlen} will bypass the sanity check \cc{optlen < sizeof(int)}
-and trigger an kernel oops in the subsequent \cc{copy_from_user}
-call.}
+\cc{optlen} will bypass both sanity checks due to sign misinterpretation
+ and trigger an kernel
+oops in the subsequent \cc{copy_from_user} call.}
 \label{f:ax25-sign}
 \end{figure}
 \if 0
@@ -89,6 +100,95 @@ error handling logic.}
 \label{f:ext4}
 \end{figure}
 \fi
+
+It is worth noting that two functionally equivalent operations from
+the perspective of an optimizing compiler may have different integer
+semantics.  For example, $\cc{maxnum}\times_u 16$ may be erroneous
+if \cc{maxnum} is large, while $\cc{maxnum} \shl 4$ is considered
+always secure as long as \cc{maxinum} is wider than 4 bits.  \sys
+assumes that the developer has chosen the appropriate integer
+operation to match their intention.
+
+Therefore, any compiler optimization that would rewrite
+$\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ would destroy the
+semantics.  Even worse, decent C compilers may completely optimize
+away checks like $(x + 1) < x$ if $x$ is a signed integer or a
+pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
+compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
+To generate error constraints that best match the developer's
+intention, \sys runs before these optimizations.
+
+\subsection{Whitelist}
+\label{s:sema:whitelist}
+
+It is commonly seen in practice to use an overflowed result to do
+the integer error check for $x +_u y$, where $x$ and $y$ are
+of type \cc{unsigned int}, as follows:
+\begin{equation*}
+x +_u y <_u x.
+\end{equation*}
+This is equivalent to a ``sane'' check:
+\begin{equation*}
+\cc{UINT_MAX} - x >_u y.
+\end{equation*}
+\sys recognizes such idioms listed in \autoref{f:whitelist} and
+does not consider them as integer errors.
+
+Note that using overflowed result to check multiplication is trickier.
+In general $x \times_u y <_u x$ is not a valid integer error check.
+For example, given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum}
+\times_u 16$ gives a larger value $\cc{0xfffffff0}$, which both
+overflows and bypasses the check.  A correct check is $(x \times_u
+y) /_u y \neq x$ or a sane form, $\cc{UINT_MAX} /_u x > y$.
+
+Another error-prone check is oversized shift, e.g., using $(1 \shl
+n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
+${1 \shl n}$ is undefined in C; its value will never be 0 on
+architectures like x86, which fails the check.
+
+Whether the imperfect check will lead to a security vulnerability
+depends on the context.  In the example above, \cc{maxnum} has to
+be at least $2^{28}$ to overflow $\cc{maxnum} \times 16$, and the
+product must be greater than or equal to that to bypass the check
+$\cc{maxnum} \times_u 16 <_u \cc{maxnum}$.  Allocating $2^{28}$
+bytes (i.e., 256~MB) is possible in a userspace application, but
+unlikely to succeed in the Linux kernel with \cc{kmalloc}, which
+imposes a relatively small limit~\cite[\chapterautorefname~8]{ldd3}.
+Nevertheless, the check becomes dangerous where the allocation
+function used has a bigger limit (e.g., \cc{vmalloc}), the
+multiplication is $\cc{maxnum} \times_u 1024$ (i.e., allocating a
+smaller chunk of memory), or the \cc{kmalloc} limit is raised in
+the future.  \sys considers these dangerous overflowed checks as
+integer errors.
+
+\begin{figure}
+\centering
+\begin{tabular}{ll}
+\toprule
+Overflowed check & Equivalent sane check \\ \midrule
+$x +_u y <_u x$ & $x >_u \cc{UINT_MAX} -_u y$ \\
+$x -_u y <_s 0$ & $x <_u y$ \\
+$(x \times_u y) /_u y \neq x$ & $x >_u \cc{UINT_MAX} /_u y$   \\
+\bottomrule
+\end{tabular}
+\caption{Whitelist.}
+\label{f:whitelist}
+\end{figure}
+
+\subsection{Circuit Implementation}
+
+A constraint solver implements these error constraints as Boolean
+circuits for deciding satisfiability.  For example, a multiplication
+error detector for two $n$-bit unsigned integers could be implemented
+using a $2n$-bit binary multiplier, which flags an overflow error
+if any of the most significant $n$ bits of the product is 1.
+
+The Boolector constraint solver constructs more efficient circuits.
+For example, its multiplication error detector does not even need
+to compute the product first~\cite[\chapterautorefname~3.5]{brummayer:phd}.
+\sys reuses them for better performance.
+
+\if 0
 
 \subsection{A Strawman Analysis}
 
@@ -152,8 +252,6 @@ for signed integer $x$~\cite{gcc:signed-overflow,us-cert:gcc},
 unless a special compile option \cc{-fwrapv} or \cc{-fno-strict-overflow}
 is given.  To generate error constraints that best match the
 developer's intention, \sys runs before these optimizations.
-
-\if 0
 
 \subsection{Challenges}
 \label{s:chal}
