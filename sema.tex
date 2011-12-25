@@ -121,33 +121,33 @@ compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
 To generate error constraints that best match the developer's
 intention, \sys runs before these optimizations.
 
-\subsection{Whitelist}
+\subsection{White List}
 \label{s:sema:whitelist}
 
 It is commonly seen in practice to use an overflowed result to do
-the integer error check for $x +_u y$, where $x$ and $y$ are
-of type \cc{unsigned int}, as follows:
+the integer error check for $x +_u y$, where both $x$ and $y$ are
+$n$-bit unsigned integers, as follows:
 \begin{equation*}
 x +_u y <_u x.
 \end{equation*}
-This is equivalent to a ``sane'' check:
-\begin{equation*}
-\cc{UINT_MAX} - x >_u y.
-\end{equation*}
+This idiom is useful when the sum is needed later in the code.
 \sys recognizes such idioms listed in \autoref{f:whitelist} and
 does not consider them as integer errors.
+
+The equivalent ``sane'' form for each overflowed check idiom is
+also shown for comparison.  Let $\umax(n)$ denote the largest $n$-bit
+unsigned integer, i.e., $2^n - 1$.  The overflowed addition check
+is equivalent to the sane form:
+\begin{equation*}
+\umax(n) - x >_u y.
+\end{equation*}
 
 Note that using overflowed result to check multiplication is trickier.
 In general $x \times_u y <_u x$ is not a valid integer error check.
 For example, given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum}
 \times_u 16$ gives a larger value $\cc{0xfffffff0}$, which both
 overflows and bypasses the check.  A correct check is $(x \times_u
-y) /_u y \neq x$ or a sane form, $\cc{UINT_MAX} /_u x > y$.
-
-Another error-prone check is oversized shift, e.g., using $(1 \shl
-n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
-${1 \shl n}$ is undefined in C; its value will never be 0 on
-architectures like x86, which fails the check.
+y) /_u y \neq x$ or a sane form, $\umax(n) /_u x > y$.
 
 Whether the imperfect check will lead to a security vulnerability
 depends on the context.  In the multiplication example above,
@@ -161,20 +161,28 @@ limit~\cite[\chapterautorefname~8]{ldd3}.  Nevertheless, the check
 becomes dangerous where the allocation function used has a bigger
 limit (e.g., \cc{vmalloc}), the multiplication is $\cc{maxnum}
 \times_u 1024$ (i.e., allocating a smaller chunk of memory), or the
-\cc{kmalloc} limit is raised in the future.  \sys considers these
-dangerous overflowed checks as integer errors.
+\cc{kmalloc} limit is raised in the future.
+
+Another error-prone check is oversized shift, e.g., using $(1 \shl
+n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
+${1 \shl n}$ is undefined in C; its value will never be 0 on
+architectures like x86, which fails the check.
+
+Currently \sys does not put these dangerous overflowed checking
+forms in the white list, even though they may not be exploitable.
 
 \begin{figure}
 \centering
 \begin{tabular}{ll}
 \toprule
 Overflowed check & Equivalent sane check \\ \midrule
-$x +_u y <_u x$ & $x >_u \cc{UINT_MAX} -_u y$ \\
-$x -_u y <_s 0$ & $x <_u y$ \\
-$(x \times_u y) /_u y \neq x$ & $x >_u \cc{UINT_MAX} /_u y$   \\
+$x + y <_u x$ & $x >_u \umax(n) - y$ \\
+$x - y <_s 0$ & $x <_u y$ \\
+$(x \times y) /_u y \neq x$ & $x >_u \umax(n) /_u y$   \\
 \bottomrule
 \end{tabular}
-\caption{Whitelist.}
+\caption{The white list of overflowed check idioms that \sys recognizes.
+Here $\umax(n)$ denotes the largest $n$-bit unsigned integer.}
 \label{f:whitelist}
 \end{figure}
 
@@ -216,32 +224,6 @@ Again \sys takes the logical AND of the two preconditions to the
 constraint solver, which will conclude that these constraints can
 never be satisfied.  This means that the integer error has been
 fixed.
-
-\subsection{Implication}
-\label{s:imply}
-
-\sys does not directly apply these guidelines described in
-\autoref{s:precondition} to real-world systems code and report every
-violation, because they are over restrictive and will cause too
-many false errors.  See \autoref{s:gen} for the constraint generation
-algorithms that aim to reduce false errors.
-
-Another issue with these guidelines is that two functionally
-equivalent operations may have different error preconditions.  For
-example, $\cc{maxnum}\times_u 16$ may be erroneous if \cc{maxnum}
-is large, while $\cc{maxnum} \shl 4$ is considered always secure
-as long as \cc{maxinum} is wider than 4 bits.  The guidelines assume
-that the developer has chosen the appropriate integer operation to
-match their intention.
-
-Therefore, any compiler optimization that performs code transformations
-like rewriting $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$
-would destroy the precondition semantics.  Even worse, decent C
-compilers may completely optimize away checks like $(x + 1) < x$
-for signed integer $x$~\cite{gcc:signed-overflow,us-cert:gcc},
-unless a special compile option \cc{-fwrapv} or \cc{-fno-strict-overflow}
-is given.  To generate error constraints that best match the
-developer's intention, \sys runs before these optimizations.
 
 \subsection{Challenges}
 \label{s:chal}
