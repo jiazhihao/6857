@@ -25,7 +25,7 @@ is unexpected.
 
 \autoref{f:bridge} shows an example of integer errors in the Linux
 kernel.  The size for allocating \cc{buf} is computed from the
-multiplication of \cc{maxnum}, a value controlled by userspace,
+multiplication of \cc{maxnum}, a value controlled by user space,
 and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
 32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
 integers, ranging from 0 to $2^{32} - 1$.
@@ -50,9 +50,9 @@ Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation we
 just mentioned, a problematic integer error may lead to information
 leakage, for example, if it is used to determine the number of data
-items to be copied from kernel to userspace, raising privacy concerns.
-It may cause more subtle logic bugs if the value is used in decision
-making, such as misleading the kernel to kill an innocent
+items to be copied from kernel to user space, raising privacy
+concerns.  It may cause more subtle logic bugs if the value is used
+in decision making, such as misleading the kernel to kill an innocent
 process~\cite[CVE-2011-4097]{cve}.
 
 
@@ -84,9 +84,9 @@ environment.
 \input{code/bridge}
 \vspace{-1em}
 \caption{An integer error~\cite[CVE-2006-5751]{cve} in the Ethernet
-bridge subsystem of the Linux kernel, which may lead to buffer
-overflows and allow local users to execute arbitrary code via a
-large \cc{maxnum} from userspace.}
+bridge subsystem of the Linux kernel, where a multiplication overflow
+may lead to buffer overflows and allow local users to execute
+arbitrary code via a large \cc{maxnum} from user space.}
 \label{f:bridge}
 \end{figure}
 
@@ -153,7 +153,7 @@ Applying \sys to XXX result in XXX patches that get upstream.
 %The main contributions of this work are: a set of pragmatic constraint
 %generation algorithms for integer errors, and XXX patches.
 
-The rest of this paper is organized as follows. \autoref{s:model}
+The rest of this paper is organized as follows. \autoref{s:sema}
 defines the integer semantics.  \autoref{s:gen} presents how \sys generates
 constraints...  We related \sys to previous work in \autoref{s:relwk},
 and conclude in \autoref{s:concl}.
