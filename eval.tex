@@ -1,9 +1,28 @@
 \section{Evaluation}
 \label{s:eval}
 
-Patch validation.
+\subsection{Validation}
 
-Run the tool over OS kernels.  Userspace apps?
+We have collected XXX integer errors of the Linux kernel in recent
+three years, from both the CVE list~\cite{cve} and a previous
+survey~\cite{chen:kbugs}, as the benchmark to validate \sys.
+
+\newcommand{\ok}{\textcolor{JungleGreen}{\checkmark}\xspace}
+\newcommand{\checked}{$\boxtimes$}
+\begin{figure*}
+\centering
+\footnotesize
+\input{data/cve}
+\caption{Linux CVE.}
+\end{figure*}
+
+\subsection{Case Study}
+
+The Linux kernel.
+
+Userspace apps.
+
+\subsection{Patching}
 
 What do patches look like?
 
