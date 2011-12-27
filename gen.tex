@@ -1,22 +1,22 @@
 \section{Design}
 \label{s:gen}
 
-\autoref{f:flow} shows \sys's workflow.  Based on the LLVM intermediate
+\autoref{f:flow} shows \sys's workflow.  Given the LLVM intermediate
 representation~(IR) compiled from source code, \sys generates a set
 of constraints for each integer operation, and feed them into the
-constraint solver.
+Boolector constraint solver for deciding satisfiability.
 
-Particularly, \sys generates three types of constraints.
+Specifically, \sys generates three types of constraints.
 %
-Given an integer operation, \sys generates its error constraint
-directly from the definition.
+Given an integer operation, the error constraint is generated
+directly from definition.
 %
 \sys also calculates the path constraint, the predicate satisfying
 which the operation is reachable from the start of that function.
 %
-To further improve accuracy, \sys infers additional integral ranges
+To further improve accuracy, \sys infers additional range information
 of function parameters and structure fields across the call graph,
-and also allows users to provide range annotations.
+and allows users to provide range annotations.
 
 \begin{figure}
 \centering
@@ -31,28 +31,30 @@ the constraints to a solver for satisfiability testing.}
 
 \subsection{Error Constraint Generation}
 
-One may implement the error constraints defined in \autoref{s:sema:constr}
-as Boolean circuits for deciding satisfiability.  For example, given
+One may implement the error constraints of integer operations defined
+in \autoref{s:sema:constr} as Boolean circuits.  For example, given
 two $n$-bit unsigned integers, the multiplication error constraint
 could be implemented using a $2n$-bit binary multiplier, which flags
 an overflow error if any of the most significant $n$ bits of the
 product is 1.
 
 The Boolector constraint solver provides several highly optimized
-circuits to implement these error constraints.  As for the
-multiplication error constraint, Boolector's overflow detection
-circuit does not even need to compute the $2n$-bit product first
-and can be solved more
-efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
-reuses them to generate error constraints for better performance.
+circuits for implementing these error constraints.  As for
+multiplication, Boolector's overflow detection circuit does not
+even need to compute the $2n$-bit product first and can be solved
+more efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.
+\sys reuses them to generate error constraints for better performance.
+
+
+[[[array index]]]
+
+[[[annotations on \cc{copy_from_user}]]]
 
 \subsection{Path Constraint Generation}
 
 use \autoref{f:ax25-sign} as an example.
 
 unroll loops once.
-
-Move in-loop constraints out.
 
 handle comparison like \cc{p == NULL}.
 
@@ -71,7 +73,7 @@ handle sysctl interface.
 
 \subsection{Optimization}
 
-false error \& performance.
+[[[Move in-loop constraints out.]]]
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
