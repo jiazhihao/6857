@@ -1,92 +1,90 @@
-\begin{tabular}{lllllll} \toprule
- & \multirow{2}{*}{Component} & \multirow{2}{*}{Error}
-   & \multicolumn{2}{c}{Architecture}
-   & \multirow{2}{*}{Caught in original} & \multirow{2}{*}{Cleared in patch} \\ \cmidrule{4-5}
- &           &       & 32 & 64 & \\ \midrule
+\begin{tabular}{lllll} \toprule
+ & Component & Error
+   & Caught in original & Cleared in patch \\ \midrule
 \cc{arch} \\
 \hspace{1em} CVE-2009-3638 & kvm
- & $\times_u$, size & \checked & & \ok & \ok \\
+ & $\times_u$, size & \ok & \ok \\
 \cc{drivers/block} \\
 \hspace{1em} CVE-2010-3437 & pktcdvd
- & index & \checked & \checked & \ok & \ok \\
+ & index & \ok & \ok \\
 \cc{drivers/char} \\
 \hspace{1em} CVE-2011-2022 & agp
- & $+_u$ & \checked & \checked & \ok & \ok \\
+ & $+_u$ & \ok & \ok \\
 \hspace{1em} CVE-2011-1746 & agp
- & $+_u$, $\times_u$ & \checked & \checked & \ok & \ok \\
+ & $+_u$, $\times_u$ & \ok & \ok \\
 \hspace{1em} CVE-2011-1745 & agp
- & $+_u$ & \checked & \checked & \ok & \ok \\
+ & $+_u$ & \ok & \ok \\
 \cc{drivers/gpu} \\
 \hspace{1em} CVE-2011-1013 & irq
- & index & \checked & \checked & \ok & \ok \\
+ & index & \ok & \ok \\
 \cc{drivers/infiniband} \\
 \hspace{1em} CVE-2010-4649 & uverbs
- & $\times_u$, size & \checked & \checked & \ok & \ok \\
+ & $\times_u$, size & \ok & \ok \\
 \cc{drivers/media} \\
 \hspace{1em} CVE-2011-0521 & av7110
- & index & \checked & \checked & \ok & \ok \\
+ & index & \ok & \ok \\
 \cc{drivers/net} \\
 \hspace{1em} CVE-2009-1385 & e1000
- & $-_u$ & \checked & \checked & \ok & \ok \\
+ & $-_u$ & \ok & \ok \\
 \cc{drivers/scsi} \\
 \hspace{1em} CVE-2011-1494 & mpt2sas
- & $\times_u$, size & \checked & \checked & \ok & \ok \\
+ & $\times_u$, size & \ok & \ok \\
 \hspace{1em} CVE-2010-4157 & gdth
- & $+_u$, size & \checked & \checked & \ok & \ok \\
+ & $+_u$, size & \ok & \ok \\
 \cc{fs} \\
 \hspace{1em} CVE-2011-4077 & xfs
- & index, size & \checked & \checked & \ok & \ok \\
+ & index, size & \ok & \ok \\
 \hspace{1em} CVE-2011-3191 & cifs
- & $+_u$, index, size & \checked & \checked & \ok & \ok \\
+ & $+_u$, index, size & \ok & \ok \\
 \hspace{1em} CVE-2010-4162 & bio
- & $+_u$, $-_u$ & \checked & \checked & \ok & \ok \\
+ & $+_u$, $-_u$ & \ok & \ok \\
 \hspace{1em} CVE-2010-3067 & aio
- & $\times_u$ & \checked & \checked & \ok & \ok \\
+ & $\times_u$ & \ok & \ok \\
 \hspace{1em} CVE-2010-2538 & btrfs
- & $+_u$, $-_u$ & \checked & \checked & \ok & solver timeout \\
+ & $+_u$, $-_u$ & \ok & solver timeout \\
 \hspace{1em} CVE-2009-4307 & ext4
- & $/_u$, $\shl$ & \checked & \checked & left shift modeling & \ok \\
+ & $\shl$, $/_u$ (ppc) & \shl modeling & ?? \\
 \cc{kernel} \\
 \hspace{1em} CVE-2011-1593 & pid
- & $+_s$, index & \checked & \checked & \ok & \ok \\
+ & $+_s$, index & \ok & \ok \\
 \cc{mm} \\
 \hspace{1em} CVE-2011-4097 & oom
- & $+_s$, $-_s$, $\times_s$ &  & \checked & \ok & page semantics \\
+ & $+_s$, $-_s$, $\times_s$ & \ok & page semantics \\
 \cc{net} \\
-\hspace{1em} CVE-2011-2497 & bluetooth
- & $-_u$, size & \checked & \checked & \ok & \ok \\
+\hspace{1em} CVE-2011-2497 & l2cap
+ & $-_u$, size & \ok & \ok \\
 \hspace{1em} CVE-2011-1770 & dccp
- & $-_u$ & \checked & \checked & \ok & \ok \\
+ & $-_u$ & \ok & \ok \\
 \hspace{1em} CVE-2010-4529 & irda
- & $+_u$, $\times_s$, size & \checked & \checked & \ok & new errors \\
+ & $+_u$, $\times_s$, size & \ok & new errors \\
 \hspace{1em} CVE-2010-4175 & rds
- & size & \checked & \checked & \ok & \ok \\
+ & size & \ok & \ok \\
 \hspace{1em} CVE-2010-4165 & tcp
- & $/_u$, $\times_u$ & \checked & \checked & \ok & \ok \\
+ & $/_u$, $\times_u$ & \ok & \ok \\
 \hspace{1em} CVE-2010-4164 & x25
- & $-_u$ & \checked & \checked & \ok & \ok \\
+ & $-_u$ & \ok & \ok \\
 \hspace{1em} CVE-2010-3873 & x25
- & $-_u$, size & \checked & \checked & \ok & CVE-2010-4164 \\
+ & $-_u$, size & \ok & CVE-2010-4164 \\
 \hspace{1em} CVE-2010-3865 & rds
- & $+_u$ & \checked & \checked & accumulation & \ok \\
+ & $+_u$ & accumulation & \ok \\
 \hspace{1em} CVE-2010-3310 & rose
- & index & \checked & \checked & \ok & \ok \\
+ & index & \ok & \ok \\
 \hspace{1em} CVE-2010-2959 & can
- & $+_u$, $\times_u$, size & \checked & \checked & \ok & \ok \\
+ & $+_u$, $\times_u$, size & \ok & \ok \\
 \hspace{1em} CVE-2010-2478 & ethtool
- & $\times_u$, size & \checked & \checked & \ok & \ok \\
+ & $\times_u$, size & \ok & \ok \\
 \hspace{1em} CVE-2009-3280 & cfg80211
- & $-_u$ & \checked & \checked & \ok & \ok \\
+ & $-_u$   & \ok & \ok \\
 \hspace{1em} CVE-2009-2909 & ax25
- & $\times_s$, size & \checked & \checked & \ok & new errors \\
+ & $\times_s$, size & \ok & new errors \\
 \hspace{1em} CVE-2009-1265 & rose
- & $+_u$, size & \checked & \checked & \ok & \ok \\
+ & $+_u$, size & \ok & \ok \\
 \hspace{1em} CVE-2008-3526 & sctp
- & $+_u$ & \checked &  & \ok & bad fix \\
+ & $+_u$ & \ok & bad fix \\
 \cc{sound} \\
 \hspace{1em} CVE-2011-1477 & opl3
- & index & \checked & \checked & \ok & \ok \\
+ & index & \ok & \ok \\
 \hspace{1em} CVE-2010-3442 & alsa
- & $+_u$, $\times_u$ & \checked &  & \ok & \ok \\
+ & $+_u$, $\times_u$ & \ok & \ok \\
 \bottomrule
 \end{tabular}
