@@ -1,112 +1,130 @@
-\begin{tabular}{lllllll} \toprule
-Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \midrule
+\begin{tabular}{llllll} \toprule
+Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \\ \midrule
 \cc{drivers:drm} \\
 \hspace{1em} crtc
 	& $\times_u$
 	& OOB write
-	& ioctl: bad \cc{kzalloc} size
+	& ioctl: \cc{kzalloc} size
 	& --
 	& \ok \cc{a5cd3351} \\
 \hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB read
-	& ioctl: bad \cc{kzalloc} size
+	& ioctl: \cc{kzalloc} size
 	& --
 	& \ok \cc{bab9efc2} \\
 \hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB write
-	& ioctl: bad VRAM size requested
+	& ioctl: VRAM size requested
 	& 2
 	& \ok \cc{8a783896} \\
 \cc{drivers:input} \\
 \hspace{1em} cma3000_d0x
 	& sign
 	& logic error
-	& $\cc{u8} <_u 0$: broken error handling
+	& $\cc{u8} <_u 0$: error handling
 	& --
 	& \ok \cc{3a7f8fb1} \\
 \cc{drivers:media} \\
 \hspace{1em} uvc
 	& $\times_u$
 	& OOB read
-	& ioctl: bad \cc{kmalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{5f72752b} (uvcvideo) \\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
 	& OOB write
-	& ioctl: bad \cc{kmalloc} size
-	& --
+	& ioctl: \cc{kmalloc} size
+	& 1
 	& \ok \cc{dfd8ee92} \\
 \hspace{1em} olpc_dcon
 	& sign
 	& logic error
-	& $\cc{(int)u8} = -1$: broken error handling
+	& $\cc{(int)u8} = -1$: error handling
 	& --
 	& \ok \cc{91762057} (staging) \\
 \hspace{1em} vt6655
 	& $\times_u$ (2)
 	& OOB write
-	& ioctl: bad \cc{kmalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{2a58b19f} (staging) \\
 \hspace{1em} vt6656
 	& $\times_u$ (2)
 	& OOB write
-	& ioctl: bad \cc{kmalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{20132043} (staging) \\
 \cc{fs} \\
 \hspace{1em} ext4
 	& sign
 	& logic error
-	& $\cc{uint} <_u 0$: broken error handling
+	& $\cc{uint} <_u 0$: error handling
 	& --
 	& fixed by others \\
 \hspace{1em} nifs2
 	& $\times_u$
 	& OOB read
-	& ioctl: bad \cc{vmalloc} size
+	& ioctl: \cc{vmalloc} size
 	& --
 	& \ok \cc{481fe17e} \\
 \hspace{1em} xfs
 	& $\times_u$
 	& OOB write
-	& disk: bad sign \& \cc{kmalloc} size
+	& disk: sign \& \cc{kmalloc} size
 	& 1
 	& \ok \cc{093019cf} (xfs) \\
 \cc{mm} \\
 \hspace{1em} vmscan
 	& sign
 	& logic error
-	& $\cc{ulong} <_u 0$: bad overflow check
+	& $\cc{ulong} <_u 0$: overflow check
 	& --
 	& fixed by others \\
 \cc{net} \\
+\hspace{1em} ax25
+	& $\times_u$ (8)
+	& timer
+	& {ioctl}/{setsockopt}: timeout
+	& --
+	& mod. \cc{be639ac6} (net-next) \\
+\hspace{1em} ax25
+	& $\times_u$ (4)
+	& timer
+	& {setsockopt}: timeout
+	& 1
+	& \ok \cc{ba1cffe0} (net-next) \\
 \hspace{1em} irda
 	& $\times_s$
 	& timer
-	& {getsockopt}: bad timeout
+	& {getsockopt}: timeout
 	& --
 	& \ok \cc{7d6c429b} (net-next) \\
+\hspace{1em} netrom
+	& $\times_u$ (3)
+	& timer
+	& {setsockopt}: timeout
+	& --
+	& \ok \cc{32288eb4} (net-next) \\
 \hspace{1em} rps
 	& $\times_u$
 	& OOB write
-	& sysfs: bad \cc{vmalloc} size
+	& sysfs: \cc{vmalloc} size
 	& --
 	& \ok \cc{a0a129f8} \\
 \hspace{1em} sctp
 	& $\times_u$
 	& timer
-	& {setsockopt}: bad timeout
+	& {setsockopt}: autoclose timeout
 	& 3
 	& \ok \cc{c89304b8} \\
 \hspace{1em} sctp
 	& N/A
 	& N/A
-	& CVE-2008-3526: not exploitable
+	& CVE-2008-3526 not exploitable
 	& 1
 	& \ok \cc{2692ba61} \\
 \bottomrule
