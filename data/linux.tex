@@ -30,6 +30,18 @@
 	& $\times_u$
 	& 1  & OOB write
 	& ioctl: bad \cc{kmalloc} size \\
+\hspace{1em} \cc{91762057} (staging) & olpc_dcon
+	& sign
+	& -- & logic error
+	& $\cc{(int)u8} = -1$: broken error handling \\
+\hspace{1em} \cc{2a58b19f} (staging) & vt6655
+	& $+_u, \times_u$
+	& -- & OOB write
+	& ioctl: bad \cc{kmalloc} size \\
+\hspace{1em} \cc{20132043} (staging) & vt6656
+	& $+_u, \times_u$
+	& -- & OOB write
+	& ioctl: bad \cc{kmalloc} size \\
 \cc{fs} \\
 \hspace{1em} \cc{481fe17e} & nifs2
 	& $\times_u$
@@ -42,7 +54,7 @@
 \cc{net} \\
 \hspace{1em} \cc{7d6c429b} (net-next) & irda
 	& $\times_s$
-	& -- & timeout
+	& -- & timer
 	& {getsockopt}: bad timeout \\
 \hspace{1em} \cc{a0a129f8} & rps
 	& $+_u, \times_u$
@@ -50,12 +62,12 @@
 	& sysfs: bad \cc{vmalloc} size \\
 \hspace{1em} \cc{c89304b8} & sctp
 	& $\times_u$
-	& 3  & timeout
+	& 3  & timer
 	& {setsockopt}: bad timeout \\
 \hspace{1em} \cc{2692ba61} & sctp
 	& --
 	& 1  & --
-	& CVE-2008-3526: not exploitable \& bad fix \\
+	& CVE-2008-3526: not exploitable \\
 \bottomrule
 \end{tabular}
 
