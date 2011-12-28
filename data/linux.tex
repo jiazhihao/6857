@@ -47,13 +47,13 @@ Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \
 	& --
 	& \ok \cc{91762057} (staging) \\
 \hspace{1em} vt6655
-	& $+_u, \times_u$
+	& $\times_u$ (2)
 	& OOB write
 	& ioctl: bad \cc{kmalloc} size
 	& --
 	& \ok \cc{2a58b19f} (staging) \\
 \hspace{1em} vt6656
-	& $+_u, \times_u$
+	& $\times_u$ (2)
 	& OOB write
 	& ioctl: bad \cc{kmalloc} size
 	& --
@@ -64,7 +64,7 @@ Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \
 	& logic error
 	& $\cc{uint} <_u 0$: broken error handling
 	& --
-	& fixed independently \\
+	& fixed by others \\
 \hspace{1em} nifs2
 	& $\times_u$
 	& OOB read
@@ -72,9 +72,9 @@ Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \
 	& --
 	& \ok \cc{481fe17e} \\
 \hspace{1em} xfs
-	& $+_u, \times_u$
+	& $\times_u$
 	& OOB write
-	& disk: bad \cc{kmalloc} size
+	& disk: bad sign \& \cc{kmalloc} size
 	& 1
 	& \ok \cc{093019cf} (xfs) \\
 \cc{mm} \\
@@ -83,7 +83,7 @@ Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \
 	& logic error
 	& $\cc{ulong} <_u 0$: bad overflow check
 	& --
-	& fixed independently \\
+	& fixed by others \\
 \cc{net} \\
 \hspace{1em} irda
 	& $\times_s$
@@ -92,7 +92,7 @@ Component & Error & Impact & Description & \# of failures & Patch accepted? \\ \
 	& --
 	& \ok \cc{7d6c429b} (net-next) \\
 \hspace{1em} rps
-	& $+_u, \times_u$
+	& $\times_u$
 	& OOB write
 	& sysfs: bad \cc{vmalloc} size
 	& --
