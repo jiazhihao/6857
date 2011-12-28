@@ -171,6 +171,14 @@ architectures like x86, which fails the check.
 Currently \sys does not put these dangerous overflowed checking
 forms in the white list, even though they may not be exploitable.
 
+In addition, \sys accepts user-provided idioms tailored for the
+code being analyzed.  For example, in the Linux kernel to set a
+timer that expires after \cc{delay} ticks one often invokes
+\cc{mod_timer(..., jiffies + delay)}, where \cc{jiffies} is the
+number of ticks since the machine started.  \sys recognizes
+such idioms and ignores the addition \cc{jiffies + delay} that may
+overflow.
+
 \begin{figure}
 \centering
 \begin{tabular}{ll}
@@ -181,7 +189,7 @@ $x - y <_s 0$ & $x <_u y$ \\
 $(x \times y) /_u y \neq x$ & $x >_u \umax(n) /_u y$   \\
 \bottomrule
 \end{tabular}
-\caption{The white list of overflowed check idioms that \sys recognizes.
+\caption{Examples of overflowed check idioms that \sys recognizes.
 Here $\umax(n)$ denotes the largest $n$-bit unsigned integer.}
 \label{f:whitelist}
 \end{figure}
