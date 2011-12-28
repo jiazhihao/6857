@@ -1,0 +1,61 @@
+\begin{tabular}{lllllll} \toprule
+ & Component & Error & \# of tries & Impact & Description \\ \midrule
+\cc{drivers:drm} \\
+\hspace{1em} \cc{a5cd3351} & crtc
+	& $\times_u$
+	& -- & OOB write
+	& ioctl: bad \cc{kzalloc} size \\
+\hspace{1em} \cc{bab9efc2} & vmwgfx
+	& $\times_u$
+	& -- & OOB read
+	& ioctl: bad \cc{kzalloc} size \\
+\hspace{1em} \cc{8a783896} & vmwgfx
+	& $\times_u$
+	& 2  & OOB write
+	& ioctl: bad VRAM size requested \\
+%\hspace{1em} \cc{8a783896}
+%& 
+\cc{drivers:input} \\
+\hspace{1em} \cc{3a7f8fb1} & cma3000_d0x
+	& sign
+	& -- & logic error
+	& $(\cc{u8} <_u 0)$: broken error handling \\
+\cc{drivers:media} \\
+\hspace{1em} \cc{5f72752b} (uvcvideo) & uvc
+	& $\times_u$
+	& -- & OOB read
+	& ioctl: bad \cc{kmalloc} size \\
+\cc{drivers:staging} \\
+\hspace{1em} \cc{dfd8ee92} & comedi
+	& $\times_u$
+	& 1  & OOB write
+	& ioctl: bad \cc{kmalloc} size \\
+\cc{fs} \\
+\hspace{1em} \cc{481fe17e} & nifs2
+	& $\times_u$
+	& -- & OOB read
+	& ioctl: bad \cc{vmalloc} size \\
+\hspace{1em} \cc{093019cf} (xfs) & xfs
+	& $+_u, \times_u$
+	& 1  & OOB write
+	& disk: bad \cc{kmalloc} size \\
+\cc{net} \\
+\hspace{1em} \cc{7d6c429b} (net-next) & irda
+	& $\times_s$
+	& -- & timeout
+	& {getsockopt}: bad timeout \\
+\hspace{1em} \cc{a0a129f8} & rps
+	& $+_u, \times_u$
+	& -- & OOB write
+	& sysfs: bad \cc{vmalloc} size \\
+\hspace{1em} \cc{c89304b8} & sctp
+	& $\times_u$
+	& 3  & timeout
+	& {setsockopt}: bad timeout \\
+\hspace{1em} \cc{2692ba61} & sctp
+	& --
+	& 1  & --
+	& CVE-2008-3526: not exploitable \& bad fix \\
+\bottomrule
+\end{tabular}
+
