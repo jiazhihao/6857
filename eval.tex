@@ -1,11 +1,21 @@
 \section{Evaluation}
 \label{s:eval}
 
+The evaluation tries to answer the following questions.
+\begin{itemize}
+\item
+Is \sys effective to catch integer errors in buggy code?
+\item
+Will \sys declare that patched code does not contain no integer errors?
+\item
+Can \sys find integer errors in real-world systems?
+\end{itemize}
+
 \subsection{Validation}
 
-We have collected XXX integer errors of the Linux kernel in recent
-three years, from both the CVE list~\cite{cve} and a previous
-survey~\cite{chen:kbugs}, as the benchmark to validate \sys.
+We have collected XXX integer errors (both original and patched
+code snippets) in the Linux kernel from the CVE list~\cite{cve} in
+recent three years and use them as the benchmark to validate \sys.
 
 \newcommand{\ok}{\textcolor{JungleGreen}{\checkmark}\xspace}
 \newcommand{\checked}{$\boxtimes$}
@@ -13,7 +23,8 @@ survey~\cite{chen:kbugs}, as the benchmark to validate \sys.
 \centering
 \footnotesize
 \input{data/cve}
-\caption{Linux CVE.}
+\caption{The result of applying \sys to integer errors in Linux
+kernel from the CVE list.}
 \end{figure*}
 
 \subsection{Case Study}
@@ -24,7 +35,7 @@ The Linux kernel.
 \centering
 \footnotesize
 \input{data/linux}
-\caption{New integer errors in the Linux kernel.}
+\caption{Integer errors in the latest Linux kernel found by \sys.}
 \end{figure*}
 
 Userspace apps.

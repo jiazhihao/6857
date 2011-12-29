@@ -69,7 +69,7 @@ The basic algorithm works as follows.  Since there is no loop, the
 path constraint of the call to \cc{copy_from_user} is simply the
 logical OR of the constraint from each of its predecesssors, namely
 \textsc{If-True} and \textsc{If-False}.  For each predecessor, the
-constraint is a logic AND of three parts: the branching condition,
+constraint is a logical AND of three parts: the branching condition,
 possible assignment(s) in the predecessor, and the path constraint
 of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
@@ -118,9 +118,9 @@ Range constraint \& annotations?
 handle sysctl interface.
 
 
-\subsection{Optimization}
+\subsection{Optimizations}
 
-[[[Move in-loop constraints out.]]]
+\paragraph{In-loop constraint.}
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
@@ -147,13 +147,14 @@ the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 How to determine the values from two load instructions
 are the same? Load hoisting, unsound aliasing rules.
 
-\autoref{f:hoist} shows in the hoisting algorithm.
+%\autoref{f:hoist} shows in the hoisting algorithm.
 
 aliasing assumption~\cite{livshits:ipssa}.
 \sys assumes that a pointer passed as a function parameter or a
 global variable points is distinct from any other memory location.
 
 
+\if 0
 \begin{figure}
 \input{algo/hoist}
 \caption{The hoisting algorithm to move a load instruction to the
@@ -163,6 +164,7 @@ basic block; if successful, try to move it into the common ancestor
 of the block's predecessors.}
 \label{f:hoist}
 \end{figure}
+\fi
 
 \paragraph{Error-before-check.}
 An integer error check may come after the overflowed computation,
