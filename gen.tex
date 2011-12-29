@@ -15,8 +15,8 @@ directly from definition.
 which the operation is reachable from the start of that function.
 %
 To further improve accuracy, \sys infers additional range information
-of function parameters and structure fields across the call graph,
-and allows users to provide range annotations.
+of function parameters and structure fields across the call graph.
+It also allows users to provide annotations as constraints.
 
 \begin{figure}
 \centering
@@ -58,11 +58,52 @@ As for the Linux kernel, we annotate parameters in functions like
 
 \subsection{Path Constraint Generation}
 
-use \autoref{f:ax25-sign} as an example.
+We use \autoref{f:ax25-sign} as an example to illustrate how \sys
+generates path constraints.  The control flow of the code is shown
+in \autoref{f:cfg}.  For clarification purpose \cc{optlen} is
+numbered~\cite[\chapterautorefname~8.11]{whale}.  Our goal is to
+evaluate the path constraint for the call to \cc{copy_from_user}.
+%the error constraint of which is $\cc{optlen} <_s 0$.
 
-unroll loops once.
+The basic algorithm works as follows.  Since there is no loop, the
+path constraint of the call to \cc{copy_from_user} is simply the
+logical OR of the constraint from each of its predecesssors, namely
+\textsc{If-True} and \textsc{If-False}.  For each predecessor, the
+constraint is a logic AND of three parts: the branching condition,
+possible assignment(s) in the predecessor, and the path constraint
+of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
+unconditionally jump to \cc{copy_from_user}, so their branching
+conditions are simply true, which can be ignored.  Now we have the
+path constraint as follows.
+\begin{align*}
+& ((\cc{optlen}_1 = 16) \land \pc(\textsc{If-True})) \\
+\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \pc(\textsc{If-False}))
+\end{align*}
+Recursively apply the algorithm to \textsc{If-True} and \textsc{If-False},
+and we can get the final path constraint.
+\begin{align*}
+& ((\cc{optlen}_1 = 16) \land (\cc{optlen}_0 >_s 16) \\
+& \; \land \neg(\cc{optlen}_0 <_u 4)) \\
+\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \neg(\cc{optlen}_0 >_s 16) \\
+     & \; \land \neg(\cc{optlen}_0 <_u 4))
+\end{align*}
+One can feed the logical AND of the path constraint and the error
+constraint (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
+will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
 
-handle comparison like \cc{p == NULL}.
+\begin{figure}
+\centering
+\resizebox{0.9\linewidth}{!}{
+\input{figs/cfg}
+}
+\caption{The control flow of the code snippet in \autoref{f:ax25-sign}.}
+\label{f:cfg}
+\end{figure}
+
+\sys deals loops using the standard unrolling-once
+approach~\cite{xie:saturn}.  It unrolls each loop once and ignores
+branching edges that point back.  The complete algorithm is shown
+in \autoref{f:path-cstr}.
 
 \begin{figure}
 \input{algo/path}
