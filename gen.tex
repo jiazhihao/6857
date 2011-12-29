@@ -31,24 +31,30 @@ the constraints to a solver for satisfiability testing.}
 
 \subsection{Error Constraint Generation}
 
-One may implement the error constraints of integer operations defined
-in \autoref{s:sema:constr} as Boolean circuits.  For example, given
-two $n$-bit unsigned integers, the multiplication error constraint
-could be implemented using a $2n$-bit binary multiplier, which flags
-an overflow error if any of the most significant $n$ bits of the
-product is 1.
+For arithmetic and shift operations, it is straightforward to
+generate the error constraints from their definitions shown in
+\autoref{s:sema:constr}.  Boolector provides highly optimized Boolean
+circuits for implementing these error constraints.  As for $n$-bit
+unsigned multiplication, a simple solution is to implement a $2n$-bit
+binary multiplier, which flags an overflow error if any of the most
+significant $n$ bits of the product is 1; Boolector's overflow
+detection circuit does not even need to compute the $2n$-bit product
+and thus can be solved more
+efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
+reuses these circuits for better performance.
 
-The Boolector constraint solver provides several highly optimized
-circuits for implementing these error constraints.  As for
-multiplication, Boolector's overflow detection circuit does not
-even need to compute the $2n$-bit product first and can be solved
-more efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.
-\sys reuses them to generate error constraints for better performance.
+According to \autoref{s:sema:constr}, \sys deals with conversions as follows.
 
+\sys derives a predicate from each comparison.  If the predicate
+is trivially true or false resulted from a conversion, \sys reports
+the conversion as an integer error.
 
-[[[array index]]]
-
-[[[annotations on \cc{copy_from_user}]]]
+Though it is easy to generate the error constraint for a value $x$
+that should be non-negative, i.e., $x <_s 0$, \sys needs to know
+them first.  \sys requires annotations on ``size'' function parameters.
+As for the Linux kernel, we annotate parameters in functions like
+\cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
+\sys also implements a front-end plugin to annotate array indices.
 
 \subsection{Path Constraint Generation}
 

@@ -52,14 +52,14 @@ underlying architecture.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are often seen in systems
-code, though one may find them by invoking GCC with \cc{-Wconversion}
-to inspect potentially dangerous ones.  In general \sys does not
+code, though one may find them by simply invoking GCC with
+\cc{-Wconversion} for inspection.  In general \sys does not consider
 such a conversion as an integer error, unless its result is used
 in one of the following cases.
 \begin{itemize}
 \item
-A comparison is made always true or false, which means that
-the result voids one of the branches.
+A comparison is made always true or false, which means that the
+result from the conversion voids one of the branches.
 \item
 A theoretically non-negative value may become negative, including
 array indices and ``size'' parameters, e.g., in a call to
