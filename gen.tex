@@ -32,29 +32,34 @@ the constraints to a solver for satisfiability testing.}
 \subsection{Error Constraint Generation}
 
 For arithmetic and shift operations, it is straightforward to
-generate the error constraints from their definitions shown in
-\autoref{s:sema:constr}.  Boolector provides highly optimized Boolean
-circuits for implementing these error constraints.  As for $n$-bit
-unsigned multiplication, a simple solution is to implement a $2n$-bit
-binary multiplier, which flags an overflow error if any of the most
-significant $n$ bits of the product is 1; Boolector's overflow
-detection circuit does not even need to compute the $2n$-bit product
-and thus can be solved more
+generate their error constraints from their definitions shown in
+\autoref{s:sema:constr}.  As for $n$-bit unsigned multiplication,
+one may use a $2n$-bit binary multiplier (extending both integers
+from $n$ to $2n$ bits first), which flags an overflow error if any
+of the most significant $n$ bits of the product is
+1~\cite{molnar:catchconv}.
+
+Boolector provides highly optimized Boolean circuits for implementing
+some of these error constraints.  Its overflow detection circuit,
+for example, does not even need to compute the $2n$-bit product and
+thus can be solved far more
 efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
 reuses these circuits for better performance.
 
-According to \autoref{s:sema:constr}, \sys deals with conversions as follows.
+\sys deals with the two conversion cases as follows.
 
-\sys derives a predicate from each comparison.  If the predicate
-is trivially true or false resulted from a conversion, \sys reports
-the conversion as an integer error.
+To detect tautological comparisons, \sys derives a predicate from
+each comparison.  If the predicate is trivially true or false
+resulted from an integer conversion within that function, \sys
+reports the conversion as an integer error.
 
-Though it is easy to generate the error constraint for a value $x$
-that should be non-negative, i.e., $x <_s 0$, \sys needs to know
-them first.  \sys requires annotations on ``size'' function parameters.
-As for the Linux kernel, we annotate parameters in functions like
-\cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
-\sys also implements a front-end plugin to annotate array indices.
+For negative counts, it is easy to generate the error constraint
+for a value $x$ that should be non-negative, i.e., $x <_s 0$, however
+\sys needs to know them first.  \sys implements a front-end plugin
+to extract array indices.  \sys also requires annotations on ``size''
+function parameters.  As for the Linux kernel, we annotate parameters
+in functions like \cc{memcpy}, \cc{copy_from_user}, and
+\cc{sock_alloc_send_skb}.
 
 \subsection{Path Constraint Generation}
 
@@ -74,19 +79,23 @@ possible assignment(s) in the predecessor, and the path constraint
 of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
 conditions are simply true, which can be ignored.  Now we have the
-path constraint as follows.
+path constraint as follows:
+%
 \begin{align*}
 & ((\cc{optlen}_1 = 16) \land \pc(\textsc{If-True})) \\
-\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \pc(\textsc{If-False}))
+\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \pc(\textsc{If-False})).
 \end{align*}
+
 Recursively apply the algorithm to \textsc{If-True} and \textsc{If-False},
-and we can get the final path constraint.
+and we can get the fully expanded result:
+%
 \begin{align*}
-& ((\cc{optlen}_1 = 16) \land (\cc{optlen}_0 >_s 16) \\
-& \; \land \neg(\cc{optlen}_0 <_u 4)) \\
+& ((\cc{optlen}_1 = 16) \land (\cc{optlen}_0 >_s 16)
+    \land \neg(\cc{optlen}_0 <_u 4)) \\
 \lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \neg(\cc{optlen}_0 >_s 16) \\
-     & \; \land \neg(\cc{optlen}_0 <_u 4))
+     & \; \land \neg(\cc{optlen}_0 <_u 4)).
 \end{align*}
+
 One can feed the logical AND of the path constraint and the error
 constraint (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
 will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
@@ -100,10 +109,11 @@ will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
 \label{f:cfg}
 \end{figure}
 
-\sys deals loops using the standard unrolling-once
-approach~\cite{xie:saturn}.  It unrolls each loop once and ignores
-branching edges that point back.  The complete algorithm is shown
-in \autoref{f:path-cstr}.
+For complex programs that contain loops, \sys handles them using
+the standard unrolling technique~\cite{xie:saturn}.  The path
+constraint generation algorithm unrolls each loop once and ignores
+branching edges that jump back in the control flow, aka back edges.
+See the complete algorithm in \autoref{f:path-cstr}.
 
 \begin{figure}
 \input{algo/path}
