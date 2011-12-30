@@ -9,6 +9,7 @@ ASPELL_CMDS=\
 	--add-tex-command='mathrm p' \
 	--add-tex-command='newcommand pp' \
 	--add-tex-command='renewcommand pp' \
+	--add-tex-command='DeclareMathOperator pp' \
 
 all: code/fmt.tex
 	$(LATEXMK) -silent -pdf p

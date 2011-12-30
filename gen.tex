@@ -20,7 +20,7 @@ It also allows users to provide annotations as constraints.
 
 \begin{figure}
 \centering
-\resizebox{0.9\linewidth}{!}{
+\resizebox{\linewidth}{!}{
 \input{figs/flow}
 }
 \caption{\sys's workflow.  It generates constraints from the LLVM
@@ -72,7 +72,7 @@ evaluate the path constraint for the call to \cc{copy_from_user}.
 
 The basic algorithm works as follows.  Since there is no loop, the
 path constraint of the call to \cc{copy_from_user} is simply the
-logical OR of the constraint from each of its predecesssors, namely
+logical OR of the constraint from each of its predecessors, namely
 \textsc{If-True} and \textsc{If-False}.  For each predecessor, the
 constraint is a logical AND of three parts: the branching condition,
 possible assignment(s) in the predecessor, and the path constraint
@@ -102,7 +102,7 @@ will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
 
 \begin{figure}
 \centering
-\resizebox{0.9\linewidth}{!}{
+\resizebox{\linewidth}{!}{
 \input{figs/cfg}
 }
 \caption{The control flow of the code snippet in \autoref{f:ax25-sign}.}
