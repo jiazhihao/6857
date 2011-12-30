@@ -1,7 +1,10 @@
 \begin{algorithmic}
 \Function{PathConstraint}{$\mathit{blk}$}
+\If{$\mathit{blk}$ has no predecessor}
+	\State \Return{\textbf{true}}
+\EndIf
 \State $g \gets \textbf{false}$
-\ForAll{$\mathit{pred} \in \mathit{blk}$'s predecessors(s)}
+\ForAll{$\mathit{pred} \in \mathit{blk}$'s predecessors}
 \State $e \gets (\mathit{pred},\mathit{blk})$
 \If{$e$ is not a back edge}
 	\State $\mathit{br} \gets e$'s branching condition
