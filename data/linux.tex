@@ -2,15 +2,15 @@
 Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \\ \midrule
 \cc{drivers:drm} \\
 \hspace{1em} crtc
-	& $\times_u$
+	& $\times_u$ (3)
 	& OOB write
-	& ioctl: \cc{kzalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{a5cd3351} \\
 \hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB read
-	& ioctl: \cc{kzalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{bab9efc2} \\
 %\hspace{1em} vmwgfx
@@ -74,7 +74,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} xfs
 	& $\times_u$
 	& OOB write
-	& disk: sign \& \cc{kmalloc} size
+	& disk: \cc{kmalloc} size
 	& 1
 	& \ok \cc{093019cf} (xfs) \\
 \cc{mm} \\
@@ -88,25 +88,25 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} ax25
 	& $\times_u$ (8)
 	& timer
-	& {ioctl}/{setsockopt}: timeout
+	& {ioctl}/{setsockopt}: T1/T2/T3/idle timers
 	& --
 	& mod. \cc{be639ac6} (net-next) \\
 %\hspace{1em} ax25
 	& $\times_u$ (4)
 	& timer
-	& {setsockopt}: timeout
+	& {setsockopt}: T1/T2/T3/idle timers
 	& 1
 	& \ok \cc{ba1cffe0} (net-next) \\
 \hspace{1em} irda
 	& $\times_s$
 	& timer
-	& {getsockopt}: timeout
+	& {getsockopt}: watchdog timer
 	& --
 	& \ok \cc{7d6c429b} (net-next) \\
 \hspace{1em} netrom
-	& $\times_u$ (3)
+	& $\times_u$ (4)
 	& timer
-	& {setsockopt}: timeout
+	& {setsockopt}: T1/T2/T4/idle timers
 	& --
 	& \ok \cc{32288eb4} (net-next) \\
 \hspace{1em} rps
@@ -118,7 +118,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} sctp
 	& $\times_u$
 	& timer
-	& {setsockopt}: autoclose timeout
+	& {setsockopt}: autoclose timer
 	& 3
 	& \ok \cc{c89304b8} \\
 %\hspace{1em} sctp
