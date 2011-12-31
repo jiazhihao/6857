@@ -54,12 +54,12 @@ resulted from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
 For negative counts, it is easy to generate the error constraint
-for a value $x$ that should be non-negative, i.e., $x <_s 0$, however
-\sys needs to know them first.  \sys implements a front-end plugin
-to extract array indices.  \sys also requires annotations on ``size''
-function parameters.  As for the Linux kernel, we annotate parameters
-in functions like \cc{memcpy}, \cc{copy_from_user}, and
-\cc{sock_alloc_send_skb}.
+for a value $x$ that should be conceptually non-negative, that is,
+$x <_s 0$; however, \sys needs to know them first.  \sys implements
+a front-end plugin to recognize array indices.  \sys also requires
+user-provided annotations on ``size'' function parameters.  As for
+the Linux kernel, we annotate parameters in functions like \cc{memcpy},
+\cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
 
 \subsection{Path Constraint Generation}
 
@@ -80,20 +80,22 @@ of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
 conditions are simply true, which can be ignored.  Now we have the
 path constraint as follows:
+\newcommand{\optlen}{{\small \texttt{optlen}}}
+\newcommand{\pc}{\textrm{PathConstraint}}
 %
 \begin{align*}
-& ((\cc{optlen}_1 = 16) \land \pc(\textsc{If-True})) \\
-\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \pc(\textsc{If-False})).
+& ((\optlen_1 = 16) \land \pc(\textsc{If-True})) \\
+\lor & ((\optlen_1 = \optlen_0) \land \pc(\textsc{If-False})).
 \end{align*}
 
 Recursively apply the algorithm to \textsc{If-True} and \textsc{If-False},
 and we can get the fully expanded result:
 %
 \begin{align*}
-& ((\cc{optlen}_1 = 16) \land (\cc{optlen}_0 >_s 16)
-    \land \neg(\cc{optlen}_0 <_u 4)) \\
-\lor & ((\cc{optlen}_1 = \cc{optlen}_0) \land \neg(\cc{optlen}_0 >_s 16) \\
-     & \; \land \neg(\cc{optlen}_0 <_u 4)).
+& ((\optlen_1 = 16) \land (\optlen_0 >_s 16)
+    \land \neg(\optlen_0 <_u 4)) \\
+\lor & ((\optlen_1 = \optlen_0) \land \neg(\optlen_0 >_s 16) \\
+     & \; \land \neg(\optlen_0 <_u 4)).
 \end{align*}
 
 One can feed the logical AND of the path constraint and the error
