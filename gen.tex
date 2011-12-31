@@ -66,9 +66,9 @@ in functions like \cc{memcpy}, \cc{copy_from_user}, and
 We use \autoref{f:ax25-sign} as an example to illustrate how \sys
 generates path constraints.  The control flow of the code is shown
 in \autoref{f:cfg}.  For clarification purpose \cc{optlen} is
-numbered~\cite[\chapterautorefname~8.11]{whale}.  Our goal is to
+numbered every time it is assigned a new
+value~\cite[\chapterautorefname~8.11]{whale}.  Our goal is to
 evaluate the path constraint for the call to \cc{copy_from_user}.
-%the error constraint of which is $\cc{optlen} <_s 0$.
 
 The basic algorithm works as follows.  Since there is no loop, the
 path constraint of the call to \cc{copy_from_user} is simply the
