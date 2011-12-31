@@ -21,7 +21,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& \ok \cc{8a783896} \\
 \cc{drivers:input} \\
 \hspace{1em} cma3000_d0x
-	& sign
+	& cmp
 	& logic error
 	& $\cc{u8} <_u 0$: error handling
 	& --
@@ -33,6 +33,12 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \cc{5f72752b} (uvcvideo) \\
+\hspace{1em} wl128x
+	& cmp (36)
+	& logic error
+	& $\cc{u32} <_u 0$: error handling
+	& --
+	& \ok \cc{a6127803} (media_tree) \\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
@@ -41,7 +47,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& 1
 	& \ok \cc{dfd8ee92} \\
 \hspace{1em} olpc_dcon
-	& sign
+	& cmp
 	& logic error
 	& $\cc{(int)u8} = -1$: error handling
 	& --
@@ -60,7 +66,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& \ok \cc{20132043} (staging) \\
 \cc{fs} \\
 \hspace{1em} ext4
-	& sign
+	& cmp
 	& logic error
 	& $\cc{uint} <_u 0$: error handling
 	& --
@@ -79,7 +85,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& \ok \cc{093019cf} (xfs) \\
 \cc{mm} \\
 \hspace{1em} vmscan
-	& sign
+	& cmp
 	& logic error
 	& $\cc{ulong} <_u 0$: overflow check
 	& --
