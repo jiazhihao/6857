@@ -126,27 +126,29 @@ intention, \sys is designed to run before these optimizations.
 
 \subsection{Default Semantics}
 
-In order to continue evaluating expressions like $x \times y + z$
-after $x \times y$ overflows,
-\sys defines the default semantics for integer operations,
-as follows.
+Signed integer overflows and oversized shifts are undefined according
+to the C language standard.  In order to continue evaluating
+expressions like $x \times_s y + z$ after $x \times_s y$ overflows,
+\sys defines the default semantics for these integer operations, as
+follows:
 \begin{itemize}
 \item
-For arithmetic operations, \sys adopts the wrapping semantics for
-both signed and unsigned integers, i.e., $\pmod{2^n}$ for $n$-bit
-integer results, which is the same as invoking GCC with \cc{-fwrapv}.
+For $n$-bit signed arithmetic operations, \sys assumes the wrapping
+semantics as if they were unsigned, i.e., $\mod{2^n}$, which is
+the same as invoking GCC with the \cc{-fwrapv} option.
 \item
 Division by zero is undefined.
 \item
-For shifts, \sys adopts x86's semantics, using $\log_2 n$ bits for
+For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
 shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
 amount for 32-bit shifts, e.g., $1 \shl 32 = 1$.  This is also the
 behavior of ARM and MIPS processors.
 \end{itemize}
-For example, consider applying  \sys to a 32-bit expression $x /
-(1 \shl k) + y$ with a large $k$.  \sys will be able to detect the
-oversized shift via error constraint $k \geq_u 32$.  However, it
-will miss the division-by-zero bug, which is possible on PowerPC
+\sys may miss some integer errors with the default semantics.
+Consider the expression $x / (1 \shl y)$, where $x$ and $y$ are
+unconstrained 32-bit integers.  \sys will be able to detect the
+oversized shift via error constraint $y \geq_u 32$.  However, it
+will miss the division-by-zero error, which is possible on PowerPC
 but not on x86.
 
 \subsection{White List}
