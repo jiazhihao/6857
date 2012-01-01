@@ -134,6 +134,16 @@ handle sysctl interface.
 \subsection{Optimizations}
 
 \paragraph{In-loop constraint.}
+\sys tries to move constraints within a loop to the outside scope
+so as to generate more constraints.  Consider the following loop.
+\begin{Verbatim}
+for (i = 0; i < n; ++i)
+	a[i] = ...
+\end{Verbatim}
+\sys will generate an error constraint $i <_s 0$ since $i$ is used
+as an array index.  As $i$ also is a loop variable, \sys will move
+the constraint out of the loop and rewrite it as $n <_s 0$, by
+substituting the loop variable $i$ with its exit value $n$.
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
