@@ -65,8 +65,9 @@ the Linux kernel, we annotate parameters in functions like \cc{memcpy},
 
 We use \autoref{f:ax25-sign} as an example to illustrate how \sys
 generates path constraints.  The control flow of the code is shown
-in \autoref{f:cfg}.  For clarification purpose \cc{optlen} is
-numbered every time it is assigned a new
+in \autoref{f:cfg}, where there are two sanity checks on \cc{optlen}
+before it reaches \cc{copy_from_user}.  For clarification purpose
+\cc{optlen} is numbered every time it is assigned a new
 value~\cite[\chapterautorefname~8.11]{whale}.  Our goal is to
 evaluate the path constraint for the call to \cc{copy_from_user}.
 
