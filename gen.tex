@@ -63,6 +63,7 @@ the Linux kernel, we annotate parameters in functions like \cc{memcpy},
 \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
 
 \subsection{Path Constraint Generation}
+\label{s:gen:path}
 
 We use \autoref{f:ax25-sign} as an example to illustrate how \sys
 generates path constraints.  The control flow of the code is shown
@@ -126,6 +127,7 @@ The complete algorithm is listed in \autoref{f:path-cstr}.
 \end{figure}
 
 \subsection{Range Constraint Generation}
+\label{s:gen:range}
 
 \sys generates range constraints for function parameters
 and structure fields.
@@ -165,9 +167,12 @@ $\cc{pid_ns} + 4 + i \times 8$; in this example we have $i =
 the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 4 + i \times 8) - (\cc{pid_ns} + 4) = i \times 8$.
 
-\paragraph{Value equality testing.}
-How to determine the values from two load instructions
-are the same? Load hoisting, unsound aliasing rules.
+\paragraph{Memory model.}
+\sys uses a very simple and conservative memory model: a load
+instruction may return an arbitrary value (unless it has a range
+constraint; see \autoref{s:gen:range}).  \sys relies on LLVM's load
+elimination algorithm to merge load instructions that will return
+the same value.
 
 %\autoref{f:hoist} shows in the hoisting algorithm.
 
