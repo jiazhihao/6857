@@ -15,23 +15,23 @@ the outside, including data copied from user space (via system
 calls, virtual file systems like \cc{sysfs}, or kernel functions
 like \cc{copy_from_user}), received from network, and read from
 disk. [[[Xen: Dom0 input from DomU?]]]
-The kernel usually needs to perform sanity checks to avoid being
-tricked by an adversary.
+The kernel usually needs to perform sanity checks on these data to
+avoid being tricked by an adversary.
 
 Two most notable error-prone channels are \cc{ioctl} and \cc{setsockopt},
 due to their infamous irregular interfaces and pervading implementations
 in device drivers and network protocols.  \sys pays special attention
-to integer errors in their calling context.
+to integer errors that could happen in their calling context.
 
 \sys currently trusts hardware devices, other it would report too
-many errors and the kernel developers are unlikely to accept such
-patches.  \sys also trusts kernel module parameters for the same
-reason.
+many errors while the kernel developers are unlikely to accept such
+patches based on our initial experience.  \sys also trusts kernel
+module parameters for the same reason.
 
 Sensitive sinks include branching conditions that make logic
-decisions, data escaping from the kernel, and data sizes for
-allocation and communication.  An erroneous integer value used in
-such places are more likely to damage the system.
+decisions, data escaping from the kernel to the outside, and data
+sizes for allocation and I/O communication.  An erroneous integer
+value used in such places are more likely to damage the system.
 
 \sys requires annotations to specify untrusted sources and sensitive
 sinks.  Currently we have annotated XXX for the Linux kernel.
