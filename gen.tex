@@ -30,6 +30,7 @@ the constraints to a solver for satisfiability testing.}
 \end{figure}
 
 \subsection{Error Constraint Generation}
+\label{s:gen:err}
 
 For arithmetic and shift operations, it is straightforward to
 generate their error constraints from their definitions shown in
@@ -126,9 +127,10 @@ See the complete algorithm in \autoref{f:path-cstr}.
 
 \subsection{Range Constraint Generation}
 
-Range constraint \& annotations?
+\sys generates range constraints for function parameters
+and structure fields.
 
-handle sysctl interface.
+%handle sysctl interface.
 
 
 \subsection{Optimizations}
@@ -208,9 +210,35 @@ In the above example, \sys will move the integer operation $x
 \times_u y$ down to right after the \cc{if} branch and before the
 \cc{malloc} call, where its result \cc{size} is first used.
 
-\paragraph{Overflowed checking idiom.}
+\paragraph{Error checking idiom.}
 
-\sys recognizes XXX integer error checking idioms...
+We notice that when generating the path constraint some integer
+operations like division would significantly slow down the constraint
+solver~\cite{brummayer:perf}.  Many of such cases are used in integer
+error checks like $N /_u x > y$, where $N$ is a constant and $x,
+y$ are $n$-bit integers.  \sys recognizes such an integer error
+checking idiom and rewrites it to avoid the division operation, as
+follows.
+
+In general, \sys first zero-extends $x$ and $y$ from $n$ to $2n$
+bits, as $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check
+as multiplication $x_{2n} \times_u y_{2n} <_u N$.  If $N$ is a
+special constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites
+the check with the multiplication overflow detection circuit (see
+\autoref{s:gen:err}).
+
+\autoref{f:udiv} shows a microbenchark that measures the solving
+time of the three forms of 32- and 64-bit integers, respectively.
+For a single unsigned division operation this optimization can
+achieve up to 2.5$\times$ speedup.
+
+\begin{figure}
+\centering
+\input{data/udiv}
+\caption{Solving time of $\uintmax(n) /_u x > y$ and its variant
+forms, measured in milliseconds.}
+\label{f:udiv}
+\end{figure}
 
 \subsection{Limitations}
 
