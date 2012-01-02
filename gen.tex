@@ -212,7 +212,7 @@ In the above example, \sys will move the integer operation $x
 
 \paragraph{Error checking idiom.}
 
-We notice that when generating the path constraint some integer
+We notice that when generating path constraints some integer
 operations like division would significantly slow down the constraint
 solver~\cite{brummayer:perf}.  Many of such cases are used in integer
 error checks like $N /_u x > y$, where $N$ is a constant and $x,
@@ -227,16 +227,18 @@ special constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites
 the check with the multiplication overflow detection circuit (see
 \autoref{s:gen:err}).
 
-\autoref{f:udiv} shows a microbenchark that measures the solving
-time of the three forms of 32- and 64-bit integers, respectively.
-For a single unsigned division operation this optimization can
-achieve up to 2.5$\times$ speedup.
+\autoref{f:udiv} shows a microbenchmark that measures the solving
+time of the three checking forms of 32- and 64-bit integers,
+respectively.  Each test is repeated 1000 times.  For a single
+unsigned division operation this optimization can achieve up to
+2.5$\times$ speedup.
 
 \begin{figure}
 \centering
 \input{data/udiv}
-\caption{Solving time of $\uintmax(n) /_u x > y$ and its variant
-forms, measured in milliseconds.}
+\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
+forms: $2n$-bit multiplication and the multiplication overflow
+detection circuit, measured in milliseconds.}
 \label{f:udiv}
 \end{figure}
 
@@ -244,19 +246,24 @@ forms, measured in milliseconds.}
 
 We discuss what integer errors \sys could miss, i.e., false negatives.
 
+\sys only understands C-language code; it will cannot detect integer
+errors written in assembly language.
+
 \sys cannot scan code that is not enabled for compilation in current
-configuration or architecture.  One may need to enable as many
-modules as possible or try different combinations.
+configuration or architecture.  One may enable as many modules as
+possible for compilation or try different combinations for better
+code coverage.
 
-\sys only understands C-language code; it will miss integer errors
-written in assembly language.
+As discussed in \autoref{s:sema:def}, \sys's default semantics may
+not apply to some architectures like PowerPC and will miss bugs
+specific to those architectures.
 
-\sys's default semantics (see \autoref{s:sema:def}) may not apply
-to some architectures like PowerPC and may miss bugs specific to
-those architectures.
+\sys analyzes loops by unrolling them once, so it will miss integer
+errors caused by looping, for example, an addition overflow in an
+accumulation.
 
-\sys analyzes loops by unrolling them once, so it will miss integer errors
-caused by looping, for example, an addition overflow in an accumulation.
+\sys's alias assumption is unsound, and thus it will miss bugs
+caused by the assumption.
 
-\sys's alias assumption is unsound, thus it will miss bugs caused by
-the assumption.
+Finally, if the solver times out, \sys will miss the possible integer
+error corresponding to the queried constraint.
