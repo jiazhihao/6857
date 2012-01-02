@@ -23,7 +23,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} cma3000_d0x
 	& cmp
 	& logic error
-	& $\cc{u8} <_u 0$: error handling
+	& $<_u 0$: error handling
 	& --
 	& \ok \\
 \cc{drivers:media} \\
@@ -36,9 +36,16 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} wl128x
 	& cmp (36)
 	& logic error
-	& $\cc{u32} <_u 0$: error handling
+	& $<_u 0$: error handling
 	& --
 	& \ok (media_tree) \\
+\cc{drivers:scsi} \\
+\hspace{1em} iscsi_tcp
+	& $\times_u$
+	& OOB write
+	& network: \cc{kmalloc} size
+	& --
+	& \ok (??) \\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
@@ -68,7 +75,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} ext4
 	& cmp
 	& logic error
-	& $\cc{uint} <_u 0$: error handling
+	& $<_u 0$: error handling
 	& --
 	& fixed by others \\
 \hspace{1em} nifs2
@@ -87,7 +94,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} vmscan
 	& cmp
 	& logic error
-	& $\cc{ulong} <_u 0$: overflow check
+	& $<_u 0$: overflow check
 	& --
 	& fixed by others \\
 \cc{net} \\
@@ -103,6 +110,12 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& {setsockopt}: T1/T2/T3/idle timers
 	& 1
 	& \ok (net-next) \\
+\hspace{1em} can
+	& cmp
+	& logic error
+	& error counter state
+	& --
+	& acknowledged \\
 \hspace{1em} irda
 	& $\times_s$
 	& timer
