@@ -242,5 +242,21 @@ forms, measured in milliseconds.}
 
 \subsection{Limitations}
 
-miss bugs in some configurations, architectures,
-and assembly code.
+We discuss what integer errors \sys could miss, i.e., false negatives.
+
+\sys cannot scan code that is not enabled for compilation in current
+configuration or architecture.  One may need to enable as many
+modules as possible or try different combinations.
+
+\sys only understands C-language code; it will miss integer errors
+written in assembly language.
+
+\sys's default semantics (see \autoref{s:sema:def}) may not apply
+to some architectures like PowerPC and may miss bugs specific to
+those architectures.
+
+\sys analyzes loops by unrolling them once, so it will miss integer errors
+caused by looping, for example, an addition overflow in an accumulation.
+
+\sys's alias assumption is unsound, thus it will miss bugs caused by
+the assumption.
