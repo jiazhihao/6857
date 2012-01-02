@@ -137,6 +137,9 @@ and structure fields.
 
 \subsection{Optimizations}
 
+\sys performs a series of optimizations and rewrites the code for
+fewer false errors and better performance.
+
 \paragraph{In-loop constraint.}
 \sys tries to move constraints within a loop to the outside scope
 so as to generate more constraints.  Consider the following loop.
@@ -174,28 +177,46 @@ an arbitrary value (unless it has a range constraint; see
 algorithm to merge load instructions that will return the same
 value.
 
-There are two problems when directlying apply LLVM's load elimination
+There are two problems when directly applying LLVM's load elimination
 algorithm.
 %
 First, the algorithm optimizes for performance and tends to delay
-load instructions.  This would result in mutiple load instructions,
+load instructions.  This would result in multiple load instructions,
 often in spanned in several branches, that are in fact identical.
 %
-Second, the algorithm considers correctness as the highest prioprioty
-and is too conservative.  For example, XXX.
+Second, the algorithm depends on LLVM's pointer analysis algorithm,
+which is over-conservative.  For example, XXX.
 
-\sys
+\sys addresses the problems by hoisting every load instruction to
+the earliest possible point within the function.  The hope is that
+those load instructions will be moved up and put closed to each
+other, so that the load elimination algorithm can easily merge them
+if they are identical.
 
-As an error detection tool, \sys adopts a more aggressive assumption
-that a pointer passed as a function parameter or a global variable
-points to a memory location is distinct from any other memory
-location.  This assumption, though unsound, has been proven to be
-practical~\cite{livshits:ipssa}.  It allows \sys to aggressively
-push load instructions for more elimination oppurtunity.
+Consider a load instruction $L$ that loads from pointer $p$.  $L$ is
+safe to move across its previous instruction $I$ if:
+\begin{itemize}
+\item $I$ does not write to any memory location, or
+\item $I$ writes to pointer $q$, while $p$ and $q$ never point to the
+same memory location, i.e., they do not alias.
+\end{itemize}
+
+\sys repeatedly hoists $L$ until it is unsafe to do so and $L$
+reaches the entry block.  If $L$ is already the first instruction
+in a non-entry block and there are multiple predecessors that jump
+to $I$, \sys tries to move $L$ up to the common ancestor.
+
+\sys also adopts an aliasing assumption: a pointer passed as a
+function parameter or a global variable points to a memory location
+is distinct from any other memory location.  This assumption, though
+unsound, has been proven to be practical for detecting bugs C
+programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
+to aggressively push load instructions ahead for more elimination
+opportunity.
 
 In practice we find out that this memory model works well for \sys.
 It does not require sophisticated analysis across the whole kernel
-and acheives good performance.  See [[eval]]].
+and achieves good performance.  See [[eval]]].
 
 \if 0
 \begin{figure}
@@ -273,7 +294,7 @@ one may enable as many modules as possible, or try cross compilation
 for different architectures.
 
 As discussed in \autoref{s:sema}, \sys will miss integer errors
-that is not modeled by its semantics.  Particuarly, it cannot catch
+that is not modeled by its semantics.  Particularly, it cannot catch
 overflows if the developer uses left shift instead of multiplication;
 its default semantics may not apply to some architectures like
 PowerPC and will miss bugs specific to those architectures;
