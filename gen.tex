@@ -168,18 +168,34 @@ the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 4 + i \times 8) - (\cc{pid_ns} + 4) = i \times 8$.
 
 \paragraph{Memory model.}
-\sys uses a very simple and conservative memory model: a load
-instruction may return an arbitrary value (unless it has a range
-constraint; see \autoref{s:gen:range}).  \sys relies on LLVM's load
-elimination algorithm to merge load instructions that will return
-the same value.
+\sys employs a very simple memory model: a load instruction may return
+an arbitrary value (unless it has a range constraint; see
+\autoref{s:gen:range}).  It relies on LLVM's load elimination
+algorithm to merge load instructions that will return the same
+value.
 
-%\autoref{f:hoist} shows in the hoisting algorithm.
+There are two problems when directlying apply LLVM's load elimination
+algorithm.
+%
+First, the algorithm optimizes for performance and tends to delay
+load instructions.  This would result in mutiple load instructions,
+often in spanned in several branches, that are in fact identical.
+%
+Second, the algorithm considers correctness as the highest prioprioty
+and is too conservative.  For example, XXX.
 
-aliasing assumption~\cite{livshits:ipssa}.
-\sys assumes that a pointer passed as a function parameter or a
-global variable points is distinct from any other memory location.
+\sys
 
+As an error detection tool, \sys adopts a more aggressive assumption
+that a pointer passed as a function parameter or a global variable
+points to a memory location is distinct from any other memory
+location.  This assumption, though unsound, has been proven to be
+practical~\cite{livshits:ipssa}.  It allows \sys to aggressively
+push load instructions for more elimination oppurtunity.
+
+In practice we find out that this memory model works well for \sys.
+It does not require sophisticated analysis across the whole kernel
+and acheives good performance.  See [[eval]]].
 
 \if 0
 \begin{figure}
@@ -246,19 +262,21 @@ detection circuit, measured in milliseconds.}
 
 \subsection{Limitations}
 
-We discuss what integer errors \sys could miss, i.e., false negatives.
+\sys will miss the following integer errors.
 
 \sys only understands C-language code; it will cannot detect integer
 errors written in assembly language.
 
-\sys cannot scan code that is not enabled for compilation in current
-configuration or architecture.  One may enable as many modules as
-possible for compilation or try different combinations for better
-code coverage.
+\sys cannot scan code that is not enabled for compilation in the
+testing configuration or architecture.  For better code coverage
+one may enable as many modules as possible, or try cross compilation
+for different architectures.
 
-As discussed in \autoref{s:sema:def}, \sys's default semantics may
-not apply to some architectures like PowerPC and will miss bugs
-specific to those architectures.
+As discussed in \autoref{s:sema}, \sys will miss integer errors
+that is not modeled by its semantics.  Particuarly, it cannot catch
+overflows if the developer uses left shift instead of multiplication;
+its default semantics may not apply to some architectures like
+PowerPC and will miss bugs specific to those architectures;
 
 \sys analyzes loops by unrolling them once, so it will miss integer
 errors caused by looping, for example, an addition overflow in an
