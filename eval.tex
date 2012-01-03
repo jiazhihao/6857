@@ -53,16 +53,19 @@ kernel and submit patches for the integer errors \sys has reported.
 \autoref{f:data:linux} shows our findings.
 
 The ``Patch accepted?'' column shows how the kernel developers
-respond to our patches.  Mostly they are happy to accept our patches,
-which are denoted with a check mark.  Since the kernel development
-is organized is a distributed fashion, that is, kernel developers
-may maintain their own git repositories and queue patches for the
-mainline, we additional specify which repository accepts the
-patch, e.g., (net-next), if that patch has not reached the mainline
-repository.  The kernel developers may modify our patches for
-inclusion; we mark those as ``modified''.  They may sometimes
-acknowledge a reported bug but the patch has not shown up in the
-repository; we mark those as ``acknowledged''.
+respond to our patches.
+\begin{itemize}
+\item
+Check mark: they have accepted our patch.  We
+additional specify which repository the patch goes into, e.g.,
+(net-next), if that patch has not reached the mainline.
+\item
+Modified: they have modified our patch for inclusion.
+\item
+Acknowledged: they have acknowledged the bug and the patch, but we
+cannot find the patch showing up in any repository.
+\end{itemize}
+We omit patches that does not get further responses. [[[numbers?]]]
 
 \begin{figure*}
 \centering
