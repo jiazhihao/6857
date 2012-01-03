@@ -1,22 +1,42 @@
 \section{Design}
 \label{s:gen}
 
+This section presents \sys's design and how \sys generates constraints
+for detecting integer errors.
+
+\subsection{Overview}
+
 \autoref{f:flow} shows \sys's workflow.  Given the LLVM intermediate
 representation~(IR) compiled from source code, \sys generates a set
 of constraints for each integer operation, and feed them into the
-Boolector constraint solver for deciding satisfiability.
+Boolector constraint solver for deciding satisfiability.  If the
+solver answers SAT with an assignment, there is a potential integer
+error that could be triggered with that assignment.
 
-Specifically, \sys generates three types of constraints.
+Particularly, \sys generates following three types of constraints
+for the solver:
 %
-Given an integer operation, the error constraint is generated
-directly from definition.
+\paragraph{Error constraint.}
+Given an integer operation, its error constraint is generated
+directly from its definition in \autoref{s:sema:constr}.
 %
-\sys also calculates the path constraint, the predicate satisfying
+\paragraph{Path constraint.}
+The path constraint of an integer operation is a predicate satisfying
 which the operation is reachable from the start of that function.
+It is used to filter out integer error cases that are infeasible
+along the control flow.
 %
-To further improve accuracy, \sys infers additional range information
-of function parameters and structure fields across the call graph.
-It also allows users to provide annotations as constraints.
+\paragraph{Range constraint.}
+\sys infers range constraints of function parameters and structure
+fields across functions.  It also allows users to provide annotations
+as constraints for improving accuracy.
+
+\paraend
+Both error and path constraints are generated within a single
+function; they encode bit-level information of integer operations
+for precise reasoning.  Range constraints are more coarse-grained
+for better performance.  This rest of this section describes how
+\sys generates each type of these constraints.
 
 \begin{figure}
 \centering
