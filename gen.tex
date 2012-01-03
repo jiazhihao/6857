@@ -201,10 +201,11 @@ safe to move across its previous instruction $I$ if:
 same memory location, i.e., they do not alias.
 \end{itemize}
 
-\sys repeatedly hoists $L$ until it is unsafe to do so and $L$
-reaches the entry block.  If $L$ is already the first instruction
-in a non-entry block and there are multiple predecessors that jump
-to $I$, \sys tries to move $L$ up to the common ancestor.
+If $L$ is already the first instruction in a non-entry block and
+there are multiple predecessors that jump to $I$, \sys tries to
+move $L$ up to the common ancestor.  \sys repeatedly hoists $L$
+until it is unsafe to do so or $L$ reaches the entry block of the
+function.
 
 \sys also adopts an aliasing assumption: a pointer passed as a
 function parameter or a global variable points to a memory location
