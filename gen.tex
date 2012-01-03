@@ -138,7 +138,7 @@ and structure fields.
 \subsection{Optimizations}
 
 \sys performs a series of optimizations and rewrites the code for
-fewer false errors and better performance.
+better constraints and performance.
 
 \paragraph{In-loop constraint.}
 \sys tries to move constraints within a loop to the outside scope
@@ -148,6 +148,9 @@ so as to generate more constraints.  Consider the following loop.
 as an array index.  As $i$ also is a loop variable, \sys will move
 the constraint out of the loop and rewrite it as $n <_s 0$, by
 substituting the loop variable $i$ with its exit value $n$.
+%
+Without the rewriting, \sys would unroll the loop once and might
+miss an integer error.
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
@@ -169,6 +172,9 @@ $\cc{pid_ns} + 4 + i \times 8$; in this example we have $i =
 (\cc{last} + 1) /_u \cc{BITS_PER_PAGE}$.  Thus, the value of \cc{off},
 the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 4 + i \times 8) - (\cc{pid_ns} + 4) = i \times 8$.
+%
+Without the rewriting, \sys would consider the subtraction between
+two black-box integers, and may report an error.
 
 \paragraph{Memory model.}
 \sys employs a very simple memory model: a load instruction may return
@@ -182,7 +188,7 @@ algorithm.
 %
 First, the algorithm optimizes for performance and tends to delay
 load instructions.  This would result in multiple load instructions,
-often in spanned in several branches, that are in fact identical.
+often spanned in several branches, that are in fact identical.
 %
 Second, the algorithm depends on LLVM's pointer analysis algorithm,
 which is over-conservative.  For example, XXX.
@@ -210,7 +216,7 @@ function.
 \sys also adopts an aliasing assumption: a pointer passed as a
 function parameter or a global variable points to a memory location
 is distinct from any other memory location.  This assumption, though
-unsound, has been proven to be practical for detecting bugs C
+unsound, has been proven to be practical for detecting bugs in C
 programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
 to aggressively push load instructions ahead for more elimination
 opportunity.
@@ -255,14 +261,14 @@ In the above example, \sys will move the integer operation $x
 We notice that when generating path constraints some integer
 operations like division would significantly slow down the constraint
 solver~\cite{brummayer:perf}.  Many of such cases are used in integer
-error checks like $N /_u x > y$, where $N$ is a constant and $x,
-y$ are $n$-bit integers.  \sys recognizes such an integer error
-checking idiom and rewrites it to avoid the division operation, as
-follows.
+error checks like $\cc{if}\ (N /_u x > y)$, where $N$ is a constant
+and $x, y$ are $n$-bit integers.  \sys recognizes such an integer
+error checking idiom and rewrites it to avoid the division operation,
+as follows.
 
 In general, \sys first zero-extends $x$ and $y$ from $n$ to $2n$
 bits, as $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check
-as multiplication $x_{2n} \times_u y_{2n} <_u N$.  If $N$ is a
+as multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a
 special constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites
 the check with the multiplication overflow detection circuit (see
 \autoref{s:gen:err}).
