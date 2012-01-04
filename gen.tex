@@ -10,8 +10,8 @@ for detecting integer errors.
 representation~(IR) compiled from source code, \sys generates a set
 of constraints for each integer operation, and feed them into the
 Boolector constraint solver for deciding satisfiability.  If the
-solver answers SAT with an assignment, there is a potential integer
-error that could be triggered with that assignment.
+solver answers SAT with an assignment of variables, there is a
+potential integer error that could be triggered with that assignment.
 
 Particularly, \sys generates following three types of constraints
 for the solver.
@@ -38,8 +38,9 @@ to propagate global information across functions for improving
 accuracy.
 
 \sys represents range constraints as more coarse-grained intervals
-using two constant integers, such as $[1, 10]$, for better performance;
-otherwise the size of path constraint would grow exponentially,
+using two constant integers, such as $[1, 10]$, for better performance.
+Otherwise, if \sys simply generates a path constraint along the
+call graph, the size of the path constraint would grow exponentially,
 making it difficult to solve.
 
 \paraend
@@ -262,7 +263,7 @@ opportunity.
 
 In practice we find out that this memory model works well for \sys.
 It does not require sophisticated analysis across the whole kernel
-and achieves good performance.  See [[eval]]].
+and achieves good performance.  See \xw{eval}.
 
 \if 0
 \begin{figure}
@@ -353,8 +354,7 @@ accumulation.
 
 \sys's alias assumption is unsound, and thus it will miss bugs
 caused by the assumption.
+\xw{data races?}
 
 Finally, if the solver times out, \sys will miss the possible integer
 error corresponding to the queried constraint.
-
-[[[how about data races?]]]

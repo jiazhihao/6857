@@ -32,4 +32,11 @@
 \newcommand{\shr}{\ \cc{>}\cc{>}\ }
 
 \DeclareMathOperator{\uintmax}{uintmax}
-\DeclareMathOperator{\umulo}{UMulOverflow}
+\DeclareMathOperator{\umulo}{umul-overflow}
+
+\newcommand{\textred}[1]{\textcolor{red}{#1}}
+\newcommand{\pgwrapper}[2]{\textred{#1: #2}}
+\newcommand{\fk}[1]{\pgwrapper{FK}{#1}}
+\newcommand{\hc}[1]{\pgwrapper{HC}{#1}}
+\newcommand{\nz}[1]{\pgwrapper{NZ}{#1}}
+\newcommand{\xw}[1]{\pgwrapper{XW}{#1}}
