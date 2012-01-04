@@ -71,6 +71,19 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok (staging) \\
+\cc{drivers:xen} \\
+\hspace{1em} gntdev
+	& $\times_u$ (5)
+	& OOB write
+	& ioctl: \cc{kmalloc} size
+	& --
+	& fixed by others \\
+\hspace{1em} xenbus
+	& $+_u$
+	& ??
+	& reliability improvement
+	& --
+	& \ok modified (xen) \\
 \cc{fs} \\
 \hspace{1em} ext4
 	& cmp
