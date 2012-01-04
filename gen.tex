@@ -62,8 +62,8 @@ the constraints to a solver for satisfiability testing.}
 \subsection{Error Constraint Generation}
 \label{s:gen:err}
 
-For arithmetic and shift operations, it is straightforward to
-generate their error constraints from their definitions shown in
+For arithmetic and shift operations, \sys generates
+generate their error constraints directly from their definitions shown in
 \autoref{s:sema:constr}.  As for $n$-bit unsigned multiplication,
 one may use a $2n$-bit binary multiplier (extending both integers
 from $n$ to $2n$ bits first), which flags an overflow error if any
@@ -112,7 +112,7 @@ possible assignment(s) in the predecessor, and the path constraint
 of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
 conditions are simply true, which can be ignored.  Now we have the
-path constraint as follows:
+following path constraint:
 \newcommand{\optlen}{{\small \texttt{optlen}}}
 \newcommand{\pc}{\textrm{PathConstraint}}
 %
@@ -122,7 +122,7 @@ path constraint as follows:
 \end{align*}
 
 Recursively apply the algorithm to \textsc{If-True} and \textsc{If-False},
-and we can get the fully expanded result:
+and we obtain the fully expanded result:
 %
 \begin{align*}
 & ((\optlen_1 = 16) \land (\optlen_0 >_s 16)
@@ -133,7 +133,8 @@ and we can get the fully expanded result:
 
 One can feed the logical AND of the path constraint and the error
 constraint (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
-will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
+will reply with an assignment that triggers the error: for example,
+$\cc{optlen}_0 = -1$.
 
 \begin{figure}
 \centering
@@ -145,9 +146,9 @@ will reply with an error example, e.g., $\cc{optlen}_0 = -1$.
 \end{figure}
 
 For complex programs that contain loops, \sys handles them using
-the standard unrolling technique~\cite{xie:saturn}.  The path
+loop unrolling~\cite{xie:saturn}.  The path
 constraint generation algorithm unrolls each loop once and ignores
-branching edges that jump back in the control flow, aka back edges.
+branching edges that jump back in the control flow.
 The complete algorithm is listed in \autoref{f:path-cstr}.
 
 \begin{figure}
@@ -306,7 +307,7 @@ and $x, y$ are $n$-bit integers.  \sys recognizes such an integer
 error checking idiom and rewrites it to avoid the division operation,
 as follows.
 
-In general, \sys first zero-extends $x$ and $y$ from $n$ to $2n$
+\sys first zero-extends $x$ and $y$ from $n$ to $2n$
 bits, as $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check
 as multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a
 special constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites
@@ -345,8 +346,8 @@ for different architectures.
 As discussed in \autoref{s:sema}, \sys will miss integer errors
 that is not modeled by its semantics.  Particularly, it cannot catch
 overflows if the developer uses left shift instead of multiplication;
-its default semantics may not apply to some architectures like
-PowerPC and will miss bugs specific to those architectures.
+it will also miss bugs specific to architectures like PowerPC, which
+its semantics does not model.
 
 \sys analyzes loops by unrolling them once, so it will miss integer
 errors caused by looping, for example, an addition overflow in an

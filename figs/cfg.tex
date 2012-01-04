@@ -37,7 +37,7 @@
 		(entry) edge[bend right=65] (exit)
 		(if) edge node[anchor=east]{$\cc{optlen}_0 >_s 16$} (true)
 		(if) edge node[anchor=west]{$\neg(\cc{optlen}_0 >_s 16)$} (false)
-		(true) edge node[anchor=east]{$\cc{optlen}_1 = 16$} (copy)
+		(true) edge node[anchor=east]{$\cc{optlen}_1 = 16$\, } (copy)
 		(false) edge node[anchor=west]{$\cc{optlen}_1 = \cc{optlen}_0$} (copy)
 		(copy) edge (exit)
 		;

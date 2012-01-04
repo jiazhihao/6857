@@ -13,8 +13,8 @@ of code patterns that \sys explicitly allows.
 a de facto standard integer representation on modern architectures.
 An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.  A subscript $s$
-or $u$ may be pinned to an operation to indicate it operates on
+with the most significant bit indicating the sign.  An operation
+may have a subscript $s$ or $u$ to indicate whether it operates on
 signed or unsigned integers, respectively.
 
 \if 0
@@ -29,43 +29,39 @@ them below.
 
 \paragraph{Addition \& subtraction \& multiplication.}
 An additive or multiplicative operation may lead to an integer error
-if the result of the corresponding infinitely ranged mathematical
-operation falls out of the predefined range.  For example,
+if the result falls out of the predefined range.  For example,
 $\cc{maxnum}\times_u 16$ causes an integer error if $\cc{maxnum} =
-\cc{0xf0000000}$, because the mathematical product $\cc{0xf0000000}
-\times 16 = 2^{32}\times 3\times 5$ is out of the range of $32$-bit
-unsigned integers ($0$ to $2^{32} - 1$).
+\cc{0xf0000000}$, because $\cc{0xf0000000} \times 16 = 2^{32}\times
+3\times 5$ is out of the range of $32$-bit unsigned integers ($0$
+to $2^{32} - 1$).
 
 \paragraph{Division.}
 A division operation causes an integer error if the divisor is 0.
 Additionally, signed division $x\ /_s\ y$ may lead to an integer
-error if $x = -2^{n-1}$ and $y = -1$, because the mathematical
-result $2^{n-1}$ is not in the range of $n$-bit signed integers
-($-2^{n-1}$ to $2^{n-1}-1$).
+error if $x = -2^{n-1}$ and $y = -1$, because $2^{n-1}$ is not in
+the range of $n$-bit signed integers ($-2^{n-1}$ to $2^{n-1}-1$).
 
 \paragraph{Shift.}
 The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
 integer errors if $y \geq_u n$, which is undefined according to the
-C standard.  For example, $(1 \shl 32)$ may yield 1 (e.g., on x86)
-or 0 (e.g., on PowerPC) for 32-bit integers, depending on the
-underlying architecture.
+C standard; $(1 \shl 32)$ yields 1 on x86 or 0 on PowerPC for 32-bit
+integers.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are often seen in systems
-code, though one may find them by simply invoking GCC with
-\cc{-Wconversion} for inspection.  In general \sys does not consider
-such a conversion as an integer error, unless its result is used
-in one of the following two cases.
+code, and they can be found by invoking GCC with \cc{-Wconversion}.
+\sys does not consider such a conversion as an integer error, unless
+its result is used in one of the following two cases.
 
 \paragraph{$(1)$ Tautological comparison.}
-A comparison is made always true or false resulted from an integer
-conversion, which means that the result from the conversion voids
-one of the branches.
+A comparison is always true or false due to an integer conversion,
+which means that the result from the conversion voids one of the
+branches.
 
 For example, in \autoref{f:ext4} the call to
 \cc{ext4_split_extent} returns a signed int, which will be negative
 on error.  However, the value is converted to an unsigned integer,
-leading to a meaningless comparison that is always false.
+leading to a meaningless comparison that is always false \xw{???}.
 
 \begin{figure}
 \centering
@@ -79,14 +75,14 @@ error handling logic.}
 \end{figure}
 
 \paragraph{$(2)$ Negative count.}
-An integer that should always be non-negative is made negative.
+An integer that should always be non-negative is to be negative.
 Such conceptually non-negative cases including array indices and
 ``size'' function parameters.
 
 \autoref{f:ax25-sign} shows such an example in the Linux kernel.
 The third parameter of $\cc{copy_from_user}(\cc{dst}, \cc{src},
 \cc{size})$ should be non-negative since it indicates the number
-of bytes to be copied from user space to kernel.  However, An
+of bytes to be copied from user space to kernel.  However, an
 adversary could supply $-1$ for \cc{optlen} from user space, which
 will bypass both sanity checks because the value is interpreted as
 unsigned in the first comparison and signed in the second.  \cc{optlen}
@@ -113,11 +109,11 @@ For example, $\cc{maxnum}\times_u 16$ and $\cc{maxnum} \shl 4$ are
 identical instructions, but the former expression causes an integer
 error if \cc{maxnum} is large, while the latter one is considered
 always safe.  \sys assumes that the developer has chosen the
-appropriate integer operation to match their intention.
+intended integer operation.
 
-Therefore, any compiler optimization that would rewrite
+Any compiler optimization that would rewrite
 $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ will destroy the
-integer semantics.  Even worse, a decent C compiler like GCC may completely
+integer semantics.  Even worse, a C compiler like GCC may completely
 optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
@@ -135,24 +131,24 @@ follows:
 \begin{itemize}
 \item
 For $n$-bit signed arithmetic operations, \sys assumes the wrapping
-semantics as if they were unsigned, i.e., $\mod{2^n}$, which is
+semantics as if they were unsigned (i.e., $\mod{2^n}$), which is
 the same as invoking GCC with the \cc{-fwrapv} option.
 \item
 Division by zero is undefined.
 \item
 For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
 shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
-amount for 32-bit shifts, e.g., $1 \shl 32 = 1$.  This is also the
-behavior of ARM and MIPS processors.
+amount for 32-bit shifts, e.g., $1 \shl 32 = 1$.  This semantics
+is also the behavior of ARM and MIPS processors.
 \end{itemize}
-\sys may miss some integer errors with the default semantics.
+\sys may miss some integer errors with \xw{??} semantics.
 Consider the expression $x / (1 \shl y)$, where $x$ and $y$ are
 unconstrained 32-bit integers.  \sys will be able to detect the
 oversized shift via error constraint $y \geq_u 32$.  However, it
 will miss the division-by-zero error, which is possible on PowerPC
 but not on x86.
 
-\subsection{White List}
+\subsection{White Listing Idioms}
 \label{s:sema:whitelist}
 
 It is commonly seen in practice to use an overflowed result to do
@@ -173,12 +169,13 @@ check is equivalent to the sane form:
 \uintmax(n) - x >_u y.
 \end{equation*}
 
-Note that using overflowed result to check multiplication is trickier.
-In general $x \times_u y <_u x$ is not a valid integer error check.
-For example, given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum}
-\times_u 16$ gives a larger value $\cc{0xfffffff0}$, which both
-overflows and bypasses the check.  A correct check is $(x \times_u
-y) /_u y \neq x$ or a sane form, $\uintmax(n) /_u x > y$.
+Note that using an overflowed result to check multiplication is
+trickier.  In general $x \times_u y <_u x$ is not a valid integer
+error check.  For example, given $\cc{maxnum} = \cc{0x1fffffff}$,
+$\cc{maxnum} \times_u 16$ gives a larger value $\cc{0xfffffff0}$,
+which both overflows and bypasses the check.  A correct check is
+$(x \times_u y) /_u y \neq x$ or a sane form, $\uintmax(n) /_u x >
+y$.
 
 Whether the imperfect check will lead to a security vulnerability
 depends on the context.  In the multiplication example above,
@@ -194,7 +191,7 @@ limit (e.g., \cc{vmalloc}), the multiplication is $\cc{maxnum}
 \times_u 1024$ (i.e., allocating a smaller chunk of memory), or the
 \cc{kmalloc} limit is raised in the future.
 
-Another error-prone check is oversized shift, e.g., using $(1 \shl
+Another error-prone check is using an oversized shift like $(1 \shl
 n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
 ${1 \shl n}$ is undefined in C; its value will never be 0 on
 architectures like x86, which fails the check.
@@ -207,7 +204,7 @@ code being analyzed.  For example, in the Linux kernel to set a
 timer that expires after \cc{delay} ticks one often invokes
 \cc{mod_timer(..., jiffies + delay)}, where \cc{jiffies} is the
 number of ticks since the machine started.  \sys recognizes
-such idioms and ignores the addition \cc{jiffies + delay} that may
+this idiom and ignores the addition \cc{jiffies + delay} that may
 overflow.
 
 \begin{figure}

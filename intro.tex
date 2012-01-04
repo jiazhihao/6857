@@ -12,17 +12,6 @@ and confirms the finding that integer errors account for more than
 one third of the vulnerabilities that can be misused to corrupt the
 kernel and gain root privilege.
 
-\if 0
-Integers are fundamental data types in systems code.  Unlike
-infinitely ranged mathematical integers, they use a fixed number
-of bits to represent integral values bounded by a predefined range.
-An integer operation may produce a numeric value that does not fall
-into the range, which could cause lost or misinterpreted data, referred
-as \emph{integer errors} in this paper.  Integer errors may introduce
-further logic problems and security vulnerabilities if the consequence
-is unexpected.
-\fi
-
 \autoref{f:bridge} shows an example of integer errors in the Linux
 kernel.  The size for allocating \cc{buf} is computed from the
 multiplication of \cc{maxnum}, a value controlled by user space,
@@ -90,24 +79,18 @@ arbitrary code via a large \cc{maxnum} from user space.}
 \label{f:bridge}
 \end{figure}
 
-This paper presents \sys, a compile-time tool that scans C-language
+This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
-\if 0
-It aims to aid developers detecting
-and fixing integer errors at compile time.  Compared to run-time
-checking, the main advantage of \sys is that it provides better
-code coverage without requiring to set up a testing environment,
-install hardware devices, nor prepare input data.
-\fi
+%
 The key challenge facing \sys is knowing what are actual integer
-errors.  Conceptually, any integer operation that may produce a
-result different from the infinitely ranged mathematical counterpart
-flags a potential integer error~\cite{air}.  However, truncations
-and sign conversions are commonly seen in C code; overflow check
-idioms such as $x + y < x$ intentionally use overflowed results to
-prevent integer errors.  \sys needs an integer semantics that
-recognizes commonly used code patterns while still effectively
-catches integer errors.
+errors.  Benign truncations and sign conversions are commonly seen
+in C code.  Developers even count on integer overflows such as $x
++ y < x$ to achieve the correctness of their programs.  \sys needs
+an integer semantics that recognizes commonly used code patterns
+while still effectively catches integer errors.
+%Conceptually, any integer operation that may produce a
+%result different from the infinitely ranged mathematical counterpart
+%flags a potential integer error~\cite{air}.
 
 A second challenge is to precisely reason about integer operations
 on every code path.  Given the semantics of an integer operation,
@@ -127,30 +110,15 @@ list is long.
 semantics that defines integer errors, a precise analysis algorithm
 that performs bit-level reasoning per function, and a set of ranking
 criteria that estimate the security impacts of possible integer
-errors.  \sys accepts C source code as input, and inspects each
+errors.  \sys accept C source code as input, and inspects each
 integer operation for possible integer errors.
-%
-\if 0
-On a per-function basis \sys generates precise bit-level integer
-constraints and consults a standard constraint
-solver~\cite{boolector} to decide the satisfiability
-of these constraints, i.e., whether the operation can become an
-integer error. 
-%\sys proposes a set of pragmatic constraint generation
-%algorithms tailored for integer errors.  They are designed to
-%effectively filter out false errors and make the generated constraints
-%to be solved efficiently.
-%
-On a whole-program basis \sys infers and propagates coarse-grained
-integer ranges across functions for better performance.
-%
-\sys introduces practical criteria for ranking integer
-errors by estimating their security impacts on the control flow and
-data integrity.
-\fi
 %
 It is implemented in the LLVM compiler framework~\cite{lattner:llvm}
 with the Boolector constraint solver~\cite{boolector}.
+%
+To further reduce false errors, users may provide a white list of
+overflow checking idioms, as well as additional vaule range annotations
+to filter out infeasible cases.
 
 Applying \sys to XXX result in XXX patches that get upstream.
 
