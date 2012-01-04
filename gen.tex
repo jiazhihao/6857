@@ -38,7 +38,7 @@ to propagate global information across functions for improving
 accuracy.
 
 \sys represents range constraints as more coarse-grained intervals
-using two constant integers, such as $[1, 10)$, for better performance;
+using two constant integers, such as $[1, 10]$, for better performance;
 otherwise the size of path constraint would grow exponentially,
 making it difficult to solve.
 
@@ -158,8 +158,18 @@ The complete algorithm is listed in \autoref{f:path-cstr}.
 \subsection{Range Constraint Generation}
 \label{s:gen:range}
 
-\sys generates range constraints for function parameters
-and structure fields.
+\sys implemented the value range propagation
+algorithm~\cite{patterson:vrp}.  for inferring the minimum and
+maximum values of function parameters, structure fields, and global
+variables.  The detail of the algorithm is omitted.  We manually
+reviewed the output and refined the ranges if needed.
+
+Some domain-specific range knowledge is required from users to
+reduce false errors.  For example, the C standard does not impose
+any limit on the \cc{argc} parameter of the \cc{main} function, nor
+could the value range propagation algorithm infer that range.
+Currently we annotate its range as $[0, 1024]$; otherwise \sys would
+report integer errors for on expressions like $\cc{argc} + 1$.
 
 %handle sysctl interface.
 
