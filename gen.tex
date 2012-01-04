@@ -14,29 +14,38 @@ solver answers SAT with an assignment, there is a potential integer
 error that could be triggered with that assignment.
 
 Particularly, \sys generates following three types of constraints
-for the solver:
-%
+for the solver.
+
 \paragraph{Error constraint.}
-Given an integer operation, its error constraint is generated
-directly from its definition in \autoref{s:sema:constr}.
-%
+The error constraint of an integer operation is derived directly
+from its definition as in \autoref{s:sema:constr}, in the form of
+a Boolean predicate.
+
 \paragraph{Path constraint.}
-The path constraint of an integer operation is a predicate satisfying
-which the operation is reachable from the start of that function.
-It is used to filter out integer error cases that are infeasible
-along the control flow.
-%
+The path constraint of an integer operation is a Boolean predicate
+satisfying which the operation is reachable from the start of that
+function.
+
+\sys generates it from the control flow, to encode all
+the branching conditions along the exeuction path.  It is used to
+filter out infeasible paths.
+
 \paragraph{Range constraint.}
-\sys infers range constraints of function parameters and structure
-fields across functions.  It also allows users to provide annotations
-as constraints for improving accuracy.
+\sys infers range constraints of function parameters, structure
+fields, and global variables.  Since both error and path constraints
+are generated within a single function, range constraints are used
+to propagate global information across functions for improving
+accuracy.
+
+\sys represents range constraints as more coarse-grained intervals
+using two constant integers, such as $[1, 10)$, for better performance;
+otherwise the size of path constraint would grow exponentially,
+making it difficult to solve.
 
 \paraend
-Both error and path constraints are generated within a single
-function; they encode bit-level information of integer operations
-for precise reasoning.  Range constraints are more coarse-grained
-for better performance.  This rest of this section describes how
-\sys generates each type of these constraints.
+
+This rest of this section describes how \sys generates each type
+of these constraints.
 
 \begin{figure}
 \centering
@@ -326,7 +335,7 @@ As discussed in \autoref{s:sema}, \sys will miss integer errors
 that is not modeled by its semantics.  Particularly, it cannot catch
 overflows if the developer uses left shift instead of multiplication;
 its default semantics may not apply to some architectures like
-PowerPC and will miss bugs specific to those architectures;
+PowerPC and will miss bugs specific to those architectures.
 
 \sys analyzes loops by unrolling them once, so it will miss integer
 errors caused by looping, for example, an addition overflow in an
@@ -337,3 +346,5 @@ caused by the assumption.
 
 Finally, if the solver times out, \sys will miss the possible integer
 error corresponding to the queried constraint.
+
+[[[how about data races?]]]
