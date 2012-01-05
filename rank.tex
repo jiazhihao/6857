@@ -12,7 +12,8 @@ Untrusted sources are essentially all channels into the kernel from
 the outside, including data copied from user space (via system
 calls, virtual file systems like \cc{sysfs}, or kernel functions
 like \cc{copy_from_user}), received from network, and read from
-disk. \xw{Xen: Dom0 input from DomU?}
+disk.
+%\xw{Xen: Dom0 input from DomU?}
 The kernel usually needs to perform sanity checks on these data to
 avoid being tricked by an adversary.
 
@@ -25,10 +26,11 @@ In general, \sys trusts hardware devices, as many device developers
 do.  Otherwise it would report too many errors, while the
 developers are unlikely to accept such patches based on our initial
 experience.  \sys also trusts kernel module parameters for the same
-reason.  However we make one exception here: USB devices are not
-trusted --- recent research has demonstrated how to develop a
-malicious USB device to plug in a Linux box and exploit the
-kernel~\cite{usb:buffer-overflow}.
+reason.
+%However we make one exception here: USB devices are not
+%trusted --- recent research has demonstrated how to develop a
+%malicious USB device to plug in a Linux box and exploit the
+%kernel~\cite{usb:buffer-overflow}.
 
 Sensitive sinks include branching conditions that make logic
 decisions, data escaping from the kernel to the outside, and data
