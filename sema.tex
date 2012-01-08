@@ -161,10 +161,10 @@ This idiom is useful when the sum is needed later in the code.
 \sys recognizes such idioms listed in \autoref{f:whitelist} and
 does not consider them as integer errors.
 
-The equivalent ``sane'' form for each overflowed check idiom is
+An equivalent non-overflow form of each overflowed check idiom is
 also shown for comparison.  Let $\uintmax(n)$ denote the largest
-$n$-bit unsigned integer, i.e., $2^n - 1$.  The overflowed addition
-check is equivalent to the sane form:
+$n$-bit unsigned integer, i.e., $2^n - 1$.  Below is a non-overflow
+version of addition overflow check:
 \begin{equation*}
 \uintmax(n) - x >_u y.
 \end{equation*}
@@ -211,7 +211,7 @@ overflow.
 \centering
 \begin{tabular}{ll}
 \toprule
-Overflowed check & Equivalent sane check \\ \midrule
+Overflowed check & Equivalent check \\ \midrule
 $x + y <_u x$ & $x >_u \uintmax(n) - y$ \\
 $x - y <_s 0$ & $x <_u y$ \\
 $(x \times y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
