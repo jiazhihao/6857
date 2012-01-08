@@ -22,20 +22,21 @@ due to their infamous irregular interfaces and pervading implementations
 in device drivers and network protocols.  \sys pays special attention
 to integer errors that could happen in their calling context.
 
-In general, \sys trusts hardware devices, as many device developers
-do.  Otherwise it would report too many errors, while the
-developers are unlikely to accept such patches based on our initial
-experience.  \sys also trusts kernel module parameters for the same
-reason.
-%However we make one exception here: USB devices are not
-%trusted --- recent research has demonstrated how to develop a
-%malicious USB device to plug in a Linux box and exploit the
-%kernel~\cite{usb:buffer-overflow}.
+In general, hardware devices are considered trusted.  Driver code
+often does not validate the response data from hardware.  According
+to our initial experience, the driver developers are unlikely to
+accept patches that fix the validation.  Thus, \sys filters out
+integer errors caused by hardware,
+%\sys also trusts kernel module parameters for the same reason.
+%
+with the exception of USB devices.  Recent research has demonstrated
+how to develop a malicious USB device to plug in a Linux box and
+exploit the kernel~\cite{usb:buffer-overflow}.
 
 Sensitive sinks include branching conditions that make logic
 decisions, data escaping from the kernel to the outside, and data
 sizes for allocation and I/O communication.  An erroneous integer
 value used in such places are more likely to damage the system.
 
-\sys requires annotations to specify untrusted sources and sensitive
-sinks.  Currently we have annotated XXX for the Linux kernel.
+\sys requires annotations to specify these sources and sinks.
+Currently we have annotated XXX for the Linux kernel.
