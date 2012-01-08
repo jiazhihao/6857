@@ -48,25 +48,28 @@ The addition overflow happens in a loop, which is an accumulation.
 
 \subsection{Case Study}
 
-We periodically run \sys over the source code of the mainline Linux
-kernel and submit patches for the integer errors \sys has reported.
-\autoref{f:data:linux} shows our findings.
+We periodically run \sys against the source code of the mainline
+Linux kernel and submit patches to fix integer errors \sys reports.
 
-The ``Patch accepted?'' column shows how the kernel developers
-respond to our patches.
+\autoref{f:data:linux} summarizes the results.  The names for most
+columns are self-explanatory.  ``Description'' shows the attack
+vector and what values are infected.  ``\# of prev. fixes'' shows
+the number of previous commits that tried to fix the same error but
+didn't do it correctly.  ``Patch accepted?'' shows how the kernel
+developers respond to our patches, as follows.
+%We additional specify which repository the patch goes
+%into, e.g., (net-next), if that patch has not reached the mainline.
 \begin{itemize}
 \item
-Check mark: they have accepted our patch.  We
-additional specify which repository the patch goes into, e.g.,
-(net-next), if that patch has not reached the mainline.
+\ok: the kernel developers accepted the patch upstream.
 \item
-Modified: they have modified our patch for inclusion.
+Modified: the kernel developers modified our patch for inclusion.
 \item
-Acknowledged: they have acknowledged the bug and the patch, but we
-cannot find the patch showing up in any repository.
+Acked: the kernel developers acknowledged the bug,
+but we cannot find the patch showing up in any repository.
 \item
-Fixed by others: the bug was fixed independently by others in some
-repository but did not reach the mainline when \sys found it.
+Fixed: we withdrew the patch because the bug discovered in the
+mainline was already fixed in some other repository.
 \end{itemize}
 We omit patches that does not get further responses. [[[numbers?]]]
 
@@ -80,11 +83,10 @@ We omit patches that does not get further responses. [[[numbers?]]]
 
 User-space applications.
 
-Though currently \sys's annotations and ranking heuristics are
-tailored for the Linux kernel, We also run \sys over the code of
-two popular user-space applications.  The developers have promptly
-fixed 5 integer errors reported by \sys: 1 for lighttpd and 4 for
-OpenSSH.
+Currently \sys's annotations and ranking heuristics are tailored
+for the Linux kernel.  We only run \sys against two popular user-space
+applications.  The developers have promptly fixed 5 integer errors
+reported by \sys: 1 for lighttpd and 4 for OpenSSH.
 
 \subsection{Patching}
 

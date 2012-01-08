@@ -45,7 +45,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& OOB write
 	& network: \cc{kmalloc} size
 	& --
-	& \ok (??) \\
+	& acked \\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
@@ -77,7 +77,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
-	& fixed by others \\
+	& fixed \\
 \hspace{1em} xenbus
 	& $+_u$
 	& N/A
@@ -90,7 +90,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& logic error
 	& $<_u 0$: error handling
 	& --
-	& fixed by others \\
+	& fixed \\
 \hspace{1em} nifs2
 	& $\times_u$
 	& OOB read
@@ -109,32 +109,32 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& logic error
 	& $<_u 0$: overflow check
 	& --
-	& fixed by others \\
+	& fixed \\
 \cc{net} \\
 \hspace{1em} ax25
 	& $\times_u$ (8)
 	& timer
 	& {ioctl}/{setsockopt}: T1/T2/T3/idle timers
 	& --
-	& \ok modified (net-next) \\
+	& \ok modified \\
 %\hspace{1em} ax25
 	& $\times_u$ (4)
 	& timer
 	& {setsockopt}: T1/T2/T3/idle timers
 	& 1
-	& \ok (net-next) \\
+	& \ok \\
 \hspace{1em} can
 	& cmp
 	& logic error
 	& error counter state
 	& --
-	& acknowledged \\
+	& acked \\
 \hspace{1em} irda
 	& $\times_s$
 	& timer
 	& {getsockopt}: watchdog timer
 	& --
-	& \ok (net-next) \\
+	& \ok \\
 \hspace{1em} netfilter
 	& $-_u$ (2)
 	& output
@@ -146,7 +146,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& timer
 	& {setsockopt}: T1/T2/T4/idle timers
 	& --
-	& \ok (net-next) \\
+	& \ok \\
 \hspace{1em} rps
 	& $\times_u$
 	& OOB write
