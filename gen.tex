@@ -154,7 +154,7 @@ call graph, the size of the path constraint would grow exponentially,
 making it difficult to solve.
 
 \sys implements the value range propagation algorithm for inferring
-the mininum and maximum values of each variable~\cite{patterson:vrp}.
+the minimum and maximum values of each variable~\cite{patterson:vrp}.
 The detail of the algorithm is omitted here.  We manually reviewed
 the output and refined the ranges if needed.  If the range of a
 parameter $x$ is $[1, 10]$, \sys adds the range constraints $x \geq
@@ -329,7 +329,7 @@ overflows if the developer uses left shift instead of multiplication;
 it will also miss bugs specific to architectures like PowerPC, which
 its semantics does not model.
 
-If the anntations for ``size'' paramters are incomplete, \sys will
+If the annotations for ``size'' parameters are incomplete, \sys will
 miss the corresponding integer errors.
 
 \sys analyzes loops by unrolling them once, so it will miss integer

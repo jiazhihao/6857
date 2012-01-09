@@ -170,7 +170,7 @@ version of addition overflow check:
 \uintmax(n) - x >_u y.
 \end{equation*}
 
-Note that \sys does not recognize the overflowed comparsion $x
+Note that \sys does not recognize the overflowed comparison $x
 \times_u y <_u x$ as a valid integer error check.  For example,
 given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum} \times_u 16$
 evaluates to a larger value $\cc{0xfffffff0}$, which both overflows
