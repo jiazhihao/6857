@@ -1,52 +1,14 @@
 \section{Design}
 \label{s:gen}
 
-This section presents \sys's design and how \sys generates constraints
-for detecting integer errors.
-
-\subsection{Overview}
-
 \autoref{f:flow} shows \sys's workflow.  Given the LLVM intermediate
 representation~(IR) compiled from source code, \sys generates a set
 of constraints for each integer operation, and feed them into the
 Boolector constraint solver for deciding satisfiability.  If the
 solver answers SAT with an assignment of variables, there is a
 potential integer error that could be triggered with that assignment.
-
-Particularly, \sys generates following three types of constraints
-for the solver.
-
-\paragraph{Error constraint.}
-The error constraint of an integer operation is derived directly
-from its definition as in \autoref{s:sema:constr}, in the form of
-a Boolean predicate.
-
-\paragraph{Path constraint.}
-The path constraint of an integer operation is a Boolean predicate
-satisfying which the operation is reachable from the start of that
-function.
-
-\sys generates it from the control flow, to encode all
-the branching conditions along the execution path.  It is used to
-filter out infeasible paths.
-
-\paragraph{Range constraint.}
-\sys infers range constraints of function parameters, structure
-fields, and global variables.  Since both error and path constraints
-are generated within a single function, range constraints are used
-to propagate global information across functions for improving
-accuracy.
-
-\sys represents range constraints as more coarse-grained intervals
-using two constant integers, such as $[1, 10]$, for better performance.
-Otherwise, if \sys simply generates a path constraint along the
-call graph, the size of the path constraint would grow exponentially,
-making it difficult to solve.
-
-\paraend
-
-This rest of this section describes how \sys generates each type
-of these constraints.
+This section describes how \sys generates each type of these
+constraints.
 
 \begin{figure}
 \centering
@@ -62,22 +24,33 @@ the constraints to a solver for satisfiability testing.}
 \subsection{Error Constraint Generation}
 \label{s:gen:err}
 
-For arithmetic and shift operations, \sys generates
-generate their error constraints directly from their definitions shown in
-\autoref{s:sema:constr}.  As for $n$-bit unsigned multiplication,
-one may use a $2n$-bit binary multiplier (extending both integers
+From the definition in \autoref{s:sema:constr}, \sys derives a
+Boolean predicate for the error constraint of each integer operation.
+
+\paragraph{Arithmetic operations.}
+\sys needs to encode the overflow condition of an arithmetic operation
+in an efficient way.  Consider the $n$-bit unsigned multiplication.
+One may use a $2n$-bit binary multiplier (extending both integers
 from $n$ to $2n$ bits first), which flags an overflow error if any
 of the most significant $n$ bits of the product is
-1~\cite{molnar:catchconv}.
+1~\cite{molnar:catchconv}.  However, the \naive implementation would
+hurt the solver's performance noticeably (see XXX).
 
 Boolector provides highly optimized Boolean circuits for implementing
-some of these error constraints.  Its overflow detection circuit,
-for example, does not even need to compute the $2n$-bit product and
-thus can be solved far more
+overflow checks.  Its overflow detection circuit for unsigned
+multiplication, for example, does not even need to compute the
+$2n$-bit product and thus can be solved far more
 efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
 reuses these circuits for better performance.
 
-\sys deals with the two conversion cases as follows.
+\paragraph{Shift.}
+The error constraint of a $n$-bit shift operation is a
+comparison $y \geq n$, where $y$ is the number of bits to shift.
+\sys simply uses the comparison as the result.
+
+\paragraph{Conversion.}
+As defined \autoref{s:sema:constr}, \sys needs to deal with conversions
+in a specific way, as follows.
 
 To detect tautological comparisons, \sys derives a predicate from
 each comparison.  If the predicate is trivially true or false
@@ -95,6 +68,14 @@ the Linux kernel, we annotate parameters in functions like \cc{memcpy},
 \subsection{Path Constraint Generation}
 \label{s:gen:path}
 
+The path constraint of an integer operation is a Boolean predicate
+satisfying which the operation is reachable from the start of that
+function.  \sys generates it from the control flow, to encode all
+the branching conditions along the execution path.  It is used to
+filter out infeasible paths.
+
+Let's consider loop-free programs first.
+%
 We use \autoref{f:ax25-sign} as an example to illustrate how \sys
 generates path constraints.  The control flow of the code is shown
 in \autoref{f:cfg}, where there are two sanity checks on \cc{optlen}
@@ -160,18 +141,31 @@ The complete algorithm is listed in \autoref{f:path-cstr}.
 \subsection{Range Constraint Generation}
 \label{s:gen:range}
 
-\sys implemented the value range propagation
-algorithm~\cite{patterson:vrp}.  for inferring the minimum and
-maximum values of function parameters, structure fields, and global
-variables.  The detail of the algorithm is omitted.  We manually
-reviewed the output and refined the ranges if needed.
+\sys infers range constraints of function parameters, structure
+fields, and global variables.  Since both error and path constraints
+are generated within a single function, range constraints are used
+to propagate global information across functions for improving
+accuracy and reducing false errors.
+
+\sys represents range constraints as more coarse-grained intervals
+using two constant integers, such as $[1, 10]$, for better performance.
+Otherwise, if \sys simply generates a path constraint along the
+call graph, the size of the path constraint would grow exponentially,
+making it difficult to solve.
+
+\sys implements the value range propagation algorithm for inferring
+the mininum and maximum values of each variable~\cite{patterson:vrp}.
+The detail of the algorithm is omitted here.  We manually reviewed
+the output and refined the ranges if needed.  If the range of a
+parameter $x$ is $[1, 10]$, \sys adds the range constraints $x \geq
+1 \land x \leq 10$ for solving.
 
 Some domain-specific range knowledge is required from users to
 reduce false errors.  For example, the C standard does not impose
 any limit on the \cc{argc} parameter of the \cc{main} function, nor
 could the value range propagation algorithm infer that range.
 Currently we annotate its range as $[0, 1024]$; otherwise \sys would
-report integer errors for on expressions like $\cc{argc} + 1$.
+report an addition overflow for on expressions like $\cc{argc} + 1$.
 
 %handle sysctl interface.
 
@@ -307,28 +301,14 @@ and $x, y$ are $n$-bit integers.  \sys recognizes such an integer
 error checking idiom and rewrites it to avoid the division operation,
 as follows.
 
-\sys first zero-extends $x$ and $y$ from $n$ to $2n$
-bits, as $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check
-as multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a
-special constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites
-the check with the multiplication overflow detection circuit (see
-\autoref{s:gen:err}).
-
-\autoref{f:udiv} shows a microbenchmark that measures the solving
-time of the three checking forms of 32- and 64-bit integers,
-respectively.  Each test is repeated 1000 times.  For a single
-unsigned division operation this optimization can achieve up to
-2.5$\times$ speedup.
-
-\begin{figure}
-\centering
-\input{data/udiv}
-\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
-forms: $2n$-bit multiplication and the multiplication overflow
-detection circuit, measured in milliseconds, for both 32- and 64-bit
-integers.}
-\label{f:udiv}
-\end{figure}
+\sys first zero-extends $x$ and $y$ from $n$ to $2n$ bits, as
+$x_{2n}$ and $y_{2n}$, respectively, and rewrites the check as
+multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a special
+constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
+with the multiplication overflow detection circuit.
+%
+\autoref{s:eval:micro} will show a microbenchmark of the three
+operations.
 
 \subsection{Limitations}
 \label{s:gen:limit}
@@ -349,13 +329,15 @@ overflows if the developer uses left shift instead of multiplication;
 it will also miss bugs specific to architectures like PowerPC, which
 its semantics does not model.
 
+If the anntations for ``size'' paramters are incomplete, \sys will
+miss the corresponding integer errors.
+
 \sys analyzes loops by unrolling them once, so it will miss integer
 errors caused by looping, for example, an addition overflow in an
 accumulation.
 
 \sys's alias assumption is unsound, and thus it will miss bugs
 caused by the assumption.
-\xw{data races?}
 
 Finally, if the solver times out, \sys will miss the possible integer
 error corresponding to the queried constraint.

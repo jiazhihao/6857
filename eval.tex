@@ -114,6 +114,25 @@ miss (i < 0) or should declare i as unsigned
 return values: (ret < 0)
 should declare ret as signed.
 
+\subsection{Microbenchmark}
+\label{s:eval:micro}
+
+\autoref{f:udiv} shows a microbenchmark that measures the solving
+time of the three checking forms of 32- and 64-bit integers,
+respectively.  Each test is repeated 1000 times.  For a single
+unsigned division operation this optimization can achieve up to
+2.5$\times$ speedup.
+
+\begin{figure}
+\centering
+\input{data/udiv}
+\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
+forms: $2n$-bit multiplication and the multiplication overflow
+detection circuit, measured in milliseconds, for both 32- and 64-bit
+integers.}
+\label{f:udiv}
+\end{figure}
+
 \subsection{Patching}
 
 What do patches look like?
