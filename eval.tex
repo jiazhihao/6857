@@ -20,7 +20,7 @@ Linux kernel and submit patches to the kernel developers.
 \autoref{f:data:linux} summarizes our experience.  Each line
 represents a patchset that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
-oraganize the patchsets based on the source directories.  Most
+organize the patchsets based on the source directories.  Most
 columns are self-explanatory.  ``Description'' shows the attack
 vector and what values are infected.  ``\# of prev. fixes'' shows
 the number of previous commits that tried to fix the same error but
@@ -80,20 +80,22 @@ to 5 seconds for each constraint solving.   \sys analyzes 8637 files,
 10 of which timeouts, and makes 411,851 solving queries.  The
 analysis (excluding compilation) takes 22 minutes to finish.
 
-\paragraph{User-space code.}
+\subsection{Case Study: User-Space Applications}
+
 Currently \sys's annotations and ranking heuristics are tailored
 for the Linux kernel.  We only run \sys against two popular user-space
 applications.  The developers have promptly fixed 5 integer errors
-reported by \sys: 1 for lighttpd and 4 for OpenSSH.
+reported by \sys: 1 for lighttpd and 4 for OpenSSH.  See
+\autoref{s:eval:common} for a summarization of common error patterns.
 
-\subsection{Completeness}
+\subsection{Completeness Validation}
 
 We have collected 36 integer errors in the Linux kernel from the
 CVE list~\cite{cve} in recent three years as a benchmark to evaluate
 \sys's completeness, as shown in \autoref{f:data:cve}.  They provide
 a fairly comprehensive coverage of the whole source tree.  For each
 case, we run \sys against both the original and the patched code
-snippets.  Ideally \sys should catch the bugs in the orignal code,
+snippets.  Ideally \sys should catch the bugs in the original code,
 while declare that the bug is fixed in the patched code.
 
 \begin{figure*}
@@ -120,7 +122,7 @@ The integer error is in the code for mounting the ext4 filesystem.
 Here \cc{sbi->s_log_groups_per_flex} could be assigned an integer
 larger than 31 if read from a corrupted filesystem.  On PowerPC
 this would cause \cc{groups_per_flex} to become zero due to the
-shift.  It then leads to a divison-by-zero bug in the subsequent
+shift.  It then leads to a division-by-zero bug in the subsequent
 use as a divisor.
 
 \sys is able to detect the oversized shift, but does not catch the
@@ -138,14 +140,59 @@ When running against the patched code, \sys declares no bug in 29
 cases, timeouts in 1 case, and still reports errors in 6 cases.
 We analyze them below.
 
-There is one false error in CVE-2011-4097 (oom).
+There is one false error in CVE-2011-4097 (oom).  Below is the code
+snippet.  It is used when the kernel is running out of memory, to
+compute a score for a process $p$ based on its memory consumption.
+If $p$ gets a higher score, it is more likely to be killed by the
+kernel in order to free more memory.
+\input{code/oom}
+The computation is basically to sum up the different numbers of
+memory pages $p$ takes, and divide the result by the total number
+of pages to get the ratio, which is scaled by 1000.  The patch
+changes the type of \cc{points} from \cc{int} to \cc{from} because
+\cc{points} could be large on 64-bit systems and multiplying it by
+1000 could overflow.  This results in a process one that consumes
+a lot of memory getting a low score; an innocent process would be
+killed instead.
+
+There is an implicit rule that the sum of these numbers of pages
+(e.g., from \cc{get_mm_rss}) is at most \cc{totalpages}, so the
+additions never overflow.  \sys does not understand the rule and
+reports false errors on these additions.
 
 In the remaining five cases, the patched code of CVE-2010-3873 (x25)
 contains known integer errors, which are further covered by
-CVE-2010-4164.  The other four contain either new errors or the patch
-is wrong, as we have discussed in \autoref{s:eval:linux}.
+CVE-2010-4164.
+The patched code of CVE-2009-4307 (ext4), however, uses undefined
+code to fix the problem, as shown below.
+\input{code/ext4-bad}
+Since \cc{sbi->s_log_groups_per_flex} could be a corrupted value
+from disk, the computation of \cc{groups_per_flex} relies on an
+oversized shift, which is undefined according to the C standard.
+This would lead to two potential problems.
+
+First, setting \cc{sbi->s_log_groups_per_flex} to a corrupted value
+such as 36 may bypass the sanity check on architectures other than
+PowerPC.  For example $(1 \shl 36)$ is equivalent to $(1 \shl 4)$
+on x86.  This would leave an inconsistency between these parameters.
+
+Second, the C compiler may rewrite undefined code is an unexpected
+way.  Consider the following sanity check, which is equivalent to
+$\cc{groups_per_flex} < 2$, assuming \cc{groups_per_flex} is an
+unsigned integer.
+\input{code/ext4-badeqv}
+We compile the code using two C compilers, Clang~3.0 and GCC~4.6,
+with optimization option \cc{-O2}.  Clang completely optimizes away
+the check $\cc{groups_per_flex} == 0$, since it considers the case
+impossible according to the C standard.  This would make the patched
+code as vulnerable as the original.  GCC~4.6 still keeps the check,
+but it is possible that future versions perform the same optimization.
+
+The other three cases contain either new errors or the patch
+is wrong, as we have shown in \autoref{s:eval:linux}.
 
 \subsection{Common Pitfalls}
+\label{s:eval:common}
 
 miss sanity checks.
 
