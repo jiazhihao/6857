@@ -44,8 +44,8 @@ the range of $n$-bit signed integers ($-2^{n-1}$ to $2^{n-1}-1$).
 \paragraph{Shift.}
 The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
 integer errors if $y \geq_u n$, which is undefined according to the
-C standard; $(1 \shl 32)$ yields 1 on x86 or 0 on PowerPC for 32-bit
-integers.
+C standard.  As for 32-bit integers, $(1 \shl 32)$ yields 1 on x86
+and 0 on PowerPC.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are often seen in systems
@@ -58,17 +58,18 @@ A comparison is always true or false due to an integer conversion,
 which means that the result from the conversion voids one of the
 branches.
 
-For example, in \autoref{f:ext4} the call to
-\cc{ext4_split_extent} returns a signed int, which will be negative
-on error.  However, the value is converted to an unsigned integer,
-leading to a meaningless comparison that is always false \xw{???}.
+For example, in \autoref{f:ext4} the call to \cc{ext4_split_extent}
+returns a signed integer, which will be negative on error.  However,
+the return value is converted to an unsigned integer for comparison,
+leading to a stale expression $\cc{allocated} <_u 0$ that always
+evaluates to false.
 
 \begin{figure}
 \centering
 \input{code/ext4}
 \vspace{-1em}
 \caption{An integer error in the ext4 filesystem of the Linux kernel.
-Since \cc{allocated} is declared as unsigned int, the test
+Since \cc{allocated} is declared as \cc{unsigned int}, the test
 $(\cc{allocated} < 0)$ will always be false, which breaks the
 error handling logic.}
 \label{f:ext4}
@@ -111,13 +112,13 @@ error if \cc{maxnum} is large, while the latter one is considered
 always safe.  \sys assumes that the developer has chosen the
 intended integer operation.
 
-Any compiler optimization that would rewrite
+Any compiler optimization that rewrites
 $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ will destroy the
-integer semantics.  Even worse, a C compiler like GCC may completely
+integer semantics.  Even worse, C compilers like GCC may completely
 optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
-compile option \cc{-fwrapv} or \cc{-fno-strict-overflow} is given.
-To generate error constraints that best match the developer's
+option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
+given.  To generate error constraints that best match the developer's
 intention, \sys is designed to run before these optimizations.
 
 \subsection{Default Semantics}
@@ -141,11 +142,11 @@ shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
 amount for 32-bit shifts, e.g., $1 \shl 32 = 1$.  This semantics
 is also the behavior of ARM and MIPS processors.
 \end{itemize}
-\sys may miss some integer errors with \xw{??} semantics.
-Consider the expression $x / (1 \shl y)$, where $x$ and $y$ are
-unconstrained 32-bit integers.  \sys will be able to detect the
-oversized shift via error constraint $y \geq_u 32$.  However, it
-will miss the division-by-zero error, which is possible on PowerPC
+\sys may miss integer errors that are not modeled by the above
+semantics.  Consider the expression $x / (1 \shl y)$, where $x$ and
+$y$ are unconstrained 32-bit integers.  \sys will be able to detect
+the oversized shift via error constraint $y \geq_u 32$.  However,
+it will miss the division-by-zero error, which is possible on PowerPC
 but not on x86.
 
 \subsection{White Listing Idioms}
@@ -169,35 +170,28 @@ version of addition overflow check:
 \uintmax(n) - x >_u y.
 \end{equation*}
 
-Note that using an overflowed result to check multiplication is
-trickier.  In general $x \times_u y <_u x$ is not a valid integer
-error check.  For example, given $\cc{maxnum} = \cc{0x1fffffff}$,
-$\cc{maxnum} \times_u 16$ gives a larger value $\cc{0xfffffff0}$,
-which both overflows and bypasses the check.  A correct check is
-$(x \times_u y) /_u y \neq x$ or a sane form, $\uintmax(n) /_u x >
-y$.
+Note that \sys does not recognize the overflowed comparsion $x
+\times_u y <_u x$ as a valid integer error check.  For example,
+given $\cc{maxnum} = \cc{0x1fffffff}$, $\cc{maxnum} \times_u 16$
+evaluates to a larger value $\cc{0xfffffff0}$, which both overflows
+and bypasses the check.  A correct check is $(x \times_u y) /_u y
+\neq x$, or an non-overflow form, $\uintmax(n) /_u x > y$.
 
-Whether the imperfect check will lead to a security vulnerability
-depends on the context.  In the multiplication example above,
-\cc{maxnum} has to be at least $2^{28}$ to overflow $\cc{maxnum}
-\times 16$, and the product must be greater than or equal to that
-to bypass the check $\cc{maxnum} \times_u 16 <_u \cc{maxnum}$.
-Allocating $2^{28}$ bytes (i.e., 256~MB) is possible in a user-space
-application, but unlikely to succeed in the Linux kernel with
-\cc{kmalloc}, which imposes a relatively small
-limit~\cite[\chapterautorefname~8]{ldd3}.  Nevertheless, the check
-becomes dangerous where the allocation function used has a bigger
-limit (e.g., \cc{vmalloc}), the multiplication is $\cc{maxnum}
-\times_u 1024$ (i.e., allocating a smaller chunk of memory), or the
-\cc{kmalloc} limit is raised in the future.
+The imperfect check does not always lead to a security vulnerability.
+In the above example, \cc{maxnum} has to be at least $2^{28}$ to
+overflow $\cc{maxnum} \times 16$, and the product must be greater
+than or equal to that to bypass the check $\cc{maxnum} \times_u 16
+<_u \cc{maxnum}$.  Allocating $2^{28}$ bytes (i.e., 256~MB) is
+possible in a user-space application, but unlikely to succeed in
+the Linux kernel with \cc{kmalloc}, which imposes a relatively small
+limit~\cite[\chapterautorefname~8]{ldd3}.  In that case, \sys
+would report a false error.
 
 Another error-prone check is using an oversized shift like $(1 \shl
 n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
-${1 \shl n}$ is undefined in C; its value will never be 0 on
-architectures like x86, which fails the check.
-
-Currently \sys does not put these dangerous overflowed checking
-forms in the white list, even though they may not be exploitable.
+its value will never be 0 on architectures like x86, which fails
+the check.  The C compiler may even rewrite the check as a no-op.
+\sys does not consider the check as a valid checking idiom.
 
 In addition, \sys accepts user-provided idioms tailored for the
 code being analyzed.  For example, in the Linux kernel to set a
@@ -205,7 +199,7 @@ timer that expires after \cc{delay} ticks one often invokes
 \cc{mod_timer(..., jiffies + delay)}, where \cc{jiffies} is the
 number of ticks since the machine started.  \sys recognizes
 this idiom and ignores the addition \cc{jiffies + delay} that may
-overflow.
+theoretically overflow.
 
 \begin{figure}
 \centering
