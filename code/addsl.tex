@@ -1,0 +1,11 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PY{k+kt}{signed} \PY{k+kt}{long} \PY{n+nf}{addsl}\PY{p}{(}\PY{k+kt}{signed} \PY{k+kt}{long} \PY{n}{lhs}\PY{p}{,} \PY{k+kt}{signed} \PY{k+kt}{long} \PY{n}{rhs}\PY{p}{)} \PY{p}{\PYZob{}}
+  \PY{n}{errno} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{;}
+  \PY{k}{if} \PY{p}{(} \PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{n}{lhs}\PY{o}{+}\PY{n}{rhs}\PY{p}{)}\PY{o}{\PYZca{}}\PY{n}{lhs}\PY{p}{)} \PY{o}{&} \PY{p}{(}\PY{p}{(}\PY{n}{lhs}\PY{o}{+}\PY{n}{rhs}\PY{p}{)}\PY{o}{\PYZca{}}\PY{n}{rhs}\PY{p}{)}\PY{p}{)}
+        \PY{o}{>}\PY{o}{>} \PY{p}{(}\PY{k}{sizeof}\PY{p}{(}\PY{k+kt}{int}\PY{p}{)}\PY{o}{*}\PY{n}{CHAR\PYZus{}BIT}\PY{o}{-}\PY{l+m+mi}{1}\PY{p}{)} \PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{error\PYZus{}handler}\PY{p}{(}\PY{l+s}{"}\PY{l+s}{OVERFLOW ERROR}\PY{l+s}{"}\PY{p}{,} \PY{n+nb}{NULL}\PY{p}{,} \PY{n}{EOVERFLOW}\PY{p}{)}\PY{p}{;}
+    \PY{n}{errno} \PY{o}{=} \PY{n}{EINVAL}\PY{p}{;}
+  \PY{p}{\PYZcb{}}
+  \PY{k}{return} \PY{n}{lhs}\PY{o}{+}\PY{n}{rhs}\PY{p}{;}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}

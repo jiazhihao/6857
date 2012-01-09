@@ -1,0 +1,12 @@
+--- ext/bigdecimal/bigdecimal.c 2010/09/29 08:55:17 ...
++++ ext/bigdecimal/bigdecimal.c 2011/03/01 04:40:49 ...
+@@ -2237,8 +2237,8 @@
+ VP_EXPORT void *
+ VpMemAlloc(size_t mb)
+ {
+-    void *p = xmalloc((unsigned int)mb);
++    void *p = xmalloc(mb);
+     if (!p) {
+         VpException(VP_EXCEPTION_MEMORY, ...);
+     }
+     memset(p, 0, mb);

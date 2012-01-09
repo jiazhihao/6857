@@ -1,7 +1,8 @@
-personal_ws-1.1 en 45 
+personal_ws-1.1 en 47 
 Boolector
 CVE
 GCC
+Haskell
 LLVM
 MITRE
 OpenSSH
@@ -9,6 +10,7 @@ PREfix
 PowerPC
 VMware
 allocator
+bignum
 bitwise
 calloc
 de

@@ -1,15 +1,11 @@
 \section{Mitigation}
 \label{s:miti}
 
-What developers can do?
+\subsection{Compiler Integration}
 
-malloc $\to$ calloc
+compiler support: warn common error patterns.
 
-choose the right type (and sign).
-
-use the correct check.
-
-type promotion.
+\subsection{Runtime Check}
 
 The grsecurity~\cite{grsecurity} patch, aiming to enhance the
 security of the Linux kernel, addresses the integer error issue
@@ -30,20 +26,60 @@ if the allocation size is already computed before being passed to
 when writing your own allocator, don't repeat the mistake that
 happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
 
-separate error code with bad values
+\subsection{Using an Integer Library}
 
-using a library?
+One approach to secure the code is to enforce the use of an integer library
+with overflow checks. [[[ examples: ms's libs ]]]
+However, developers have to (re)write their
+code using library functions like $\cc{addsl}(x, y)$ rather than
+intuitive arithmetic operators like $x + y$ for addition of two signed
+long integers.
+
+Developers also have to make sure that the integer library itself
+is implemented correctly.  Below is the implementation of \cc{addsl}
+in CERT's IntegerLib.
+%
+\input{code/addsl}
+%
+We believe the code is broken in two ways. First, \cc{sizeof(int)}
+should be \cc{sizeof(signed long)}, otherwise the code would
+trigger false alarms on a 64-bit system.  Second, \cc{addsl}
+(as well as other \cc{adds}* functions)
+relies on undefined behavior, i.e., signed overflow of \cc{lhs+rhs},
+to defend against overflow.  This would case [[[cite]]].  Also other
+library bugs in Mozilla.
 
 \subsection{Language Design}
 
 type-safe languages: not so exploitable, DoS more likely
 
-bignum vs. fixed-width integers.
+logic bugs are still there.
 
-sign or not?
+Removing unsigned types from the language does not help much.  For
+example, Java only supports signed integers.  Embarrassingly, its
+binary search implementation contained an integer overflow bug which
+was not fixed until JDK~6~\cite{java-bsearch}.  When calculating
+the midpoint with $(\cc{low} + \cc{high})/2$, which is the intuitive
+way, the expression becomes negative for large $\cc{low}$ and
+$\cc{high}$.  A correct version for signed integers is $\cc{low} +
+(\cc{high}-\cc{low})/2$.  In the C language one may simply declare
+$\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
 
-compiler support: warn common error patterns.
 
+Some functional and scripting languages such as Haskell,
+Python, and Ruby provide built-in bignum support. Though sacrificing
+performance, using bignum is conceptually more immune to integer
+vulnerabilities.
+%
+Interestingly, the underlying bignum implementation itself,
+often written in C, may contain vulnerabilities.
+CVE-2011-0188 is a recent example discovered in Ruby's bignum,
+shown as below.
+\input{code/ruby}
+The truncation may cause \cc{xmalloc} to allocate a smaller buffer
+than expected, leading to a buffer overflow.
+
+\if 0
 range annotations?  something like?
 \begin{Verbatim}
 #define RANGE(lo, hi) __attribute__((range(lo, hi)))
@@ -56,4 +92,4 @@ struct X {
 \end{Verbatim}
 Then you can do instrumentation on stores of nelts.
 Better runtime checks \& good for static analysis.
-
+\fi
