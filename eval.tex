@@ -4,27 +4,106 @@
 The evaluation tries to answer the following questions.
 \begin{itemize}
 \item
-Is \sys effective to catch integer errors in buggy code?
+Is \sys effective to discover integer errors in practice?
 \item
-Will \sys declare that patched code does not contain no integer errors?
-\item
-Can \sys find integer errors in real-world systems?
+How complete will \sys report integer errors?
 \end{itemize}
 
-\subsection{Validation}
+All the experiments are conducted on a 64-bit machine equipped with
+Intel 3.2~G HZ CPU and 24~G memory.
 
-We have collected XXX integer errors (both original and patched
-code snippets) in the Linux kernel from the CVE list~\cite{cve} in
-recent three years and use them as the benchmark to validate \sys.
+\subsection{Case Study: Linux}
 
-\newcommand{\ok}{\textcolor{JungleGreen}{\checkmark}\xspace}
-\newcommand{\checked}{$\boxtimes$}
+We periodically run \sys against the source code of the mainline
+Linux kernel and submit patches to the kernel developers.
+\autoref{f:data:linux} summarizes our experience.  Each line
+represents a patchset that fixes one or more integer errors; the
+number is shown in the ``Error'' column if it is more than one.  We
+oraganize the patchsets based on the source directories.  Most
+columns are self-explanatory.  ``Description'' shows the attack
+vector and what values are infected.  ``\# of prev. fixes'' shows
+the number of previous commits that tried to fix the same error but
+didn't do it correctly.  ``Patch accepted?'' shows how the kernel
+developers respond to our patches, in one of the following cases.
+\begin{itemize}
+\item
+\ok: the kernel developers accepted the patch upstream.  We
+additionally specify the original repository that contains the
+patch,  such as (xen), if the patch has not shown up in the mainline.
+\item
+modified: the kernel developers modified our patch for inclusion.
+\item
+acked: the kernel developers acknowledged the bug,
+but we cannot find the patch showing up in any repository.
+\item
+fixed: we withdrew the patch because the bug discovered in the
+mainline was already fixed in some other repository.
+\end{itemize}
+We omit XXX patches that do not get further responses.
+
+\begin{figure*}
+\centering
+\footnotesize
+\input{data/linux}
+\caption{Integer errors discovered by \sys in the latest Linux
+kernel source trees.  Each line is a patchset that tries to fix one
+or more bugs (the number is in the ``Error'' column if more than
+one).  For each patchset, we list the corresponding component, the
+error operation with the number of bugs, the security impact, a
+description of the attack vector and affected values, the number
+of previous commits that did not to fix the same problem correctly,
+and how the kernel developers respond to the patchset.}
+\label{f:data:linux}
+\end{figure*}
+
+We can see that \sys has discovered integer errors in a wide range
+of kernel subsystems, including the memory management, drivers,
+file systems, and network protocols.
+
+
+\paragraph{Bad fixes.}
+It is worth noting that six integer errors were fixed incorrectly
+at least once before; one was fixed twice and another was fixed
+three times, still ending up with buggy code.  We will show two
+examples below.
+
+\paragraph{Attack vectors.}
+
+Two of the integer errors reported by \sys turn out to be not
+exploitable.
+
+\paragraph{Performance.}
+To measure the performance, we run \sys against the Linux kernel
+3.2 source code, on 12 CPU cores in parallel.  We set the timeout
+to 5 seconds for each constraint solving.   \sys analyzes 8637 files,
+10 of which timeouts, and makes 411,851 solving queries.  The
+analysis (excluding compilation) takes 22 minutes to finish.
+
+\paragraph{User-space code.}
+Currently \sys's annotations and ranking heuristics are tailored
+for the Linux kernel.  We only run \sys against two popular user-space
+applications.  The developers have promptly fixed 5 integer errors
+reported by \sys: 1 for lighttpd and 4 for OpenSSH.
+
+\subsection{Completeness}
+
+We have collected XXX integer errors in the Linux kernel from the
+CVE list~\cite{cve} in recent three years as a benchmark to evaluate
+\sys's completeness.  For each case, we run \sys against both the
+original and the patched code snippets.  Ideally \sys should catch
+the bugs in the orignal code, while declare that the bug is fixed
+in the patched code.
+
 \begin{figure*}
 \centering
 \footnotesize
 \input{data/cve}
 \caption{The result of applying \sys to integer errors in Linux
-kernel from the CVE list.}
+kernel from the CVE list.  Each test case consists of two parts:
+the original and the patched code snippets.  We list the corresponding
+component, the error operations, whether \sys catches the expected
+bugs in the original code, and does not report the bug in the patched
+code.}
 \end{figure*}
 
 \subsubsection{False Negatives}
@@ -46,47 +125,6 @@ The addition overflow happens in a loop, which is an accumulation.
 \subsubsection{False Positives and New Bugs}
 
 
-\subsection{Case Study}
-
-We periodically run \sys against the source code of the mainline
-Linux kernel and submit patches to fix integer errors \sys reports.
-
-\autoref{f:data:linux} summarizes the results.  The names for most
-columns are self-explanatory.  ``Description'' shows the attack
-vector and what values are infected.  ``\# of prev. fixes'' shows
-the number of previous commits that tried to fix the same error but
-didn't do it correctly.  ``Patch accepted?'' shows how the kernel
-developers respond to our patches, as follows.
-%We additional specify which repository the patch goes
-%into, e.g., (net-next), if that patch has not reached the mainline.
-\begin{itemize}
-\item
-\ok: the kernel developers accepted the patch upstream.
-\item
-Modified: the kernel developers modified our patch for inclusion.
-\item
-Acked: the kernel developers acknowledged the bug,
-but we cannot find the patch showing up in any repository.
-\item
-Fixed: we withdrew the patch because the bug discovered in the
-mainline was already fixed in some other repository.
-\end{itemize}
-We omit patches that does not get further responses. [[[numbers?]]]
-
-\begin{figure*}
-\centering
-\footnotesize
-\input{data/linux}
-\caption{Integer errors found in the latest Linux kernel by \sys.}
-\label{f:data:linux}
-\end{figure*}
-
-User-space applications.
-
-Currently \sys's annotations and ranking heuristics are tailored
-for the Linux kernel.  We only run \sys against two popular user-space
-applications.  The developers have promptly fixed 5 integer errors
-reported by \sys: 1 for lighttpd and 4 for OpenSSH.
 
 \subsection{Common Pitfalls}
 
