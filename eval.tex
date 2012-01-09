@@ -13,6 +13,7 @@ All the experiments are conducted on a 64-bit machine equipped with
 Intel 3.2~G HZ CPU and 24~G memory.
 
 \subsection{Case Study: Linux}
+\label{s:eval:linux}
 
 We periodically run \sys against the source code of the mainline
 Linux kernel and submit patches to the kernel developers.
@@ -87,12 +88,13 @@ reported by \sys: 1 for lighttpd and 4 for OpenSSH.
 
 \subsection{Completeness}
 
-We have collected XXX integer errors in the Linux kernel from the
+We have collected 36 integer errors in the Linux kernel from the
 CVE list~\cite{cve} in recent three years as a benchmark to evaluate
-\sys's completeness.  For each case, we run \sys against both the
-original and the patched code snippets.  Ideally \sys should catch
-the bugs in the orignal code, while declare that the bug is fixed
-in the patched code.
+\sys's completeness, as shown in \autoref{f:data:cve}.  They provide
+a fairly comprehensive coverage of the whole source tree.  For each
+case, we run \sys against both the original and the patched code
+snippets.  Ideally \sys should catch the bugs in the orignal code,
+while declare that the bug is fixed in the patched code.
 
 \begin{figure*}
 \centering
@@ -104,27 +106,44 @@ the original and the patched code snippets.  We list the corresponding
 component, the error operations, whether \sys catches the expected
 bugs in the original code, and does not report the bug in the patched
 code.}
+\label{f:data:cve}
 \end{figure*}
 
-\subsubsection{False Negatives}
+\subsubsection{Missed Bugs}
 
-\sys does not catch two integer errors, both of which have been
-discussed in \autoref{s:gen:limit}.  We detail them below.
+\sys is able to find 34 (94\%) out of the 36 integer errors, while
+misses only two cases.  We detail them below.
 
-\xw{show code?}
+\paragraph{CVE-2009-4307 (ext4).}
+The integer error is in the code for mounting the ext4 filesystem.
+\input{code/ext4-2009-4307}
+Here \cc{sbi->s_log_groups_per_flex} could be assigned an integer
+larger than 31 if read from a corrupted filesystem.  On PowerPC
+this would cause \cc{groups_per_flex} to become zero due to the
+shift.  It then leads to a divison-by-zero bug in the subsequent
+use as a divisor.
 
-\paragraph{CVE-2009-4307.}
 \sys is able to detect the oversized shift, but does not catch the
-division by zero, which could happen on PowerPC but not x86, since
-\sys's default semantics does not model the PowerPC architecture.
+division by zero, because in \sys's semantics the shift never
+produces zero, as discussed in \autoref{s:sema:def}.
 
-\paragraph{CVE-2010-3865.}
-The addition overflow happens in a loop, which is an accumulation.
-\sys cannot catch the bug since it unrolls the loop only once.
+\paragraph{CVE-2010-3865 (rds).}
+This bug in due to an addition overflow that happens in an accumulation
+loop.  \sys cannot catch the bug since it unrolls the loop only
+once.
 
-\subsubsection{False Positives and New Bugs}
+\subsubsection{False and New Bugs}
 
+When running against the patched code, \sys declares no bug in 29
+cases, timeouts in 1 case, and still reports errors in 6 cases.
+We analyze them below.
 
+There is one false error in CVE-2011-4097 (oom).
+
+In the remaining five cases, the patched code of CVE-2010-3873 (x25)
+contains known integer errors, which are further covered by
+CVE-2010-4164.  The other four contain either new errors or the patch
+is wrong, as we have discussed in \autoref{s:eval:linux}.
 
 \subsection{Common Pitfalls}
 
