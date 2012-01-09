@@ -88,6 +88,32 @@ for the Linux kernel.  We only run \sys against two popular user-space
 applications.  The developers have promptly fixed 5 integer errors
 reported by \sys: 1 for lighttpd and 4 for OpenSSH.
 
+\subsection{Common Pitfalls}
+
+miss sanity checks.
+
+char$\to$int: 
+CA-1996-22,
+Apache,
+lighttpd new bug
+
+bad overflow checks: $x \times y < x$, 
+\autoref{f:bridge}.
+
+compilers and arch:
+signed overflow (IntegerLib, etc.),
+oversized shift (Google's Native Client sandboxing),
+ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
+and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
+
+pivot in binary search.
+
+index checks:
+miss (i < 0) or should declare i as unsigned
+
+return values: (ret < 0)
+should declare ret as signed.
+
 \subsection{Patching}
 
 What do patches look like?
@@ -99,3 +125,5 @@ interface change (e.g., CVE-2009-2909)
 sometimes infeasible if the interface is exposed to userspace.
 
 misread specification (CAN bits).
+
+
