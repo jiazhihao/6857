@@ -1,11 +1,58 @@
 \section{Mitigation}
 \label{s:miti}
 
-\subsection{Compiler Integration}
+This section discusses mitigate stratigies for integer errors in
+software.
 
-compiler support: warn common error patterns.
+\subsection{Compiler Checking}
 
-\subsection{Runtime Check}
+It would be useful to have the compiler check and warn against
+integer errors, so that dvelopers can easily notice these bugs and
+fix them at compile time.  Ideally, the check should not slow down
+the compilation too much, and the false rate should be kept low,
+so that developers are willing to enable the check.
+
+Due to the above two concerns, it is unlikely to directly integrate
+our solver-based approach into a compiler.  A pragmatic workaround
+could be to match and warn against the common error patterns
+summarized in \autoref{s:eval:common}, which can be done efficiently
+with a low false rate.
+
+Decent C compilers have some support for detecting integer error
+patterns.
+%
+GCC provides \cc{-Wtype-limits} to warn if a comparison if always
+true or false due to type range limits.
+%however this
+%option is not turned on even with \cc{-Wall}, probably because of
+%its high false rate.
+%
+Clang has a similar option called \cc{-Wtautological-compare}.
+
+We test these features by running latest versions of both compilers
+against three simple error patterns extracted from the bugs discovered
+by \sys.  The result as shown in \autoref{f:cmp-stat}.  GCC cannot
+find any of them with \cc{-Wall}; it can find two with \cc{-Wextra}
+or \cc{-Wtype-limits}, but these options are usually turned off by
+developers due to high false rate.  Clang can find one of them
+without any special option.
+%
+%Neither of the compilers can detect the third error pattern, which
+%is simply a variation of the second one.
+%
+We plan to push our work on integer error patterns into these C
+compilers and improve their compile-time checking mechanism.
+
+\begin{figure}
+\centering
+\input{data/cmp-stat}
+\caption{Applying GCC and Clang to checking three simple integer
+error patterns.  GCC can detect two, but only when \cc{-Wextra} is
+given.  Clang can detect one without any special option.}
+\label{f:cmp-stat}
+\end{figure}
+
+\subsection{Run-Time Checking}
 
 The grsecurity~\cite{grsecurity} patch, aiming to enhance the
 security of the Linux kernel, addresses the integer error issue
@@ -51,33 +98,27 @@ library bugs in Mozilla.
 
 \subsection{Language Design}
 
-type-safe languages: not so exploitable, DoS more likely
+We believe that removing unsigned types from the language does not
+help.  For example, Java only supports signed integers.  However,
+its binary search implementation contained an integer bug, which
+was not fixed until JDK~6~\cite{java-bsearch}.  The buggy code
+calculates the midpoint using $(\cc{low} + \cc{high})/2$, which
+will become negative for large $\cc{low}$ and $\cc{high}$.  A correct
+version is $\cc{low} + (\cc{high}-\cc{low})/2$.  In the C language
+one may simply declare $\cc{low}$ and $\cc{high}$ as unsigned
+integers to avoid the problem.
 
-logic bugs are still there.
-
-Removing unsigned types from the language does not help much.  For
-example, Java only supports signed integers.  Embarrassingly, its
-binary search implementation contained an integer overflow bug which
-was not fixed until JDK~6~\cite{java-bsearch}.  When calculating
-the midpoint with $(\cc{low} + \cc{high})/2$, which is the intuitive
-way, the expression becomes negative for large $\cc{low}$ and
-$\cc{high}$.  A correct version for signed integers is $\cc{low} +
-(\cc{high}-\cc{low})/2$.  In the C language one may simply declare
-$\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
-
-
-Some functional and scripting languages such as Haskell,
-Python, and Ruby provide built-in bignum support. Though sacrificing
-performance, using bignum is conceptually more immune to integer
-vulnerabilities.
+Scripting languages such as Python and Ruby have built-in bignum,
+i.e., infinitely ranged integer.  Though sacrificing performance,
+using bignum is generally more immune to integer errors since bignum
+does not wrap.
 %
-Interestingly, the underlying bignum implementation itself,
-often written in C, may contain vulnerabilities.
-CVE-2011-0188 is a recent example discovered in Ruby's bignum,
-shown as below.
-\input{code/ruby}
-The truncation may cause \cc{xmalloc} to allocate a smaller buffer
-than expected, leading to a buffer overflow.
+However, the underlying bignum implementation itself, often written
+in C, may contain vulnerabilities.  A recent example in Ruby
+(CVE-2011-0188) is due to improper integer truncation, where using
+a large bignum value may cause a buffer overflow.
+%shown as below.
+%\input{code/ruby}
 
 \if 0
 range annotations?  something like?
