@@ -62,13 +62,27 @@ and how the kernel developers respond to the patchset.}
 \label{f:data:linux}
 \end{figure*}
 
-\subsubsection{Security Impact}
+\subsubsection{Impact}
 
 Not every integer error has security issues.  Those error-handling
 logic bugs would make the kernel behave in unanticipated ways, but
-are hard to control from the outside.  Timing issues, as mostly
-seen in network protocols, would confuse user-space applications
-with a wrong timeout.
+are hard to control from the outside.  Most error-handling bugs are
+a simple tautological comparison.  One driver for WiLink wl128x
+chipsets contains 36 such bugs alone, almost disabling all its error
+handling mechanism.
+
+An interesting non-trival case is a specification misread in CAN.
+\sys detects a tautological comparison:
+\begin{align*}
+((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
+\end{align*}
+The intent of the code is to test whether the counter has reached
+certain error level but did it in a wrong way.  This comparison
+will never be true because the left-hand side is at most 127.  The
+fix is to read the right bit, via $\cc{errc}\ \&\ \cc{0x80}$.
+
+Timing issues, as mostly seen in network protocols, would confuse
+user-space applications with a wrong timeout.
 
 The security bugs discovered by \sys can be exploited via local
 access, disk (malformed filesystem), and network.  We see a large
@@ -230,8 +244,33 @@ contains additional integer errors that are covered by CVE-2010-4164.
 The other four contain either new errors or wrong patches revealed
 by \sys, as we have shown in \autoref{s:eval:linux}.
 
-\subsection{Common Pitfalls}
+\subsection{Microbenchmark}
+\label{s:eval:micro}
+
+As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
+idioms for better performance.  Here we measure the solving time
+of three forms: division, multiplication, and overflow detection
+circuit, for both 32- and 64-integers, respectively.  The result
+is shown in \autoref{f:udiv}.  Each test is repeated 1000 times.
+For a single unsigned division operation this optimization can
+achieve up to 2.5$\times$ speedup.
+
+\begin{figure}
+\centering
+\input{data/udiv}
+\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
+forms: $2n$-bit multiplication and the multiplication overflow
+detection circuit, measured in milliseconds, for both 32- and 64-bit
+integers.}
+\label{f:udiv}
+\end{figure}
+
+
+\subsection{Common Pitfalls and Patching}
 \label{s:eval:common}
+
+We summarize common integer error patterns and the way to fix them.
+
 
 miss sanity checks.
 
@@ -257,27 +296,6 @@ miss (i < 0) or should declare i as unsigned
 return values: (ret < 0)
 should declare ret as signed.
 
-\subsection{Microbenchmark}
-\label{s:eval:micro}
-
-\autoref{f:udiv} shows a microbenchmark that measures the solving
-time of the three checking forms of 32- and 64-bit integers,
-respectively.  Each test is repeated 1000 times.  For a single
-unsigned division operation this optimization can achieve up to
-2.5$\times$ speedup.
-
-\begin{figure}
-\centering
-\input{data/udiv}
-\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
-forms: $2n$-bit multiplication and the multiplication overflow
-detection circuit, measured in milliseconds, for both 32- and 64-bit
-integers.}
-\label{f:udiv}
-\end{figure}
-
-\subsection{Patching}
-
 What do patches look like?
 
 simple sanity check.
@@ -286,7 +304,6 @@ simple sanity check.
 interface change (e.g., CVE-2009-2909)
 sometimes infeasible if the interface is exposed to userspace.
 
-misread specification (CAN bits).
 
 malloc $\to$ calloc
 
