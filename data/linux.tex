@@ -91,6 +91,11 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& $<_u 0$: error handling
 	& --
 	& fixed \\
+	& \shl
+	& DoS
+	& disk: \cc{groups_per_flex}
+	& 1 (CVE-2009-4307)
+	& \ok (ext4) \\
 \hspace{1em} nifs2
 	& $\times_u$
 	& OOB read
@@ -162,8 +167,8 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 %\hspace{1em} sctp
 	& N/A
 	& N/A
-	& not exploitable (CVE-2008-3526)
-	& 1
+	& not exploitable
+	& 1 (CVE-2008-3526)
 	& \ok \\
 \cc{sound} \\
 \hspace{1em} usb

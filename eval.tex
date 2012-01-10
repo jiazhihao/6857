@@ -30,15 +30,16 @@ developers respond to our patches, in one of the following cases.
 \item
 \ok: the kernel developers accepted the patch upstream.  We
 additionally specify the original repository that contains the
-patch,  such as (xen), if the patch has not shown up in the mainline.
+patch, such as (xen), if the patch has not been merged into the
+mainline.
 \item
 modified: the kernel developers modified our patch for inclusion.
 \item
-acked: the kernel developers acknowledged the bug,
-but we cannot find the patch showing up in any repository.
+acked: the kernel developers acknowledged the patch, but they
+did not apply it for unknown reason.
 \item
-fixed: we withdrew the patch because the bug discovered in the
-mainline was already fixed in some other repository.
+fixed: the bug was already fixed in some repository other than the
+mainline when \sys discovered it, so we withdraw our patch.
 \end{itemize}
 We omit XXX patches that do not get further responses.
 
@@ -62,18 +63,66 @@ of kernel subsystems, including the memory management, drivers,
 file systems, and network protocols.
 
 
-\paragraph{Bad fixes.}
-It is worth noting that six integer errors were fixed incorrectly
-at least once before; one was fixed twice and another was fixed
-three times, still ending up with buggy code.  We will show two
-examples below.
+\subsubsection{Bad Patches}
 
-\paragraph{Attack vectors.}
+\sys discovers 7 integer errors that were previously known but fixed
+incorrectly, one of which was fixed three times, still ending up
+with buggy code.
+
+It is interesting that two cases were reported on the CVE list,
+which we expect to be reviewed comprehensively by the community.
+We describe them below.
+
+\paragraph{CVE-2008-3526 (sctp).}
+Below is the fix that performs a sanity check on \cc{key_len} to
+avoid an integer overflow and possible heap overflow.
+\input{code/sctp-bad}
+If \cc{key_len} get get large, this sanity check does not actually
+work.  Consider $\cc{key_len} = \cc{0xf0000000}$, i.e., $\cc{INT_MAX}
++ 1$.  The left-hand side is then $-1$.  Notice that the right-hand
+side is unsigned, thus the comparison is unsigned, too, and the
+left-hand side value $-1$ is treated as $2^{32} - 1$, which bypasses
+the check.
+
+Fortunately, after discussing with the kernel developers, we come
+to a conclusion that \cc{key_len} cannot become that large with
+input either from user space or network.  This CVE-2008-3526 is not
+exploitable, and the previous commit is unnecessary.  Our patch is
+applied to clarify the case.
+
+\paragraph{CVE-2009-4307 (ext4).}
+Below is the fix to avoid a division-by-zero DoS via a crafted
+\cc{s_log_groups_per_flex} value from disk.
+\input{code/ext4-bad}
+The sanity check $(\cc{groups_per_flex} < 2)$ relies on an oversized
+shift, which is undefined behavior in C.  This would lead to two
+potential issues.
+
+First, when \cc{s_log_groups_per_flex} is set to a corrupted value
+like 36, $\cc{groups_per_flex} = 1 \shl 36$ is essentially $1 \shl
+4 = 16$ on x86, rather than 0.  This will bypass the check, leaving
+the two values \cc{s_log_groups_per_flex} and \cc{groups_per_flex}
+inconsistent.
+
+Second, the C compiler may rewrite undefined code in unexpected
+ways.  Consider the following equivalent sanity check (which was
+in the originally proposed patch), assuming \cc{groups_per_flex}
+is an unsigned integer.
+\input{code/ext4-badeqv}
+We compile the code using both Clang~3.0 and GCC~4.6, with optimization
+option \cc{-O2}.  Clang completely optimizes away the check
+$\cc{groups_per_flex} == 0$, since it considers the case impossible
+according to the C standard.  This would make the patched code as
+vulnerable as the original.  GCC~4.6 still keeps the check, but
+there is no guarantee that future versions will do the same.
+
+\subsubsection{Attack Vectors}
 
 Two of the integer errors reported by \sys turn out to be not
 exploitable.
 
-\paragraph{Performance.}
+\subsubsection{Performance}
+
 To measure the performance, we run \sys against the Linux kernel
 3.2 source code, on 12 CPU cores in parallel.  We set the timeout
 to 5 seconds for each constraint solving.   \sys analyzes 8637 files,
@@ -85,8 +134,9 @@ analysis (excluding compilation) takes 22 minutes to finish.
 Currently \sys's annotations and ranking heuristics are tailored
 for the Linux kernel.  We only run \sys against two popular user-space
 applications.  The developers have promptly fixed 5 integer errors
-reported by \sys: 1 for lighttpd and 4 for OpenSSH.  See
-\autoref{s:eval:common} for a summary of common error patterns.
+reported by \sys: 1 for lighttpd and 4 for OpenSSH.  We omit the
+details here.  See \autoref{s:eval:common} for a summary of common
+error patterns.
 
 \subsection{Completeness Validation}
 
@@ -118,7 +168,7 @@ misses only two cases.  We detail them below.
 
 \paragraph{CVE-2009-4307 (ext4).}
 The integer error is in the code for mounting the ext4 filesystem.
-\input{code/ext4-2009-4307}
+\input{code/ext4-bad}
 Here \cc{sbi->s_log_groups_per_flex} could be assigned an integer
 larger than 31 if read from a corrupted filesystem.  On PowerPC
 this would cause \cc{groups_per_flex} to become zero due to the
@@ -163,30 +213,6 @@ reports false errors on these additions.
 In the remaining five cases, the patched code of CVE-2010-3873 (x25)
 contains known integer errors, which are further covered by
 CVE-2010-4164.
-The patched code of CVE-2009-4307 (ext4), however, uses undefined
-code to fix the problem, as shown below.
-\input{code/ext4-bad}
-Since \cc{sbi->s_log_groups_per_flex} could be a corrupted value
-from disk, the computation of \cc{groups_per_flex} relies on an
-oversized shift, which is undefined according to the C standard.
-This would lead to two potential problems.
-
-First, setting \cc{sbi->s_log_groups_per_flex} to a corrupted value
-such as 36 may bypass the sanity check on architectures other than
-PowerPC.  For example $(1 \shl 36)$ is equivalent to $(1 \shl 4)$
-on x86.  This would leave an inconsistency between these parameters.
-
-Second, the C compiler may rewrite undefined code is an unexpected
-way.  Consider the following sanity check, which is equivalent to
-$\cc{groups_per_flex} < 2$, assuming \cc{groups_per_flex} is an
-unsigned integer.
-\input{code/ext4-badeqv}
-We compile the code using two C compilers, Clang~3.0 and GCC~4.6,
-with optimization option \cc{-O2}.  Clang completely optimizes away
-the check $\cc{groups_per_flex} == 0$, since it considers the case
-impossible according to the C standard.  This would make the patched
-code as vulnerable as the original.  GCC~4.6 still keeps the check,
-but it is possible that future versions perform the same optimization.
 
 The other three cases contain either new errors or the patch
 is wrong, as we have shown in \autoref{s:eval:linux}.

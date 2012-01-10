@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PY{k}{if} \PY{p}{(}\PY{p}{(}\PY{n}{INT\PYZus{}MAX} \PY{o}{-} \PY{n}{key\PYZus{}len}\PY{p}{)} \PY{o}{<} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{sctp\PYZus{}auth\PYZus{}bytes}\PY{p}{)}\PY{p}{)}
+    \PY{k}{return} \PY{n+nb}{NULL}\PY{p}{;}
+\PY{n}{key} \PY{o}{=} \PY{n}{kmalloc}\PY{p}{(}\PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{sctp\PYZus{}auth\PYZus{}bytes}\PY{p}{)}
+                \PY{o}{+} \PY{n}{key\PYZus{}len}\PY{p}{,} \PY{n}{gfp}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}

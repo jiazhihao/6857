@@ -120,7 +120,14 @@ To further reduce false errors, \sys asks users to provide a white
 list of overflow checking idioms, as well as additional range
 constraint annotations to filter out infeasible cases.
 
-Applying \sys to XXX result in XXX patches that get upstream.
+Applying \sys to the Linux kernel and user-space applications
+(including lighttpd and OpenSSH) results in 20+ patchsets that have
+fixed more than 50 integer errors upstream.  It also reveals that
+even two previously known CVE cases were not fixed correctly.
+%
+We evaluate \sys's completeness by running it against 36 known
+integer errors in the Linux kernel from the past three years; \sys
+is able to detect 34 of them.
 
 The rest of this paper is organized as follows. \autoref{s:sema}
 defines the integer semantics.  \autoref{s:gen} presents \sys's
