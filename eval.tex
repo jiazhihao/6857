@@ -67,8 +67,8 @@ and how the kernel developers respond to the patchset.}
 Not every integer error has security issues.  Those error-handling
 logic bugs would make the kernel behave in unanticipated ways, but
 are hard to control from the outside.  Most error-handling bugs are
-a simple tautological comparison.  One driver for WiLink wl128x
-chipsets contains 36 such bugs alone, almost disabling all its error
+a simple tautological comparison.  One driver (wl128x) contains 36
+such bugs alone, effectively disabling almost its entire error
 handling mechanism.
 
 An interesting non-trival case is a specification misread in CAN.
