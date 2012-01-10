@@ -16,7 +16,11 @@ Intel 3.2~G HZ CPU and 24~G memory.
 \label{s:eval:linux}
 
 We periodically run \sys against the source code of the mainline
-Linux kernel and submit patches to the kernel developers.
+Linux kernel and submit patches to the kernel developers.  \sys has
+discovered more than 50 integer errors in a wide range of kernel
+subsystems, including the core kernel, drivers, file systems, and
+network protocols.
+
 \autoref{f:data:linux} summarizes our experience.  Each line
 represents a patchset that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
@@ -41,7 +45,7 @@ did not apply it for unknown reason.
 fixed: the bug was already fixed in some repository other than the
 mainline when \sys discovered it, so we withdraw our patch.
 \end{itemize}
-We omit XXX patches that do not get further responses.
+We omit patches that do not receive further responses.
 
 \begin{figure*}
 \centering
@@ -58,10 +62,26 @@ and how the kernel developers respond to the patchset.}
 \label{f:data:linux}
 \end{figure*}
 
-We can see that \sys has discovered integer errors in a wide range
-of kernel subsystems, including the memory management, drivers,
-file systems, and network protocols.
+\subsubsection{Security Impact}
 
+Not every integer error has security issues.  Those error-handling
+logic bugs would make the kernel behave in unanticipated ways, but
+are hard to control from the outside.  Timing issues, as mostly
+seen in network protocols, would confuse user-space applications
+with a wrong timeout.
+
+The security bugs discovered by \sys can be exploited via local
+access, disk (malformed filesystem), and network.  We see a large
+portion of \cc{ioctl} since it is error-prone and biased by \sys's
+ranking heuristics.  We also have an interesting vulnerability in
+the sound subsystem; it can be exploited via plugging in a malicious
+USB audio device that responds with bogus sampling rates, leading
+to kernel hang, DoS, buffer overflow, and potential privilege
+escalation.
+
+Two cases (in xen and sctp, respectively) turn out to be non-exploitable.
+The kernel developers still apply our patches for clarification and
+realiability improvement.
 
 \subsubsection{Bad Patches}
 
@@ -70,8 +90,8 @@ incorrectly, one of which was fixed three times, still ending up
 with buggy code.
 
 It is interesting that two cases were reported on the CVE list,
-which we expect to be reviewed comprehensively by the community.
-We describe them below.
+which we expect to have been reviewed comprehensively by the
+community.  We describe them below.
 
 \paragraph{CVE-2008-3526 (sctp).}
 Below is the fix that performs a sanity check on \cc{key_len} to
@@ -115,11 +135,6 @@ $\cc{groups_per_flex} == 0$, since it considers the case impossible
 according to the C standard.  This would make the patched code as
 vulnerable as the original.  GCC~4.6 still keeps the check, but
 there is no guarantee that future versions will do the same.
-
-\subsubsection{Attack Vectors}
-
-Two of the integer errors reported by \sys turn out to be not
-exploitable.
 
 \subsubsection{Performance}
 
@@ -211,11 +226,9 @@ additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
 In the remaining five cases, the patched code of CVE-2010-3873 (x25)
-contains known integer errors, which are further covered by
-CVE-2010-4164.
-
-The other three cases contain either new errors or the patch
-is wrong, as we have shown in \autoref{s:eval:linux}.
+contains additional integer errors that are covered by CVE-2010-4164.
+The other four contain either new errors or wrong patches revealed
+by \sys, as we have shown in \autoref{s:eval:linux}.
 
 \subsection{Common Pitfalls}
 \label{s:eval:common}
