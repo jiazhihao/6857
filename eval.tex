@@ -81,7 +81,7 @@ escalation.
 
 Two cases (in xen and sctp, respectively) turn out to be non-exploitable.
 The kernel developers still apply our patches for clarification and
-realiability improvement.
+reliability improvement.
 
 \subsubsection{Bad Patches}
 
@@ -97,7 +97,7 @@ community.  We describe them below.
 Below is the fix that performs a sanity check on \cc{key_len} to
 avoid an integer overflow and possible heap overflow.
 \input{code/sctp-bad}
-If \cc{key_len} get get large, this sanity check does not actually
+If \cc{key_len} can get large, this sanity check does not actually
 work.  Consider $\cc{key_len} = \cc{0xf0000000}$, i.e., $\cc{INT_MAX}
 + 1$.  The left-hand side is then $-1$.  Notice that the right-hand
 side is unsigned, thus the comparison is unsigned, too, and the
