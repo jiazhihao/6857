@@ -3,13 +3,26 @@
 
 This section relates \sys to previous work.
 
-\paragraph{Static error detection.}
+A simple static analysis technique is to extend the type system to
+distinguish trusted and untrusted integers, and then perform taint
+analysis to detect untrusted integers used in sensitive sinks~\cite{cqual,
+lclint}.  Since path conditions (e.g., sanity checks) are not
+tracked, such tools would report false errors on all correctly fixed
+code.
+
+The range checker from Stanford's metacompiler~\cite{range-checker}
+eliminates cases where a user-controlled value is checked against
+\emph{some} bound and reports unbounded values.  A similar heuristic
+is used in a PREfast-baed tool~\cite{prefast} inside Microsoft.
+This approach will miss integer errors due to incorrect bounds.
 
 PREfix~\cite{moy:prefix}
 
-MC
+Carburizer~\cite{kadav:tolerating}.
+\sys trusts hardware devices and filters out integer errors
+caused by hardware.  One could disable the filter in \sys
+to find such bugs for improving reliability of device code.
 
-\paragraph{Dynamic error detection.}
 
 compiler
 
@@ -23,11 +36,5 @@ SAGE
 
 ESBMC, KLEE
 
-\paragraph{OS fuzzing testing.}
-
-Linux fuzzing tool: fsfuzzer, trinity
-
-Carburizer~\cite{kadav:tolerating}.
-\sys trusts hardware devices and filters out integer errors
-caused by hardware.  One could disable the filter in \sys
-to find such bugs for improving reliability of device code.
+Linux fuzzing testing tools
+like fsfuzzer and Trinity.

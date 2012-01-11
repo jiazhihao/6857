@@ -111,9 +111,9 @@ the code in unexpected ways.
 
 \subsection{Replacing Allocation Calls}
 
-Integer errors that affect allocation size is particularly dangerous,
+Integer errors that affect allocation size are particularly dangerous,
 as discussed in \autoref{s:rank}.  The grsecurity patch~\cite{grsecurity}
-for of the Linux kernel addresses the issue by replacing
+for the Linux kernel addresses the issue by replacing
 \cc{kmalloc} with a macro of the same name.
 %
 \input{code/grsecurity-kmalloc}
@@ -140,7 +140,7 @@ define a ranged subtype, e.g., integers from 0 to 9.  The runtime
 will raise an exception for any attempt to storing an out-of-range
 value to variables of that subtype, and developers are responsible
 for handling the exception.  There is a similar proposal that adds
-ranged integers to C~\cite{ranged-c}.
+ranged integers to the C language~\cite{ranged-c}.
 
 Another option is to use infinitely ranged integers, aka bignum,
 if the code is not performance critical.  Scripting languages such
