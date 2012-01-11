@@ -64,34 +64,35 @@ and how the kernel developers respond to the patchset.}
 
 \subsubsection{Impact}
 
-Not every integer error has security issues.  Those error-handling
-logic bugs would make the kernel behave in unanticipated ways, but
-are hard to control from the outside.  Most error-handling bugs are
-a simple tautological comparison.  One driver (wl128x) contains 36
-such bugs alone, effectively disabling almost its entire error
-handling mechanism.
+Error-handling related bugs would make the kernel behave in
+unanticipated ways, though they are hard to be exploited from the
+outside.  Most of these bugs are a simple tautological comparison.
+One driver (wl128x) contains 36 such bugs alone, effectively disabling
+almost its entire error handling mechanism.
 
-An interesting non-trival case is a specification misread in CAN.
-\sys detects a tautological comparison:
+An interesting non-trival bug is due to specification misread in
+CAN, where \sys detects a tautological comparison:
 \begin{align*}
 ((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
 \end{align*}
-The intent of the code is to test whether the counter has reached
-certain error level but did it in a wrong way.  This comparison
-will never be true because the left-hand side is at most 127.  The
-fix is to read the right bit, via $\cc{errc}\ \&\ \cc{0x80}$.
+The intent of the code is to test whether the error counter has
+reached certain level but did it in a wrong way.  However, this
+comparison will never be true because the left-hand side is at most
+127.  The fix is to read the right bit according to the specification,
+via $\cc{errc}\ \&\ \cc{0x80}$.
 
 Timing issues, as mostly seen in network protocols, would confuse
 user-space applications with a wrong timeout.
 
-The security bugs discovered by \sys can be exploited via local
-access, disk (malformed filesystem), and network.  We see a large
-portion of \cc{ioctl} since it is error-prone and biased by \sys's
-ranking heuristics.  We also have an interesting vulnerability in
-the sound subsystem; it can be exploited via plugging in a malicious
-USB audio device that responds with bogus sampling rates, leading
-to kernel hang, DoS, buffer overflow, and potential privilege
-escalation.
+The vulnerabilies that allow out-out-bounds writes (i.e., buffer
+overflow) would break the integrity of the kernel and potentially
+allow prviledge escalation.  They can be exploited via local access,
+disk (malformed filesystem), and network.  We see a large portion
+of \cc{ioctl} since it is error-prone and biased by \sys's ranking
+heuristics.  We also have an interesting vulnerability in the sound
+subsystem; it can be exploited via plugging in a malicious USB audio
+device that responds with bogus sampling rates, leading to kernel
+hang, DoS, and buffer overflow.
 
 Two cases (in xen and sctp, respectively) turn out to be non-exploitable.
 The kernel developers still apply our patches for clarification and
@@ -161,11 +162,13 @@ analysis (excluding compilation) takes 22 minutes to finish.
 \subsection{Case Study: User-Space Applications}
 
 Currently \sys's annotations and ranking heuristics are tailored
-for the Linux kernel.  We only run \sys against two popular user-space
-applications.  The developers have promptly fixed 5 integer errors
-reported by \sys: 1 for lighttpd and 4 for OpenSSH.  We omit the
-details here.  See \autoref{s:eval:common} for a summary of common
-error patterns.
+for the Linux kernel.
+%
+We only run \sys against two popular user-space applications,
+lighttpd and OpenSSH.  The developers have promptly fixed 5 integer
+errors reported by \sys: 1 in lighttpd and 4 in OpenSSH.  We omit
+the details here.  See \autoref{s:eval:common} for a summary of
+common error patterns.
 
 \subsection{Completeness Validation}
 
@@ -196,20 +199,14 @@ code.}
 misses only two cases.  We detail them below.
 
 \paragraph{CVE-2009-4307 (ext4).}
-The integer error is in the code for mounting the ext4 filesystem.
-\input{code/ext4-bad}
-Here \cc{sbi->s_log_groups_per_flex} could be assigned an integer
-larger than 31 if read from a corrupted filesystem.  On PowerPC
-this would cause \cc{groups_per_flex} to become zero due to the
-shift.  It then leads to a division-by-zero bug in the subsequent
-use as a divisor.
-
-\sys is able to detect the oversized shift, but does not catch the
-division by zero, because in \sys's semantics the shift never
-produces zero, as discussed in \autoref{s:sema:def}.
+This bug is due to a possible division by zero that is caused by
+an oversized left shift on PowerPC.  \sys is able to catch the
+oversized shift, but not the division by zero, because in \sys's
+semantics a left shift never produces zero, as discussed in
+\autoref{s:sema:def}.
 
 \paragraph{CVE-2010-3865 (rds).}
-This bug in due to an addition overflow that happens in an accumulation
+This bug is due to an addition overflow that happens in an accumulation
 loop.  \sys cannot catch the bug since it unrolls the loop only
 once.
 
@@ -274,6 +271,8 @@ We summarize common integer error patterns and the way to fix them.
 
 miss sanity checks.
 
+define bounds (often small integers).
+
 char$\to$int: 
 CA-1996-22,
 Apache,
@@ -314,3 +313,6 @@ use the correct check.
 type promotion.
 
 separate error code with bad values
+
+when writing your own allocator, don't repeat the mistake that
+happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
