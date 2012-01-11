@@ -102,7 +102,12 @@ reliability improvement.
 
 \sys discovers 7 integer errors that were previously known but fixed
 incorrectly, one of which was fixed three times, still ending up
-with buggy code.
+with buggy code.  Here we count the incorrect patches that were
+committed into the mainline repository, not to mention those
+bad patches proposed in the mailing list.
+%Actually the kernel developers challenged three of our submitted patches,
+%and proposed different solutions, all of which have been proven wrong
+%and withrawn.
 
 It is interesting that two cases were reported on the CVE list,
 which we expect to have been reviewed comprehensively by the
@@ -167,7 +172,7 @@ for the Linux kernel.
 We only run \sys against two popular user-space applications,
 lighttpd and OpenSSH.  The developers have promptly fixed 5 integer
 errors reported by \sys: 1 in lighttpd and 4 in OpenSSH.  We omit
-the details here.  See \autoref{s:eval:common} for a summary of
+the details here.  See \autoref{s:common} for a summary of
 common error patterns.
 
 \subsection{Completeness Validation}
@@ -261,58 +266,3 @@ detection circuit, measured in milliseconds, for both 32- and 64-bit
 integers.}
 \label{f:udiv}
 \end{figure}
-
-
-\subsection{Common Pitfalls and Patching}
-\label{s:eval:common}
-
-We summarize common integer error patterns and the way to fix them.
-
-
-miss sanity checks.
-
-define bounds (often small integers).
-
-char$\to$int: 
-CA-1996-22,
-Apache,
-lighttpd new bug
-
-bad overflow checks: $x \times y < x$, 
-\autoref{f:bridge}.
-
-compilers and arch:
-signed overflow (IntegerLib, etc.),
-oversized shift (Google's Native Client sandboxing),
-ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
-and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
-
-pivot in binary search.
-
-index checks:
-miss (i < 0) or should declare i as unsigned
-
-return values: (ret < 0)
-should declare ret as signed.
-
-What do patches look like?
-
-simple sanity check.
-- return -EINVAL or silently limit the value (e.g., timeout).
-
-interface change (e.g., CVE-2009-2909)
-sometimes infeasible if the interface is exposed to userspace.
-
-
-malloc $\to$ calloc
-
-choose the right type (and sign).
-
-use the correct check.
-
-type promotion.
-
-separate error code with bad values
-
-when writing your own allocator, don't repeat the mistake that
-happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
