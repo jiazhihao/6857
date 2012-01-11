@@ -16,30 +16,51 @@ of \cc{count} and \cc{size} and additionally zeroes the allocated
 memory.  In fact, almost every call to \cc{kzalloc(count * size)},
 which also zeros the memory, may be substituted with \cc{kcalloc}
 for better reliability.  In less performance-critical code,
-\cc{kmalloc} may be substituted with \cc{kcalloc}, too.  In user
-space, \cc{calloc} may be used in favor of \cc{malloc} similarly.
+\cc{kmalloc} may be substituted with \cc{kcalloc}, too.
 
-The obviously wrong check $(\cc{uint} < 0)$, often used for return
-values, yet has appeared in several drivers and even the core kernel.
-A trickier form is $(\cc{uchar} < 0)$, where the left-hand side is
-zero-extended so that it can never be negative.  In most cases the
-fix is to simply use the signed type instead.
+Similarly, in user space \cc{calloc} may be used in favor of
+\cc{malloc} if performance is not the highest priority,
+assuming that modern libc implementations are aware
+of the multiplication overflow issue~\cite{rus-cert:calloc}.  It
+is worth noting that, however, allocate elements in C++ like \cc{new
+int[n]} is dangerous without correctly bounding $n$.  GCC so far
+does not generate any overflow checking code for the \cc{new}
+operator~\cite{gcc-new}.
 
-char$\to$int: 
-CA-1996-22,
-Apache,
-lighttpd new bug
+Using an unsigned integer for return value checking is often a mistake,
+since in practice negative return values are used for error status.
+The obviously wrong check $(\cc{uint} < 0)$ yet has bitten several
+drivers and even the core kernel.  A trickier form is $(\cc{uchar}
+< 0)$, where the left-hand side is zero-extended so that it can
+never be negative.  In most cases the fix is to simply use the
+signed type instead.
 
-%oversized shift (Google's Native Client sandboxing),
+Using a signed integer in bounds checking needs extra cautious.  As
+shown in \autoref{f:ax25-sign}, limiting the upper bound of signed
+$n$ with $n > 16$ will be bypassed for a negative $n$, which could
+lead to an integer error if $n$ is used as an array index or ``size''
+parameter.  On the other hand, limiting the lower bound of signed
+$n$ with $n < \cc{sizeof}(\cc{int})$ will be bypassed, too, when
+$n$ is negative, since $n$ is misinterpreted as unsigned.  The fix
+is usually to compare $n$ with 0 or change its type to unsigned.
+
+Using \cc{char} as an array index is a common mistake, since a
+character can easily go negative when the value is beyond 127,
+leading to an out-of-bounds access.  This bug pattern has appeared
+in many applications, including bash (CA-1996-22)and recently the lighttpd
+web server (CVE-2011-4362, found by
+\sys).  The fix is to simply change the type to unsigned.
+
+A tricky variant of this bug pattern is using the result of
+$\cc{tolower}(c)$ as the array index, without noticing that in POSIX
+\cc{tolower} returns a signed \cc{int}, which happend to the Apache
+web server (CVE-2009-0023).  The Linux kernel's \cc{tolower} returns
+an unsigned \cc{char} and does not have the problem.
+
+Oversized shifting bit the ext4 file system (CVE-2009-4307),
+as we have discussed in \autoref{s:eval:linux}.
+It also disabled Google Native Client sandboxing mechanism~\cite{nacl}.
+The fix is to check the shifting amount before the shift.
+
 %ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
 %and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
-
-index checks:
-miss (i < 0) or should declare i as unsigned
-
-
-%interface change (e.g., CVE-2009-2909)
-%sometimes infeasible if the interface is exposed to userspace.
-
-when writing your own allocator, don't repeat the mistake that
-happened in glibc and Microsoft's libc~\cite{rus-cert:calloc}.
