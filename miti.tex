@@ -69,13 +69,14 @@ in the generated code; any violation will cause a trap at run time.
 This is extended by Clang via \cc{-fcatch-undefined-behavior} for
 more undefined integer operations such as oversized shifts, and by
 other compiler patches~\cite{brumley:rich, ioc} even for unsigned
-integer overflows, to detect integer errors at run time.
+integer overflows.  They are useful for detecting integer errors
+at run time.
 
-The main concern of enabling trapping semantics in the comiler for
-production code is that it introduces false alarms at run time,
-while there is no convenient way to specify fine-grained error
-handlers.  It also incurrs noticeable runtime overhead~\cite{ioc},
-given the prevalence of integer operations.
+The main concern of enabling trapping semantics for production code
+is that it introduces false alarms at run time, while there is no
+convenient way for developers to provide fine-grained error handlers
+if such an alarm is raised.  It also incurrs noticeable runtime
+overhead~\cite{ioc}, given the prevalence of integer operations.
 
 \subsection{Using an Integer Library}
 
