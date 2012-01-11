@@ -70,7 +70,7 @@ outside.  Most of these bugs are a simple tautological comparison.
 One driver (wl128x) contains 36 such bugs alone, effectively disabling
 almost its entire error handling mechanism.
 
-An interesting non-trival bug is due to specification misread in
+An interesting non-trivial bug is due to specification misread in
 CAN, where \sys detects a tautological comparison:
 \begin{align*}
 ((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
@@ -84,9 +84,9 @@ via $\cc{errc}\ \&\ \cc{0x80}$.
 Timing issues, as mostly seen in network protocols, would confuse
 user-space applications with a wrong timeout.
 
-The vulnerabilies that allow out-out-bounds writes (i.e., buffer
+The vulnerabilities that allow out-out-bounds writes (i.e., buffer
 overflow) would break the integrity of the kernel and potentially
-allow prviledge escalation.  They can be exploited via local access,
+allow privilege escalation.  They can be exploited via local access,
 disk (malformed filesystem), and network.  We see a large portion
 of \cc{ioctl} since it is error-prone and biased by \sys's ranking
 heuristics.  We also have an interesting vulnerability in the sound

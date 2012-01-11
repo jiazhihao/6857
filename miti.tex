@@ -75,7 +75,7 @@ at run time.
 The main concern of enabling trapping semantics for production code
 is that it introduces false alarms at run time, while there is no
 convenient way for developers to provide fine-grained error handlers
-if such an alarm is raised.  It also incurrs noticeable runtime
+if such an alarm is raised.  It also incurs noticeable runtime
 overhead~\cite{ioc}, given the prevalence of integer operations.
 
 \subsection{Using an Integer Library}
@@ -163,17 +163,5 @@ large $\cc{low}$ and $\cc{high}$.  A correct version is $\cc{low}
 + (\cc{high}-\cc{low})/2$.  In the C language one may simply declare
 $\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
 
-\if 0
-range annotations?  something like?
-\begin{Verbatim}
-#define RANGE(lo, hi) __attribute__((range(lo, hi)))
-#define MAX_ELTS 1024
 
-struct X {
-	unsigned int nelts RANGE(1, MAX_ELTS);
-	struct Y *elts;
-};
-\end{Verbatim}
-Then you can do instrumentation on stores of nelts.
-Better runtime checks \& good for static analysis.
-\fi
+\xw{OS design and SFI?}

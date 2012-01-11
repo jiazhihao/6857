@@ -1,15 +1,18 @@
-personal_ws-1.1 en 49 
+personal_ws-1.1 en 53 
 Boolector
 CVE
 DoS
 GCC
 Haskell
+IntegerLib
+JDK
 LLVM
 LLVM's
 MITRE
 OpenSSH
 PREfix
 PowerPC
+SafeInt
 VMware
 allocator
 bignum
@@ -41,6 +44,7 @@ satisfiability
 scalability
 signedness
 strawman
+subtype
 truncations
 untether
 untrusted
