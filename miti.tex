@@ -88,25 +88,26 @@ for addition of two signed long integers $x$ and $y$.  The library
 then performs sanity checks at run time, and invokes a preset error
 handler if an integer error happens.
 
-SafeInt~\cite{safeint}, a C++ template class widely used in Microsoft
-products and Mozilla Firefox, eases the adoption and allows to write
+SafeInt~\cite{safeint} is a C++ template class widely used in Microsoft
+products and Mozilla Firefox.  It eases the adoption and allows to write
 the intuitive expression $x + y$ via operator overloading in C++;
 developers need to declare $x$ and $y$ as the \cc{SafeInt<long>}
 type.
 
-The underlying integer library is trusted to be implemented
-correctly.  Unfortunately, integer errors have recently been
-discovered in both IntegerLib and SafeInt~\cite{ioc}.
-Below is IntegerLib's \cc{addsl} implementation.
+The underlying integer library is trusted to be implemented correctly.
+Unfortunately, integer errors have recently been discovered in both
+IntegerLib and SafeInt~\cite{ioc}.  Developers who adopt these
+integer libraries should be aware any such issues.
+%Below is IntegerLib's \cc{addsl} implementation.
 %
-\input{code/addsl}
-We believe that there are two issues in the above code.
+%\input{code/addsl}
+%We believe that there are two issues in the above code.
 %
-First, \cc{sizeof(int)} should be \cc{sizeof(signed long)}, otherwise
-the code would trigger false alarms on a 64-bit system.  Second,
-the code relies on undefined behavior, i.e., signed overflow of
-\cc{lhs+rhs}, to defend against overflow.  A compiler may rewrite
-the code in unexpected ways.
+%First, \cc{sizeof(int)} should be \cc{sizeof(signed long)}, otherwise
+%the code would trigger false alarms on a 64-bit system.  Second,
+%the code relies on undefined behavior, i.e., signed overflow of
+%\cc{lhs+rhs}, to defend against overflow.  A compiler may rewrite
+%the code in unexpected ways.
 
 
 \subsection{Replacing Allocation Calls}
