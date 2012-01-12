@@ -4,25 +4,25 @@
 This section summarizes common integer error patterns and the way
 to fix them.
 
-A large portion of integer errors found in the Linux kernel are
-due to missing or incorrect bound checks for data from untrusted
-sources.  The fix is simply to add or correct the sanity check,
-and return \cc{-EINVAL} or silently limit the value to the bounds.
+A large portion of integer errors found in the Linux kernel are due
+to missing or incorrect bound checks for data from untrusted sources.
+The fix is to add or correct the sanity check, and return \cc{-EINVAL}
+or silently limit the value to the bounds.
 
-Multiplication in for calculating allocation size seems particularly
+Multiplication for calculating allocation size seems particularly
 prone to integer errors.  The Linux kernel provides the function
 \cc{kcalloc(count, size)} that checks for multiplication overflow
 of \cc{count} and \cc{size} and additionally zeroes the allocated
 memory.  In fact, almost every call to \cc{kzalloc(count * size)},
 which also zeros the memory, may be substituted with \cc{kcalloc}
 for better reliability.  In less performance-critical code,
-\cc{kmalloc} may be substituted with \cc{kcalloc}, too.
+\cc{kmalloc} may also be substituted with \cc{kcalloc}.
 
 Similarly, in user space \cc{calloc} may be used in favor of
 \cc{malloc} if performance is not the highest priority,
-assuming that modern libc implementations are aware
-of the multiplication overflow issue~\cite{rus-cert:calloc}.  It
-is worth noting that, however, allocate elements in C++ like \cc{new
+assuming that libc's \cc{calloc} implementations is resistant
+to the multiplication overflow issue~\cite{rus-cert:calloc}.  It
+is worth noting that, however, allocating elements in C++ like \cc{new
 int[n]} is dangerous without correctly bounding $n$.  GCC so far
 does not generate any overflow checking code for the \cc{new}
 operator~\cite{gcc-new}.
@@ -53,7 +53,7 @@ web server (CVE-2011-4362, found by
 
 A tricky variant of this bug pattern is using the result of
 $\cc{tolower}(c)$ as the array index, without noticing that in POSIX
-\cc{tolower} returns a signed \cc{int}, which happend to the Apache
+\cc{tolower} returns a signed \cc{int}, which happened to the Apache
 web server (CVE-2009-0023).  The Linux kernel's \cc{tolower} returns
 an unsigned \cc{char} and does not have the problem.
 
