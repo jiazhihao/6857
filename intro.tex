@@ -44,30 +44,6 @@ concerns.  It may cause more subtle logic bugs if the value is used
 in decision making, such as misleading the kernel to kill an innocent
 process (CVE-2011-4097).
 
-
-\if 0
-To avoid integer errors developers need, for example, to perform
-sanity checks on untrusted inputs.  Even with that in mind, writing
-integer-error-free code is often more error-prone than expected.
-In \autoref{f:bridge} though the developers were aware that \cc{size}
-could be too large, they failed to limit the value in a correct
-way.  XXX will show XXX more subtle mistakes we have identified,
-including XXX erroneous patches that the developers have committed
-to the mainline Linux kernel.  One of the cases, a two-line check,
-had been fixed three times before we submitted a correct patch.
-
-Integer errors are difficult to catch at run time during testing.
-They may only manifest themselves with abnormal input, which are
-not seen in typical usages.  Besides, a buggy module that contains
-integer errors may only be loaded with some specific hardware or
-configuration, which is unlikely to be fully explored in development
-and testing environment.  Decent compilers like GCC have provided
-code generation options such as \cc{-ftrapv} to insert runtime
-checks for catching common integer errors.  Since doing so hurts
-performance, these options are usually turned off in product
-environment.
-\fi
-
 \begin{figure}[t]
 \centering
 \input{code/bridge}
@@ -122,7 +98,7 @@ constraint annotations to filter out infeasible cases.
 
 Applying \sys to the Linux kernel and user-space applications
 (including lighttpd and OpenSSH) results in 20+ patchsets that have
-fixed more than 50 integer errors upstream.  It also reveals that
+fixed more than 60 integer errors upstream.  It also reveals that
 even two previously known CVE cases were not fixed correctly.
 %
 We evaluate \sys's completeness by running it against 36 known
