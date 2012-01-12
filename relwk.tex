@@ -3,38 +3,109 @@
 
 This section relates \sys to previous work.
 
-A simple static analysis technique is to extend the type system to
-distinguish trusted and untrusted integers, and then perform taint
-analysis to detect untrusted integers used in sensitive sinks~\cite{cqual,
-lclint}.  Since path conditions (e.g., sanity checks) are not
-tracked, such tools would report false errors on all correctly fixed
-code.
+\paragraph{Semantics.}
+\sys's integer semantics differs from previous work on integer error
+detection in the following ways.
+
+First, it formalizes error constraints in a pragmatic way: instead
+of imposing constraints on every conversion~\cite{brumley:rich,
+moy:prefix}, it catches tautological comparisons and negative counts.
+Otherwise, the output would be flooded by noisy, innocuous
+conversion warnings~\cite{moy:prefix}.
+
+Second, as pointed out in \autoref{s:sema:eqv}, integer semantics
+is \emph{not} preserved by the compiler during optimizations.  While
+\sys is designed to avoid their destructive rewriting, tools that
+detect integer errors on instrumented binary at run time will suffer
+from this problem and not be able to extract correct
+constraints~\cite{molnar:catchconv, intscope}.
+
+The AIR model~\cite{air} provides a different approach of loosing
+integer constraints.  In their model, it is acceptable to delay
+catching integer semantic violations, as long as the program's
+behavior is the same as if all integers were infinitely ranged.
+However, developers may intentionally use overflow operations like
+$x + y < x$ to defend against integer errors; treating integers as
+infinitely ranged would observe a different behavior, which could
+be amended using \sys's white list shown in \autoref{s:sema:whitelist}.
+
+\paragraph{Analysis techniques.}
+
+Constraint solving has been proven to be effective for bug detection,
+as it offers precise bit-level reasoning of programs.  \sys, as
+well as previous tools such as PREfix~\cite{moy:prefix} and
+Saturn~\cite{xie:saturn}, benefits from this technique.  In addition,
+\sys proposes a set of optimizations tailored for integer error
+detection, as shown in \autoref{s:gen:opt}.
+
+A simple integer error detection approach is to extend the type
+system to distinguish trusted and untrusted integers, and then
+perform taint analysis to warn untrusted integers used in sensitive
+sinks~\cite{cqual, lclint}.  Since path conditions (e.g., sanity
+checks) are not tracked, such tools would report false errors on
+all correctly fixed code.
 
 The range checker from Stanford's metacompiler~\cite{range-checker}
 eliminates cases where a user-controlled value is checked against
 \emph{some} bound and reports unbounded values.  A similar heuristic
-is used in a PREfast-based tool~\cite{prefast} inside Microsoft.
-This approach will miss integer errors due to incorrect bounds.
+is used in a Microsoft's tool based on PREfast~\cite{prefast}.  This
+approach will miss integer errors due to incorrect bounds since
+they do not perform precise reasoning.
 
-PREfix~\cite{moy:prefix}
+Dynamic integer error detection tools,
+including
+RICH~\cite{brumley:rich},
+Archerr~\cite{archerr},
+IOC~\cite{ioc},
+blip~\cite{blip},
+and
+IntPatch~\cite{intpatch},
+extend GCC's \cc{-ftrapv} to insert trap code during compilation for
+run time checking.
+%
+An alternative approach is to instrument binary executable files,
+such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
+%
+The advantage of these tools is that they have a lower false rate.
+Using them to find integer errors requires input that can trigger
+those bugs, and thus it is in general difficult to achieve a high
+coverage.
 
-Carburizer~\cite{kadav:tolerating}.
-\sys trusts hardware devices and filters out integer errors
-caused by hardware.  One could disable the filter in \sys
-to find such bugs for improving reliability of device code.
+Symbolic model checking tools systematically explore code paths by
+treating input as symbolic values and pruning infeasible paths via
+constraint solving.  Examples include
+KLEE~\cite{cadar:klee},
+LLBMC~\cite{llbmc},
+Catchconv~\cite{molnar:catchconv},
+and
+IntScope~\cite{intscope}.
+Applying these tools to the Linux kernel is challenging.  One would
+have to model hardware devices, otherwise the corresponding driver
+code will not load or function correctly.  The environment and
+constraints are so complex that one may also have to to split
+individual modules for model checking~\cite{engler:vs}.  These
+preparations require too much manual effort, especially given the
+large number of drivers and the rapid code changes in the Linux
+kernel.
 
+\paragraph{OS testing tools.}
+OS testing tools that target on finding bugs in particular kernel
+subsystems are a complement to \sys.
 
-compiler
+System call fuzzers such as Trinity~\cite{trinity} and
+iknowthis~\cite{iknowthis} perform stress testing to detect
+Linux kernel bugs that can be triggered via system calls.
 
-RICH~\cite{brumley:rich}
+FiSC~\cite{fisc:yang} and \textsc{eXplode}~\cite{explode:yang}
+explore file system code via model checking to detect bugs that can
+be triggered by malformed file systems.
+%
+Rubio-González et al.~\cite{eio} develop a static analysis tool
+that detects incorrect error code in file system code.
 
-IOC
-
-Pex
-
-SAGE
-
-ESBMC, KLEE
-
-Linux fuzzing testing tools
-like fsfuzzer and Trinity.
+Carburizer~\cite{kadav:tolerating} analyzes driver code to find
+potential bugs that can be triggered by misbehaved hardware devices.
+\sys trusts most hardware devices and filters out the corresponding
+integer errors, as we have explained in \autoref{s:rank}.  One could
+disable the filter in \sys to find such bugs for improving reliability
+of device code.

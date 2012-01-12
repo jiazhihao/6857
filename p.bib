@@ -245,6 +245,7 @@
 	booktitle = {Oakland},
         title = {Using Programmer-Written Compiler Extensions to Catch Security Holes},
 	crossref = {IEEESP02},
+	pages = {143--159},
 }
 
 @techreport{prefast,
@@ -255,6 +256,100 @@
         Year = {2006},
 }
 
-@inproceedings{
+@inproceedings{intpatch,
+	author = {Chao Zhang and Tielei Wang and Tao Wei and Yu Chen and Wei Zou},
+	title = {{IntPatch}: Automatically Fix Integer-Overflow-to-Buffer-Overflow Vulnerability at Compile-Time},
+	crossref = {ESORICS10},
+	pages = {71--86},
+}
 
+@article{blip,
+	author = {Oded Horovitz},
+	journal = {Phrack},
+	number = {60},
+	title = {Big Loop Integer Protection},
+	volume = {11},
+	year = {2002},
+}
+
+@inproceedings{archerr,
+	author = {Ramkumar Chinchani and Anusha Iyer and Bharat Jayaraman and Shambhu Upadhyaya},
+	booktitle = {Proceedings of the 9th European Symposium on Research in Computer Security},
+	title = {{ARCHERR}: Runtime Environment Driven Program Safety},
+	crossref = {ESORICS04},
+	pages = {385--406},
+}
+
+@inproceedings{intscope,
+	author = {Tielei Wang and Tao Wei and Zhiqiang Lin and Wei Zou},
+	crossref = {NDSS09},
+	title = {{IntScope}: Automatically Detecting Integer Overflow Vulnerability in X86 Binary Using Symbolic Execution},
+}
+
+@inproceedings{intfinder,
+	author = {Ping Chen and Hao Han and Yi Wang and Xiaobin Shen and Xinchun Yin and Bing Mao and Li Xie},
+	title = {{IntFinder}: Automatically Detecting Integer Bugs in x86 Binary Program},
+	booktitle = {Proceedings of the 11th International Conference on Information and Communications Security},
+	year = {2009},
+	month = {December},
+	pages = {336--345},
+	address = {Beijing, China},
+}
+
+@inproceedings{uqbtng,
+	author = {Rafal Wojtczuk},
+	booktitle = {Proceedings of the 22nd Chaos Communication Congress},
+	title = {{UQBTng}: A tool capable of automatically finding integer overows in {Win32} binaries},
+	year = {2005},
+	month = {December},
+	address = {Berlin, Germany},
+}
+
+@inproceedings{llbmc,
+	author = {Florian Merz and Stephan Falke and Carsten Sinz},
+	booktitle = {Proceedings of the 4th International Conference on Verified Software: Theories, Tools, and Experiments},
+	title = {{LLBMC}: Bounded Model Checking of {C} and {C++} Programs Using a Compiler {IR}},
+	address = {Philadelphia, PA},
+	year = {2012},
+	month = {January},
+}
+
+@inproceedings{engler:vs,
+	author = {Dawson Engler and Madanlal Musuvathi},
+	booktitle = {Proceedings of the 5th International Conference on Verification, Model Checking, and Abstract Interpretation},
+	title = {Static analysis versus software model checking for bug finding},
+	year = {2004},
+	month = {January},
+	address = {Venice, Italy},
+	pages = {191--210},
+}
+
+@misc{trinity,
+	author = {Dave Jones},
+	howpublished = {\url{http://codemonkey.org.uk/projects/trinity/}},
+	title = {Trinity: A system call fuzzer},
+}
+
+@misc{iknowthis,
+	author = {Tavis Ormandy},
+	howpublished = {\url{http://code.google.com/p/iknowthis/}},
+	title = {{iknowthis} {Linux} System Call Fuzzer},
+}
+
+@inproceedings{fisc:yang,
+	author = {Junfeng Yang and Paul Twohey and Dawson Engler and Madanlal Musuvathi},
+	title = {Using Model Checking to Find Serious File System Errors},
+	crossref = {OSDI04},
+}
+
+@inproceedings{explode:yang,
+	author = {Junfeng Yang and Paul Twohey and Dawson Engler and Madanlal Musuvathi},
+	title = {\textsc{eXplode}: a Lightweight, General System for Finding Serious Storage System Errors},
+	crossref = {OSDI04},
+}
+
+@inproceedings{eio,
+	title = {Error Propagation Analysis for File Systems},
+	author = {Cindy Rubio-Gonz\'alez and Haryadi S. Gunawi and Ben Liblit and Remzi H. Arpaci-Dusseau and and Andrea C. Arpaci-Dusseau},
+	crossref = {PLDI09},
 }
