@@ -51,10 +51,10 @@ in many applications, including bash (CA-1996-22)and recently the lighttpd
 web server (CVE-2011-4362, found by
 \sys).  The fix is to simply change the type to unsigned.
 
-A tricky variant of this bug pattern is using the result of
-$\cc{tolower}(c)$ as the array index, without noticing that in POSIX
-\cc{tolower} returns a signed \cc{int}, which happened to the Apache
-web server (CVE-2009-0023).  The Linux kernel's \cc{tolower} returns
+A tricky variant of this bug pattern, which happened to the Apache
+web server (CVE-2009-0023), is using the result of $\cc{tolower}(c)$
+as the array index, without noticing that in POSIX \cc{tolower}
+returns a signed \cc{int}.  The Linux kernel's \cc{tolower} returns
 an unsigned \cc{char} and does not have the problem.
 
 Oversized shifting bit the ext4 file system (CVE-2009-4307),
