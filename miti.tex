@@ -52,11 +52,34 @@ given.  Clang can detect one without any special option.}
 \label{f:cmp-stat}
 \end{figure}
 
+\subsection{Replacing Allocation Calls}
+
+Integer errors that affect allocation size are particularly dangerous,
+as discussed in \autoref{s:rank}.  The grsecurity patch~\cite{grsecurity}
+for the Linux kernel addresses the issue by replacing
+\cc{kmalloc} with a macro of the same name.
+%
+\input{code/grsecurity-kmalloc}
+%
+Here \cc{intoverflow_t} is defined as the 128-bit unsigned integer
+type.  The trick is that, assuming the developer often writes code
+like \cc{kmalloc(count * size)}, with the macro of the same name
+the C preprocessor will silently change the call to
+\cc{kmalloc((intoverflow_t)count * size)}, where \cc{count} is first
+promoted to 128 bits for the computation.  This should be large
+enough to detect most integer errors.
+
+However, the trick does not work if the call is written in forms
+like \cc{kmalloc(header_size + count * size)}, or the allocation
+size is already computed before being passed to \cc{kmalloc}, such
+as in \autoref{f:bridge}.
+
+
 \subsection{Alternative Integer Semantics}
 
 Wrapping is the default behavior in languages like Java.
 GCC provides the option \cc{-fwrapv} to enforce wrapping semantics
-for signed integers in C.  The Linux kernel is compiled with a
+for signed integers in C code.  The Linux kernel is compiled with a
 slightly different option \cc{-fno-strict-overflow}, to prevent GCC
 from optimizing away checks with signed integers (e.g., $x + 1 <
 x$) and pointers (e.g., $p + \mathit{len} < p$).
@@ -110,29 +133,6 @@ integer libraries should be aware any such issues.
 %the code in unexpected ways.
 
 
-\subsection{Replacing Allocation Calls}
-
-Integer errors that affect allocation size are particularly dangerous,
-as discussed in \autoref{s:rank}.  The grsecurity patch~\cite{grsecurity}
-for the Linux kernel addresses the issue by replacing
-\cc{kmalloc} with a macro of the same name.
-%
-\input{code/grsecurity-kmalloc}
-%
-Here \cc{intoverflow_t} is defined as the 128-bit unsigned integer
-type.  The trick is that, assuming the developer often writes code
-like \cc{kmalloc(count * size)}, with the macro of the same name
-the C preprocessor will silently change the call to
-\cc{kmalloc((intoverflow_t)count * size)}, where \cc{count} is first
-promoted to 128 bits for the computation.  This should be large
-enough to detect most integer errors.
-
-However, the trick does not work if the call is written in forms
-like \cc{kmalloc(header_size + count * size)}, or the allocation
-size is already computed before being passed to \cc{kmalloc}, such
-as in \autoref{f:bridge}.
-
-
 \subsection{Language Design}
 
 Developers would benefit from language support for specifying precise
@@ -163,6 +163,3 @@ using $(\cc{low} + \cc{high})/2$, which will become negative for
 large $\cc{low}$ and $\cc{high}$.  A correct version is $\cc{low}
 + (\cc{high}-\cc{low})/2$.  In the C language one may simply declare
 $\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
-
-
-\xw{OS design and SFI?}
