@@ -1,17 +1,17 @@
 \section{Related Work}
 \label{s:relwk}
 
-This section relates \sys to previous work.
+This section relates \sys to existing work.
 
 \paragraph{Semantics.}
-\sys's integer semantics differs from previous work on integer error
-detection in the following ways.
+\sys's integer semantics differs from that used in previous integer
+error detection tools in the following ways.
 
-First, it formalizes error constraints in a pragmatic way: instead
-of imposing constraints on every conversion~\cite{brumley:rich,
+First, it formalizes error constraints in a pragmatic way: rather
+than imposing constraints on every conversion~\cite{brumley:rich,
 moy:prefix, seacord:secure-c}, it catches tautological comparisons
-and negative counts.  Otherwise, the output would be flooded by
-noisy, innocuous conversion warnings~\cite{moy:prefix}.
+and negative counts instead.  Otherwise, the output would be flooded
+by noisy, innocuous conversion warnings~\cite{moy:prefix}.
 
 Second, as pointed out in \autoref{s:sema:eqv}, integer semantics
 is \emph{not} preserved by the compiler during optimizations.  While
@@ -82,7 +82,7 @@ IntScope~\cite{intscope}.
 Applying these tools to the Linux kernel is challenging.  One would
 have to model hardware devices, otherwise the corresponding driver
 code will not load or function correctly.  The environment and
-constraints are so complex that one may also have to to split
+constraints are so complex that one may also have to split
 individual modules for model checking~\cite{engler:vs}.  These
 preparations require too much manual effort, especially given the
 large number of drivers and the rapid code changes in the Linux
@@ -100,8 +100,8 @@ FiSC~\cite{fisc:yang} and \textsc{eXplode}~\cite{explode:yang}
 explore file system code via model checking to detect bugs that can
 be triggered by malformed file systems.
 %
-Rubio-González et al.~\cite{eio} develop a static analysis tool
-that detects incorrect error code in file system code.
+Rubio-Gonz\'alez et al.~\cite{eio} develop a static analysis tool
+that detects incorrect error code in file system implementations.
 
 Carburizer~\cite{kadav:tolerating} analyzes driver code to find
 potential bugs that can be triggered by misbehaved hardware devices.
