@@ -134,9 +134,9 @@ applied to clarify the case.
 Below is the fix to avoid a division-by-zero DoS via a crafted
 \cc{s_log_groups_per_flex} value from disk.
 \input{code/ext4-bad}
-The sanity check $(\cc{groups_per_flex} < 2)$ relies on an oversized
-shift, which is undefined behavior in C.  This would lead to two
-potential issues.
+The sanity check $(\cc{groups_per_flex} < 2)$ relies on undefined
+behavior, an oversized shift.  This would lead to two potential
+issues.
 
 First, when \cc{s_log_groups_per_flex} is set to a corrupted value
 like 36, $\cc{groups_per_flex} = 1 \shl 36$ is essentially $1 \shl
