@@ -432,7 +432,7 @@ add_input_ext( 'pdflatex', 'tex', 'jpg', 'pdf', 'png' );
 
 ## Command to invoke biber & bibtex
 $biber  = 'biber %O %B';
-$bibtex  = 'bibtex %O %B';
+$bibtex  = 'bibtex -min-crossrefs=1000 %O %B';
 # Switch(es) to make biber & bibtex silent:
 $biber_silent_switch  = '--onlylog';
 $bibtex_silent_switch  = '-terse';
