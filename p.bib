@@ -33,6 +33,15 @@
 	number = {19351},
 }
 
+@techreport{java-bsearch,
+	note = {\url{http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5045582}},
+        title = {\texttt{binarySearch()} fails for size larger than $1 \shl 30$},
+        year = {2004},
+	type = {Bug},
+	institution = {Java},
+	number = {5045582},
+}
+
 @techreport{nacl,
 	author = {Cliff L. Biffle},
 	note = {\url{http://code.google.com/p/nativeclient/issues/detail?id=245}},
@@ -202,12 +211,6 @@
 	pages = {67--81},
 }
 
-@misc{java-bsearch,
-	howpublished = {\url{http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5045582}},
-        title = {Java Bug 5045582: \texttt{binarySearch()} fails for size larger than \texttt{1<<30}},
-        year = {2004},
-}
-
 @misc{ioc,
 	author = {Will Dietz and Peng Li and John Regehr and Vikram Adve},
 	title = {Understanding Integer Overﬂow in {C}/{C++}},
@@ -335,22 +338,4 @@
 	author = {Tavis Ormandy},
 	howpublished = {\url{http://code.google.com/p/iknowthis/}},
 	title = {{iknowthis} {Linux} System Call Fuzzer},
-}
-
-@inproceedings{fisc:yang,
-	author = {Junfeng Yang and Paul Twohey and Dawson Engler and Madanlal Musuvathi},
-	title = {Using Model Checking to Find Serious File System Errors},
-	crossref = {OSDI04},
-}
-
-@inproceedings{explode:yang,
-	author = {Junfeng Yang and Paul Twohey and Dawson Engler and Madanlal Musuvathi},
-	title = {\textsc{eXplode}: a Lightweight, General System for Finding Serious Storage System Errors},
-	crossref = {OSDI04},
-}
-
-@inproceedings{eio,
-	title = {Error Propagation Analysis for File Systems},
-	author = {Cindy Rubio-Gonz\'alez and Haryadi S. Gunawi and Ben Liblit and Remzi H. Arpaci-Dusseau and and Andrea C. Arpaci-Dusseau},
-	crossref = {PLDI09},
 }
