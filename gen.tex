@@ -34,7 +34,7 @@ One may use a $2n$-bit binary multiplier (extending both integers
 from $n$ to $2n$ bits first), which flags an overflow error if any
 of the most significant $n$ bits of the product is
 1~\cite{molnar:catchconv}.  However, the \naive implementation would
-hurt the solver's performance noticeably (see XXX).
+hurt the solver's performance noticeably (see \autoref{s:eval:micro}).
 
 Boolector provides highly optimized Boolean circuits for implementing
 overflow checks.  Its overflow detection circuit for unsigned
@@ -147,17 +147,18 @@ are generated within a single function, range constraints are used
 to propagate global information across functions for improving
 accuracy and reducing false errors.
 
-\sys represents range constraints as more coarse-grained intervals
-using two constant integers, such as $[1, 10]$, for better performance.
-Otherwise, if \sys simply generates a path constraint along the
-call graph, the size of the path constraint would grow exponentially,
-making it difficult to solve.
+\sys represents range constraints as more coarse-grained intervals,
+using two constant integers as the minimum and maximum values,
+respectively, for better performance.  Otherwise, if \sys simply
+generates a path constraint along the call graph, the size of the
+path constraint would grow exponentially, making it difficult to
+solve.
 
 \sys implements the value range propagation algorithm for inferring
 the minimum and maximum values of each variable~\cite{patterson:vrp}.
 The detail of the algorithm is omitted here.  We manually reviewed
 the output and refined the ranges if needed.  If the range of a
-parameter $x$ is $[1, 10]$, \sys adds the range constraints $x \geq
+parameter $x$ is from 1 to 10, \sys adds the range constraints $x \geq
 1 \land x \leq 10$ for solving.
 
 Some domain-specific range knowledge is required from users to
