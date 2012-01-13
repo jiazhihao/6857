@@ -47,9 +47,9 @@ is usually to compare $n$ with 0 or change its type to unsigned.
 Using \cc{char} as an array index is a common mistake, since a
 character can easily go negative when the value is beyond 127,
 leading to an out-of-bounds access.  This bug pattern has appeared
-in many applications, including bash (CA-1996-22)and recently the lighttpd
-web server (CVE-2011-4362, found by
-\sys).  The fix is to simply change the type to unsigned.
+in many applications, including bash (CA-1996-22) and recently
+lighttpd (CVE-2011-4362, found by \sys).  The fix is to simply
+change the type to unsigned.
 
 A tricky variant of this bug pattern, which happened to the Apache
 web server (CVE-2009-0023), is using the result of $\cc{tolower}(c)$

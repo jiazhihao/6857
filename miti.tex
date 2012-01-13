@@ -9,14 +9,14 @@ software.
 It would be useful to have the compiler check and warn against
 integer errors, so that developers can easily notice these bugs and
 fix them at compile time.  Ideally, the check should not slow down
-the compilation too much, and the false rate should be kept low,
+the compilation too much, and the false error rate should be kept low,
 so that developers are willing to enable the check.
 
 Due to the above two concerns, it is unlikely to directly integrate
 our solver-based approach into a compiler.  A pragmatic workaround
 could be to match and warn against the common error patterns
 summarized in \autoref{s:common}, which can be done efficiently
-with a low false rate.
+with a low false error rate.
 
 Decent C compilers have some support for detecting integer error
 patterns.
@@ -34,7 +34,7 @@ against three simple error patterns extracted from the bugs discovered
 by \sys.  The result as shown in \autoref{f:cmp-stat}.  GCC cannot
 find any of them with \cc{-Wall}; it can find two with \cc{-Wextra}
 or \cc{-Wtype-limits}, but these options are usually turned off by
-developers due to high false rate.  Clang can find one of them
+developers due to high false error rate.  Clang can find one of them
 without any special option.
 %
 %Neither of the compilers can detect the third error pattern, which
