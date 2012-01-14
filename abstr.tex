@@ -1,16 +1,16 @@
 \begin{abstract}
 
 Integer errors have emerged as a threat to systems security,
-which allow further exploits such as buffer overflow
+because they allow further exploits such as buffer overflow
 and privilege escalation.
 %
 This paper presents \sys, a static analysis tool that detects
-integer errors in systems code.  It generates Boolean constraints
+integer errors in systems code.  It generates integer constraints
 from source code and user annotations, and feeds them into
 a solver for deciding satisfiability.
 %
-\sys has found more than 60 integer errors in the Linux kernel, the
-lighttpd web server, and OpenSSH, all of which have been confirmed
-and fixed upstream.
+\sys identified more than 60 integer errors in the Linux kernel,
+the lighttpd web server, and OpenSSH, which were confirmed and fixed
+by the developers.
 
 \end{abstract}

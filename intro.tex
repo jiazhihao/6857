@@ -37,7 +37,7 @@ actually exploited to untether the iOS jailbreak~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation we
-just mentioned, a problematic integer error may lead to information
+just mentioned, a problematic integer error may also lead to information
 leakage, for example, if it is used to determine the number of data
 items to be copied from kernel to user space, raising privacy
 concerns.  It may cause more subtle logic bugs if the value is used
@@ -51,7 +51,9 @@ process (CVE-2011-4097).
 \caption{An integer error (CVE-2006-5751) in the Ethernet
 bridge subsystem of the Linux kernel, where a multiplication overflow
 may lead to buffer overflows and allow local users to execute
-arbitrary code via a large \cc{maxnum} from user space.}
+arbitrary code via a large \cc{maxnum} from user space.
+\xw{is the XFS example better?}
+}
 \label{f:bridge}
 \end{figure}
 
@@ -59,9 +61,12 @@ This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
 %
 The key challenge facing \sys is knowing what are actual integer
-errors.  Benign truncations and sign conversions are commonly seen
-in C code.  Developers even count on integer overflows such as $x
-+ y < x$ to achieve the correctness of their programs.  \sys needs
+errors.  For example, one could strictly enforce that a signed
+integer being converted to unsigned must be non-negative.  However,
+sign conversions are so commonly seen in C code that doing so would
+cause too many false errors~\cite{moy:prefix}.
+Developers even count on integer overflows such as $x
++ y < x$ for the correctness of their programs.  \sys needs
 an integer semantics that recognizes commonly used code patterns
 while still effectively catches integer errors.
 %Conceptually, any integer operation that may produce a
@@ -71,15 +76,15 @@ while still effectively catches integer errors.
 A second challenge is to precisely reason about integer operations
 on every code path.  Given the semantics of an integer operation,
 \sys needs to determine whether the control flow can reach that
-operation while simultaneously violating the semantics.  As for the
-example in \autoref{f:bridge}, \sys should conclude that an overflowed
+operation while simultaneously violating the semantics.  For
+example, in \autoref{f:bridge} \sys should conclude that an overflowed
 product \cc{size} will bypass the sanity check and reach the
 \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
 Linux kernel.  \sys needs to finish scanning the source code in a
 reasonable amount of time.  \sys also should rank reported integer
-errors and screen out unlikely ones for human inspection if the bug
+errors and remove unlikely ones for human inspection if the bug
 list is long.
 
 \sys addresses these challenges with three ideas: a practical integer
@@ -89,27 +94,27 @@ criteria that estimate the security impacts of possible integer
 errors.  \sys accept C source code as input, and inspects each
 integer operation for possible integer errors.
 %
-It is implemented in the LLVM compiler framework~\cite{lattner:llvm}
-with the Boolector constraint solver~\cite{boolector}.
+It is implemented using the LLVM compiler framework~\cite{lattner:llvm}
+and the Boolector constraint solver~\cite{boolector}.
 %
 To further reduce false errors, \sys asks users to provide a white
 list of overflow checking idioms, as well as additional range
 constraint annotations to filter out infeasible cases.
 
-Applying \sys to the Linux kernel and user-space applications
-(including lighttpd and OpenSSH) results in 20+ patchsets that have
-fixed more than 60 integer errors upstream.  It also reveals that
-even two previously known CVE cases were not fixed correctly.
+\sys identified more than 60 integer errors in the Linux kernel,
+the lighttpd web server, and OpenSSH, which were confirmed and fixed
+by the developers.  It also reveals that even two previously known
+CVE cases were not fixed correctly.
 %
 We evaluate \sys's completeness by running it against 36 known
 integer errors in the Linux kernel from the past three years; \sys
 is able to detect 34 of them.
 
 The rest of this paper is organized as follows. \autoref{s:sema}
-defines the integer semantics.  \autoref{s:gen} presents \sys's
-design for generating constraints.  \autoref{s:rank} describes
-ranking heuristics.  \autoref{s:eval} evaluates \sys using the Linux
-kernel source tree and known CVE cases.  \autoref{s:common} summarizes
-common integer errors and \autoref{s:miti} discusses mitigation
-strategies.  We relate \sys to previous work in \autoref{s:relwk},
-and then conclude in \autoref{s:concl}.
+defines the integer semantics that \sys uses.  \autoref{s:gen}
+presents \sys's design for generating constraints.  \autoref{s:rank}
+describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
+the Linux kernel source tree and known CVE cases.  \autoref{s:common}
+summarizes common integer errors and \autoref{s:miti} discusses
+mitigation strategies.  \autoref{s:relwk} relates \sys to previous
+work and \autoref{s:concl} concludes.
