@@ -27,6 +27,8 @@ int[n]} is dangerous without correctly bounding $n$.  GCC so far
 does not generate any overflow checking code for the \cc{new}
 operator~\cite{gcc-new}.
 
+\xw{$x \times y < ??$}
+
 Using an unsigned integer for return value checking is often a mistake,
 since in practice negative return values are used for error status.
 The obviously wrong check $(\cc{uint} < 0)$ yet has bitten several
