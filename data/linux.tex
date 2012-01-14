@@ -32,13 +32,20 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& OOB read
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok (uvcvideo) \\
+	& \ok \\
 \hspace{1em} wl128x
 	& cmp (36)
 	& logic error
 	& $<_u 0$: error handling
 	& --
-	& \ok (media_tree) \\
+	& \ok \\
+\cc{drivers:mtd} \\
+\hspace{1em} pmc551
+	& cmp
+	& logic error
+	& $<\leq_u 0$: error handling
+	& --
+	& \ok \\
 \cc{drivers:scsi} \\
 \hspace{1em} iscsi_tcp
 	& $\times_u$

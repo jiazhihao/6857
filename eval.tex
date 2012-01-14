@@ -32,12 +32,8 @@ didn't do it correctly.  ``Patch accepted?'' shows how the kernel
 developers respond to our patches, in one of the following cases.
 \begin{itemize}
 \item
-\ok: the kernel developers accepted the patch upstream.  We
-additionally specify the original repository that contains the
-patch, such as (xen), if the patch has not been merged into the
-mainline.
-\item
-modified: the kernel developers modified our patch for inclusion.
+\ok: the kernel developers accepted the patch;
+``modified'' means that they modified our patch for inclusion.
 \item
 acked: the kernel developers acknowledged the patch, but they
 did not apply it for unknown reason.
@@ -45,7 +41,8 @@ did not apply it for unknown reason.
 fixed: the bug was already fixed in some repository other than the
 mainline when \sys discovered it, so we withdraw our patch.
 \end{itemize}
-We omit patches that do not receive further responses.
+We omit patches that did not receive any further response.
+\xw{say \sys is effective}
 
 \begin{figure*}
 \centering
