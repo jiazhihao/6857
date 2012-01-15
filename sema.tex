@@ -1,12 +1,12 @@
 \section{Integer Semantics}
 \label{s:sema}
 
-We define \sys's integer semantics via error constraints.  The error
-constraint of an integer operation is a Boolean predicate if satisfied
-implies an integer error, unless the operation is in the white list
-of code patterns that \sys explicitly allows.
+We define \sys's integer semantics via safety requirements.
+Any integer operation that violates these requirements implies
+an error, unless the operation is in the white list of code patterns
+that \sys explicitly allows.
 
-\subsection{Error Constraint}
+\subsection{Safe Integer Operations}
 \label{s:sema:constr}
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
@@ -18,30 +18,31 @@ may have a subscript $s$ or $u$ to indicate whether it operates on
 signed or unsigned integers, respectively.
 
 \paragraph{Addition \& subtraction \& multiplication.}
-An additive or multiplicative operation may lead to an integer error
-if the result falls out of the predefined range.  For example,
+The result of an additive or multiplicative operation should fall
+in the predefined range.  For example,
 $\cc{maxnum}\times_u 16$ causes an integer error if $\cc{maxnum} =
-\cc{0xf0000000}$, because $\cc{0xf0000000} \times 16 = 2^{32}\times
-3\times 5$ is out of the range of $32$-bit unsigned integers ($0$
+\cc{0xf0000000}$, because the expected product $2^{32}\times
+3\times 5$ is out of the range of $32$-bit unsigned integers~($0$
 to $2^{32} - 1$).
 
 \paragraph{Division.}
 A division operation causes an integer error if the divisor is 0.
-Additionally, signed division $x\ /_s\ y$ may lead to an integer
-error if $x = -2^{n-1}$ and $y = -1$, because $2^{n-1}$ is not in
-the range of $n$-bit signed integers ($-2^{n-1}$ to $2^{n-1}-1$).
+Additionally, signed division $-2^{n-1} /_s {-1}$ may lead to an integer
+error, because the expected quotient $2^{n-1}$ is not in
+the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
 
 \paragraph{Shift.}
-The bitwise shifts $x \shl y$ and $x \shr y$ are considered as
-integer errors if $y \geq_u n$, which is undefined according to the
-C standard.  As for 32-bit integers, $(1 \shl 32)$ yields 1 on x86
-and 0 on PowerPC.
+For $n$-bit integers, the shifting amount should be non-negative
+and at most $n-1$.  Otherwise, the operation is undefined according
+to the C standard.  As for 32-bit integers, $1 \shl 32$ yields 1
+on x86 and 0 on PowerPC.  \sys considers the operation as an integer
+error.
 
 \paragraph{Conversion.}
-Lossy truncations and sign conversions are often seen in systems
+Lossy truncations and sign conversions are often seen in C
 code, and they can be found by invoking GCC with \cc{-Wconversion}.
 \sys does not consider such a conversion as an integer error, unless
-its result is used in one of the following two cases.
+its result is used in one of the following two cases:
 
 \paragraph{$(1)$ Tautological comparison.}
 A comparison is always true or false due to an integer conversion,
@@ -109,8 +110,8 @@ integer semantics.  Even worse, C compilers like GCC may completely
 optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
-given.  To generate error constraints that best match the developer's
-intention, \sys is designed to run before these optimizations.
+given.  To avoid the interference, \sys is designed to run before
+these optimizations.
 
 \subsection{Default Semantics}
 \label{s:sema:def}
@@ -126,7 +127,8 @@ For $n$-bit signed arithmetic operations, \sys assumes the wrapping
 semantics as if they were unsigned (i.e., $\mod{2^n}$), which is
 the same as invoking GCC with the \cc{-fwrapv} option.
 \item
-Division by zero is undefined.
+Division by zero is undefined.  \sys does not consider the result
+in further expressions.
 \item
 For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
 shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
@@ -143,8 +145,8 @@ but not on x86.
 \subsection{White Listing Idioms}
 \label{s:sema:whitelist}
 
-It is commonly seen in practice to use an overflowed result to do
-the integer error check for $x +_u y$, where both $x$ and $y$ are
+It is common in practice to use an overflowed result to perform
+an integer error check for $x +_u y$, where both $x$ and $y$ are
 $n$-bit unsigned integers, as follows:
 \begin{equation*}
 x +_u y <_u x.
@@ -158,7 +160,7 @@ also shown for comparison.  Let $\uintmax(n)$ denote the largest
 $n$-bit unsigned integer, i.e., $2^n - 1$.  Below is a non-overflow
 version of addition overflow check:
 \begin{equation*}
-\uintmax(n) - x >_u y.
+\uintmax(n) -_u x >_u y.
 \end{equation*}
 
 Note that \sys does not recognize the overflowed comparison $x
@@ -197,9 +199,9 @@ theoretically overflow.
 \begin{tabular}{ll}
 \toprule
 Overflowed check & Equivalent check \\ \midrule
-$x + y <_u x$ & $x >_u \uintmax(n) - y$ \\
-$x - y <_s 0$ & $x <_u y$ \\
-$(x \times y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
+$x +_u y <_u x$ & $x >_u \uintmax(n) -_u y$ \\
+$x -_u y <_s 0$ & $x <_u y$ \\
+$(x \times_u y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
 \bottomrule
 \end{tabular}
 \caption{Examples of overflowed check idioms that \sys recognizes.
