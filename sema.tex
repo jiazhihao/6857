@@ -1,13 +1,13 @@
 \section{Integer Semantics}
 \label{s:sema}
 
-We define \sys's integer semantics via safety requirements.
-Any integer operation that violates these requirements implies
-an error, unless the operation is in the white list of code patterns
-that \sys explicitly allows.
+We define \sys's integer semantics via the security requirement of
+each integer operation.  Any integer operation that violates the
+security requirement implies an error, unless the operation is in
+the white list of code patterns that \sys explicitly allows.
 
-\subsection{Safe Integer Operations}
-\label{s:sema:constr}
+\subsection{Secure Integer Operations}
+\label{s:sema:sec}
 
 \sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
@@ -181,7 +181,7 @@ limit~\cite[\chapterautorefname~8]{ldd3}.  In that case, \sys
 would report a false error.
 
 Another error-prone check is using an oversized shift like $(1 \shl
-n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:constr},
+n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:sec},
 its value will never be 0 on architectures like x86, which fails
 the check.  The C compiler may even rewrite the check as a no-op.
 \sys does not consider the check as a valid checking idiom.
@@ -199,9 +199,9 @@ theoretically overflow.
 \begin{tabular}{ll}
 \toprule
 Overflowed check & Equivalent check \\ \midrule
-$x +_u y <_u x$ & $x >_u \uintmax(n) -_u y$ \\
-$x -_u y <_s 0$ & $x <_u y$ \\
-$(x \times_u y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
+$x + y <_u x$ & $x >_u \uintmax(n) - y$ \\
+$x - y <_s 0$ & $x <_u y$ \\
+$(x \times y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
 \bottomrule
 \end{tabular}
 \caption{Examples of overflowed check idioms that \sys recognizes.

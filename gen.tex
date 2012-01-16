@@ -5,7 +5,7 @@
 representation~(IR) compiled from source code, \sys generates a set
 of constraints for each integer operation, and feed them into the
 Boolector constraint solver for deciding satisfiability.  If the
-solver answers SAT with an assignment of variables, there is a
+solver answers ``satisfiable'' with an assignment of variables, there is a
 potential integer error that could be triggered with that assignment.
 This section describes how \sys generates each type of these
 constraints.
@@ -24,7 +24,7 @@ the constraints to a solver for satisfiability testing.}
 \subsection{Error Constraint Generation}
 \label{s:gen:err}
 
-From the definition in \autoref{s:sema:constr}, \sys derives a
+From the definition in \autoref{s:sema:sec}, \sys derives a
 Boolean predicate for the error constraint of each integer operation.
 
 \paragraph{Arithmetic operations.}
@@ -49,7 +49,7 @@ comparison $y \geq n$, where $y$ is the number of bits to shift.
 \sys simply uses the comparison as the result.
 
 \paragraph{Conversion.}
-As defined \autoref{s:sema:constr}, \sys needs to deal with conversions
+As defined \autoref{s:sema:sec}, \sys needs to deal with conversions
 in a specific way, as follows.
 
 To detect tautological comparisons, \sys derives a predicate from
