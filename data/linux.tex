@@ -43,7 +43,7 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 \hspace{1em} pmc551
 	& cmp
 	& logic error
-	& $<\leq_u 0$: error handling
+	& $\leq_u 0$: error handling
 	& --
 	& \ok \\
 \cc{drivers:scsi} \\
@@ -114,6 +114,13 @@ Component & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& OOB write
 	& disk: \cc{kmalloc} size
 	& 1
+	& \ok \\
+\cc{kernel} \\
+\hspace{1em} auditsc
+	& cmp
+	& logic error
+	& $\leq_u 0$: error handling
+	& --
 	& \ok \\
 \cc{mm} \\
 \hspace{1em} vmscan
