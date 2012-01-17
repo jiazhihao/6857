@@ -66,3 +66,25 @@ The fix is to check the shifting amount before the shift.
 
 %ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
 %and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
+
+\subsection{Blacklist}
+
+
+Another error-prone check is using an oversized shift like $(1 \shl
+n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:sec},
+its value will never be 0 on architectures like x86, which fails
+the check.  The C compiler may even rewrite the check as a no-op.
+\sys does not consider the check as a valid checking idiom.
+
+The imperfect check $x \times_u y <_u x$ does not always lead to a security vulnerability.
+Imagine $\cc{maxnum} \times_u 16 <_u \cc{maxnum}$ is used as an
+overflow check in \autoref{f:bridge}, where $\cc{maxnum} \times_u
+16$ is the allocation size.
+\cc{maxnum} has to be at least $2^{28}$ to
+overflow $\cc{maxnum} \times 16$, and the product must be greater
+than or equal to that to bypass the check $\cc{maxnum} \times_u 16
+<_u \cc{maxnum}$.  Allocating $2^{28}$ bytes (i.e., 256~MB) is
+possible in a user-space application, but unlikely to succeed in
+the Linux kernel with \cc{kmalloc}, which imposes a relatively small
+limit~\cite[\chapterautorefname~8]{ldd3}.  In that case, \sys
+would report a false error.
