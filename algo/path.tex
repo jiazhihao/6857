@@ -1,5 +1,5 @@
 \begin{algorithmic}
-\Function{PathConstraint}{$\mathit{blk}$}
+\Function{PathPredicate}{$\mathit{blk}$}
 \If{$\mathit{blk}$ is entry}
 	\State \Return{\textbf{true}}
 \EndIf
@@ -9,7 +9,7 @@
 \If{$e$ is not a back edge}
 	\State $\mathit{br} \gets e$'s branching condition
 	\State $\mathit{as} \gets \bigwedge_i(x_i = y_i)$ for all assignments along $e$
-	\State $g \gets g \lor (\Call{PathConstraint}{\mathit{pred}} \land \mathit{br} \land \mathit{as})$
+	\State $g \gets g \lor (\Call{PathPredicate}{\mathit{pred}} \land \mathit{br} \land \mathit{as})$
 \EndIf
 \EndFor
 \State \Return{$g$}

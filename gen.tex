@@ -1,101 +1,114 @@
 \section{Design}
 \label{s:gen}
 
-\autoref{f:flow} shows \sys's workflow.  Given the LLVM intermediate
+Given the LLVM intermediate
 representation~(IR) compiled from source code, \sys generates a set
-of constraints for each integer operation, and feed them into the
+of predicates for each integer operation, and feeds them into the
 Boolector constraint solver for deciding satisfiability.  If the
-solver answers ``satisfiable'' with an assignment of variables, there is a
-potential integer error that could be triggered with that assignment.
-This section describes how \sys generates each type of these
-constraints.
+solver answers ``satisfiable'' with an assignment of variables,
+there is a potential integer error that could be triggered with that assignment.
+The workflow is shown in \autoref{f:flow}.
+
+The central challenge is reducing the complexity of these predicates,
+so that the solver can run efficiently.  This section describes how
+\sys generates the predicates.
 
 \begin{figure}
 \centering
 \resizebox{\linewidth}{!}{
 \input{figs/flow}
 }
-\caption{\sys's workflow.  It generates constraints from the LLVM
+\caption{\sys's workflow.  It generates predicates from the LLVM
 intermediate representation~(IR) and user annotations, and then feeds
-the constraints to a solver for satisfiability testing.}
+the predicates to a solver for satisfiability testing.}
 \label{f:flow}
 \end{figure}
 
-\subsection{Error Constraint Generation}
+\subsection{Error Predicate Generation}
 \label{s:gen:err}
 
-From the definition in \autoref{s:sema:sec}, \sys derives a
-Boolean predicate for the error constraint of each integer operation.
+%From the definition in \autoref{s:sema:sec},
+\sys derives an error predicate for each integer operation.
+It is the negation of the corresponding security requirement,
+satisfying which implies an error.
 
 \paragraph{Arithmetic operations.}
-\sys needs to encode the overflow condition of an arithmetic operation
-in an efficient way.  Consider the $n$-bit unsigned multiplication.
-One may use a $2n$-bit binary multiplier (extending both integers
-from $n$ to $2n$ bits first), which flags an overflow error if any
-of the most significant $n$ bits of the product is
-1~\cite{molnar:catchconv}.  However, the \naive implementation would
-hurt the solver's performance noticeably (see \autoref{s:eval:micro}).
-
-Boolector provides highly optimized Boolean circuits for implementing
-overflow checks.  Its overflow detection circuit for unsigned
-multiplication, for example, does not even need to compute the
-$2n$-bit product and thus can be solved far more
-efficiently~\cite[\chapterautorefname~3.5]{brummayer:phd}.  \sys
-reuses these circuits for better performance.
+Take multiplication for an example.  Given two $n$-bit unsigned integers
+$x$ and $y$, the security requirement is that their product cannot overflow.
+There are several possible error predicates \sys could generate.
+A \naive form is:
+\begin{equation*}
+x \neq 0 \land \uintmax(n) /_u / x > y.
+\end{equation*}
+Another possible predicate is to use a $2n$-bit
+multiplier~\cite{molnar:catchconv}: extend $x$ and $y$ to $2n$ bits
+and flag an error if any of the most significant $n$ bits of the
+product is 1.  This is conceptually equivalent to:
+\begin{equation*}
+x_{2n} \times y_{2n} > \uintmax(n).
+\end{equation*}
+Both forms would hurt the solver's performance noticeably
+(see \autoref{s:eval:micro} for a performance comparison).
+%
+\sys reuses a specialized multiplication overflow detection predicate
+from the Boolector constraint
+solver~\cite[\chapterautorefname~3.5]{brummayer:phd}, which can be
+solved far more efficiently The detail implementation of the predicate
+is beyond the scope of this paper.
 
 \paragraph{Shift.}
-The error constraint of a $n$-bit shift operation is a
-comparison $y \geq n$, where $y$ is the number of bits to shift.
-\sys simply uses the comparison as the result.
+The error predicate \sys generates for a $n$-bit shift operation
+$x \shl y$ or $x \shr y$ is a simple comparison $y \geq n$, where
+$y$ is the number of bits to shift.
 
 \paragraph{Conversion.}
-As defined \autoref{s:sema:sec}, \sys needs to deal with conversions
-in a specific way, as follows.
+As defined \autoref{s:sema:sec}, \sys deals with conversions
+in the following two cases.
 
 To detect tautological comparisons, \sys derives a predicate from
 each comparison.  If the predicate is trivially true or false
 resulted from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
-For negative counts, it is easy to generate the error constraint
-for a value $x$ that should be conceptually non-negative, that is,
-$x <_s 0$; however, \sys needs to know them first.  \sys implements
-a front-end plugin to recognize array indices.  \sys also requires
+For a value $x$ that should be conceptually non-negative (i.e.,
+array indices and ``size'' function parameters), the error predicate
+\sys generates is simply $x <_s 0$.
+\sys implements a front-end plugin to recognize array indices.  \sys requires
 user-provided annotations on ``size'' function parameters.  As for
-the Linux kernel, we annotate parameters in functions like \cc{memcpy},
+the Linux kernel, we annotate the ``size'' parameters in functions like \cc{memcpy},
 \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
 
-\subsection{Path Constraint Generation}
+\subsection{Path Predicate Generation}
 \label{s:gen:path}
 
-The path constraint of an integer operation is a Boolean predicate
-satisfying which the operation is reachable from the start of that
-function.  \sys generates it from the control flow, to encode all
-the branching conditions along the execution path.  It is used to
-filter out infeasible paths.
+\sys generates a path predicate for each integer operation from the
+control flow, to encode all the branching conditions along the
+execution path.  Satisfying the path predicate means that the integer
+operation is reachable from the start of the function that contains
+the operation.  The path predicate is used to filter out infeasible
+paths.
 
 Let's consider loop-free programs first.
 %
-We use \autoref{f:ax25-sign} as an example to illustrate how \sys
-generates path constraints.  The control flow of the code is shown
-in \autoref{f:cfg}, where there are two sanity checks on \cc{optlen}
-before it reaches \cc{copy_from_user}.  For clarification purpose
-\cc{optlen} is numbered every time it is assigned a new
-value~\cite[\chapterautorefname~8.11]{whale}.  Our goal is to
-evaluate the path constraint for the call to \cc{copy_from_user}.
+We use \autoref{f:ax25-sign} as an example.  The control flow of
+the code is shown in \autoref{f:cfg}.  There are two sanity checks
+on \cc{optlen} before it reaches the call to \cc{copy_from_user}.
+For clarification purpose \cc{optlen} is numbered every time it is
+assigned a new value~\cite[\chapterautorefname~8.11]{whale}.  Our
+goal is to evaluate the path predicate for the call to \cc{copy_from_user}.
 
 The basic algorithm works as follows.  Since there is no loop, the
-path constraint of the call to \cc{copy_from_user} is simply the
-logical OR of the constraint from each of its predecessors, namely
+path predicate of the call to \cc{copy_from_user} is simply the
+logical OR of the predicates from each of its predecessors, namely
 \textsc{If-True} and \textsc{If-False}.  For each predecessor, the
-constraint is a logical AND of three parts: the branching condition,
-possible assignment(s) in the predecessor, and the path constraint
+predicate is a logical AND of three parts: the branching condition,
+possible assignment(s) in the predecessor, and the path predicate
 of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
 conditions are simply true, which can be ignored.  Now we have the
-following path constraint:
+following path predicate:
 \newcommand{\optlen}{{\small \texttt{optlen}}}
-\newcommand{\pc}{\textrm{PathConstraint}}
+\newcommand{\pc}{\textrm{PathPredicate}}
 %
 \begin{align*}
 & ((\optlen_1 = 16) \land \pc(\textsc{If-True})) \\
@@ -112,8 +125,8 @@ and we obtain the fully expanded result:
      & \; \land \neg(\optlen_0 <_u 4)).
 \end{align*}
 
-One can feed the logical AND of the path constraint and the error
-constraint (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
+One can feed the logical AND of the path predicate and the error
+predicate (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
 will reply with an assignment that triggers the error: for example,
 $\cc{optlen}_0 = -1$.
 
@@ -126,40 +139,54 @@ $\cc{optlen}_0 = -1$.
 \label{f:cfg}
 \end{figure}
 
-For complex programs that contain loops, \sys handles them using
+For programs that contain loops, \sys handles them using
 loop unrolling~\cite{xie:saturn}.  The path
-constraint generation algorithm unrolls each loop once and ignores
-branching edges that jump back in the control flow.
+predicate generation algorithm unrolls each loop once and ignores
+branching edges that jump back in the control flow,
+so as to restrict the size of the path predicate
+and reduce the solving time.
 The complete algorithm is listed in \autoref{f:path-cstr}.
 
 \begin{figure}
 \input{algo/path}
-\caption{Algorithm for path constraint generation.}
+\caption{Algorithm for path predicate generation.}
 \label{f:path-cstr}
 \end{figure}
 
-\subsection{Range Constraint Generation}
+To alleviate missing predicates due to loop unrolling,
+\sys tries to move predicates within a loop to the outside scope.
+Consider the following loop.
+\input{code/loop}
+\sys generates an error predicate $i <_s 0$ since $i$ is used
+as an array index.  Simply unrolling the loop once (i.e., $i = 0$)
+would make a false predicate $0 <_s 0$, which might miss a possible
+integer error (e.g., if the code does not correctly restrict $n$).
+To address the problem, \sys generates a new predicate $n <_s 0$
+outside the loop, by substituting the loop variable $i$ with its
+exit value $n$ in the predicate $i <_s 0$.
+
+\subsection{Range Predicate Generation}
 \label{s:gen:range}
 
-\sys infers range constraints of function parameters, structure
-fields, and global variables.  Since both error and path constraints
-are generated within a single function, range constraints are used
-to propagate global information across functions for improving
-accuracy and reducing false errors.
+Since both error and path predicates are generated within a single
+function, \sys generates range predicate to propagate global
+information across functions for improving accuracy and reducing
+false errors.
 
-\sys represents range constraints as more coarse-grained intervals,
-using two constant integers as the minimum and maximum values,
-respectively, for better performance.  Otherwise, if \sys simply
-generates a path constraint along the call graph, the size of the
-path constraint would grow exponentially, making it difficult to
-solve.
+\sys represents ranges using two constant integers as the minimum
+and maximum values, respectively, for better performance.  If the
+range of a parameter $x$ is from 1 to 10, \sys generates the range
+predicates $x \geq 1 \land x \leq 10$.
+Otherwise, if \sys simply
+generates a path predicate along the call graph, the size of the
+path predicate grows exponentially, causing the solver to run for
+too long time.
 
 \sys implements the value range propagation algorithm for inferring
-the minimum and maximum values of each variable~\cite{patterson:vrp}.
-The detail of the algorithm is omitted here.  We manually reviewed
-the output and refined the ranges if needed.  If the range of a
-parameter $x$ is from 1 to 10, \sys adds the range constraints $x \geq
-1 \land x \leq 10$ for solving.
+ranges of function parameters, structure fields, and global
+variables~\cite{patterson:vrp}.  The detail of the algorithm is
+omitted here.  We manually reviewed and refined the
+output ranges.
 
 Some domain-specific range knowledge is required from users to
 reduce false errors.  For example, the C standard does not impose
@@ -171,37 +198,25 @@ report an addition overflow for on expressions like $\cc{argc} + 1$.
 %handle sysctl interface.
 
 
-\subsection{Optimizations}
+\subsection{Code Rewriting}
 \label{s:gen:opt}
 
-\sys performs a series of optimizations and rewrites the code for
-better constraints and performance.
-
-\paragraph{In-loop constraint.}
-\sys tries to move constraints within a loop to the outside scope
-so as to generate more constraints.  Consider the following loop.
-\input{code/loop}
-\sys will generate an error constraint $i <_s 0$ since $i$ is used
-as an array index.  As $i$ also is a loop variable, \sys will move
-the constraint out of the loop and rewrite it as $n <_s 0$, by
-substituting the loop variable $i$ with its exit value $n$.
-%
-Without the rewriting, \sys would unroll the loop once and might
-miss an integer error.
+\sys performs a series of code transformations and rewrites code
+for reducing false errors and improving performance.
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
 expression~\cite{engelen:symbolic}, and tries to simplify it if
-possible.  A pointer expression that \sys fails to simplify will
-be considered as a black-box integer, which can be any value within
-its range.  Consider the code snippet below.
+possible.  \sys considers a pointer expression that it fails to simplify
+as a black-box integer, which can be any value within its range.
+Consider the code snippet below.
 %
 \input{code/pid-ptrsub}
 %
 The offset of \cc{pidmap} in the structure \cc{pid_namespace} is 4
-bytes, i.e., the size of \cc{kref}, thus \sys represents the address
-\cc{pid_ns->pidmap} as $\cc{pid_ns} + 4$.  Here \cc{pid_ns} is
-considered as a black box since no further information is available.
+bytes (i.e., the size of \cc{kref}), thus \sys represents the address
+\cc{pid_ns->pidmap} as $\cc{pid_ns} + 4$.  Here \sys considers \cc{pid_ns}
+as a black box since no further information is available.
 
 In addition, assuming the size of each element of \cc{pidmap} is 8
 bytes, \sys represents the address \cc{\&pid_ns->pidmap[i]} as
@@ -211,12 +226,12 @@ the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 4 + i \times 8) - (\cc{pid_ns} + 4) = i \times 8$.
 %
 Without the rewriting, \sys would consider the subtraction between
-two black-box integers, and may report an error.
+two black-box integers, and report an error.
 
 \paragraph{Memory model.}
-\sys employs a very simple memory model: a load instruction may return
-an arbitrary value (unless it has a range constraint; see
-\autoref{s:gen:range}).  It relies on LLVM's load elimination
+\sys employs a simple memory model: a load instruction may return
+an arbitrary value (unless it has a range predicate).
+It relies on LLVM's load elimination
 algorithm to merge load instructions that will return the same
 value.
 
@@ -241,7 +256,7 @@ safe to move across its previous instruction $I$ if:
 \begin{itemize}
 \item $I$ does not write to any memory location, or
 \item $I$ writes to pointer $q$, while $p$ and $q$ never point to the
-same memory location, i.e., they do not alias.
+same memory location (i.e., they do not alias).
 \end{itemize}
 
 If $L$ is already the first instruction in a non-entry block and
@@ -275,14 +290,14 @@ of the block's predecessors.}
 \fi
 
 \paragraph{Error-before-check.}
-An integer error check may come after the overflowed computation,
+An integer error check may occur after the overflowed computation,
 but before any use of the result.  In that case, the overflowed
-computation is benign.  Below is such an example.  Even the
+computation is benign.  Below is such an example.  Even if the
 multiplication $x \times_u y$ overflows, the product \cc{size} is
 not used before the check.
 \input{code/error-before-use}
 
-To avoid warning against such cases, \sys invokes LLVM to push every
+To avoid warning against such cases, \sys pushes every
 integer operation down to the latest possible point along the control
 flow, so that the result is computed only when it is needed.  The
 detail of the algorithm is omitted since it is similar to load
@@ -295,19 +310,19 @@ In the above example, \sys will move the integer operation $x
 
 \paragraph{Error checking idiom.}
 
-We notice that when generating path constraints some integer
-operations like division would significantly slow down the constraint
-solver~\cite{brummayer:perf}.  Many of such cases are used in integer
+When generating path predicates some integer
+operations like division significantly slows down the constraint
+solver~\cite{brummayer:perf}.  Many of such cases occur in integer
 error checks like $\cc{if}\ (N /_u x > y)$, where $N$ is a constant
-and $x, y$ are $n$-bit integers.  \sys recognizes such an integer
-error checking idiom and rewrites it to avoid the division operation,
-as follows.
+and $x, y$ are $n$-bit integers.  \sys recognizes such idioms and
+rewrites them to avoid the slow operations, as follows.
 
 \sys first zero-extends $x$ and $y$ from $n$ to $2n$ bits, as
 $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check as
 multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a special
 constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
-with the multiplication overflow detection circuit.
+with the multiplication overflow detection predicate, as described
+in \autoref{s:gen:err}.
 %
 \autoref{s:eval:micro} will show a microbenchmark of the three
 operations.
@@ -316,20 +331,20 @@ operations.
 \label{s:gen:limit}
 
 \sys will miss the following integer errors.
-
+%
 \sys only understands C-language code; it will cannot detect integer
 errors written in assembly language.
-
+%
 \sys cannot scan code that is not enabled for compilation in the
 testing configuration or architecture.  For better code coverage
-one may enable as many modules as possible, or try cross compilation
+one should enable as many modules as possible, or try cross compilation
 for different architectures.
 
 As discussed in \autoref{s:sema}, \sys will miss integer errors
-that is not modeled by its semantics.  Particularly, it cannot catch
+that are not modeled by its semantics.  Particularly, it cannot catch
 overflows if the developer uses left shift instead of multiplication;
-it will also miss bugs specific to architectures like PowerPC, which
-its semantics does not model.
+it will also miss errors specific to architectures like PowerPC,
+whose semantics it does not model.
 
 If the annotations for ``size'' parameters are incomplete, \sys will
 miss the corresponding integer errors.
@@ -338,8 +353,8 @@ miss the corresponding integer errors.
 errors caused by looping, for example, an addition overflow in an
 accumulation.
 
-\sys's alias assumption is unsound, and thus it will miss bugs
+\sys's alias assumption is unsound, and thus it will miss errors
 caused by the assumption.
 
 Finally, if the solver times out, \sys will miss the possible integer
-error corresponding to the queried constraint.
+error corresponding to the queried predicates.

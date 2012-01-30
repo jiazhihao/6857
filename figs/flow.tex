@@ -7,11 +7,11 @@
 	line/.style={draw, thick, ->},
 	]
 	\matrix[row sep=2mm, column sep=15mm] {
-		& \node [block] (ec) {Error constraint}; & \\
+		& \node [block] (ec) {Error predicate}; & \\
 		\node [block, text width=6em] (ir) {LLVM IR \& Annotation};
-		& \node [block] (pc) {Path constraint};
+		& \node [block] (pc) {Path predicate};
 		& \node [block] (sol) {Solver}; \\
-		& \node [block] (rc) {Range constraint}; & \\
+		& \node [block] (rc) {Range predicate}; & \\
 	};
 
 	\path [line] (ir) -- (ec);

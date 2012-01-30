@@ -1,13 +1,12 @@
 \section{Ranking}
 \label{s:rank}
 
-Despite that \sys may report a long list of bugs, we are particularly
-interested in integer errors that developers are willing to fix.
-We consider an integer error as a serious bug if the result is
-either controlled from untrusted sources or used at sensitive sinks.
-Such sources and sinks are generally specific to the system being
-analyzed.  This section discuss them in the context of the Linux
-kernel.
+\sys may report a long list of errors.  We are only interested in
+those serious ones.  We consider an integer error as serious if the
+result is either controlled from untrusted sources or used at
+sensitive sinks.  Such sources and sinks are generally specific to
+the system being analyzed.  This section discuss them in the context
+of the Linux kernel.
 
 Untrusted sources are essentially all channels into the kernel from
 the outside, including data copied from user space (via system
@@ -40,4 +39,4 @@ sizes for allocation and I/O communication.  An erroneous integer
 value used in such places are more likely to damage the system.
 
 \sys requires annotations to specify these sources and sinks.
-Currently we have 55 annotations for the Linux kernel.
+Currently we have 55 annotations for sources and sinks in the Linux kernel.
