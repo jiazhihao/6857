@@ -5,39 +5,62 @@ This section summarizes common integer error patterns and ways
 to fix them.
 
 A large portion of integer errors found in the Linux kernel are due
-to missing or incorrect bound checks for data from untrusted sources.
-The fix is to add or correct the sanity check, and return \cc{-EINVAL}
-or silently limit the value to the bounds.
+to missing or incorrect bounds checks for values from untrusted sources.
+The fix is to add or correct the bounds checks, and return \cc{-EINVAL}
+or silently change the values if the values are out of bounds.
 
 Multiplication for calculating allocation size seems particularly
-prone to integer errors.  The Linux kernel provides the function
+prone to integer errors, particularly in the forms of
+\cc{kzalloc}/\cc{kmalloc}\cc{(count * size, ...)} if
+the code does not correctly bound \cc{count};
+the difference of the two functions is that \cc{kzalloc} additionally
+zeros allocated memory.
+The Linux kernel provides the function
 \cc{kcalloc(count, size)} that checks for multiplication overflow
-of \cc{count} and \cc{size} and additionally zeroes the allocated
-memory.  In fact, almost every call to \cc{kzalloc(count * size)},
-which also zeros the memory, may be substituted with \cc{kcalloc}
-for better reliability.  In less performance-critical code,
-\cc{kmalloc} may also be substituted with \cc{kcalloc}.
+of \cc{count} and \cc{size} and allocates
+$\cc{count}\times\cc{size}$ zeroed bytes of memory.
+For better reliability developers should consider to replace every
+call to \cc{kzalloc(count * size)} with the safer \cc{kcalloc(count,
+size)}.
+In less performance-critical code, developers may also replace calls
+to \cc{kmalloc} with \cc{kcalloc}.
 
-Similarly, in user space \cc{calloc} may be used in favor of
-\cc{malloc} if performance is not the highest priority,
-assuming that libc's \cc{calloc} implementations is resistant
-to the multiplication overflow issue~\cite{rus-cert:calloc}.  It
-is worth noting that, however, allocating elements in C++ like \cc{new
+Similarly, in user-space code developers may replace \cc{malloc(count
+* size)} with \cc{calloc(count, size)}
+if performance is not the highest priority,
+since modern \cc{calloc} implementations are resistant
+to the multiplication overflow issue~\cite{rus-cert:calloc}.
+
+It is worth noting that, however, allocating elements in C++ like \cc{new
 int[n]} is dangerous without correctly bounding $n$.  GCC so far
 does not generate any overflow checking code for the \cc{new}
 operator~\cite{gcc-new}.
 
-\xw{$x \times y < ??$}
+As discussed in \autoref{s:sema:whitelist},
+$x \times_u y <_u x$ is not a valid overflow checking form,
+though it does not always lead to a security vulnerability.
+Imagine $\cc{maxnum} \times_u 16 <_u \cc{maxnum}$ is used as an
+overflow check in \autoref{f:bridge}, where $\cc{maxnum} \times_u
+16$ is the allocation size.
+\cc{maxnum} has to be at least $2^{28}$ to
+overflow $\cc{maxnum} \times 16$, and the product must be greater
+than or equal to that to bypass the check $\cc{maxnum} \times_u 16
+<_u \cc{maxnum}$.  Allocating $2^{28}$ bytes (i.e., 256~MB) is
+possible in a user-space application, but unlikely to succeed in
+the Linux kernel with \cc{kmalloc}, which imposes a relatively small
+limit~\cite[\chapterautorefname~8]{ldd3}.
+Nevertheless, developers should avoid using the dangerous form for
+better reliability.
 
 Using an unsigned integer for return value checking is often a mistake,
 since in practice negative return values are used for error status.
-The obviously wrong check $(\cc{uint} < 0)$ yet has bitten several
-drivers and even the core kernel.  A trickier form is $(\cc{uchar}
+The obviously wrong check $(\cc{uint} < 0)$ occured in several
+drivers and even in the core kernel.  A trickier form is $(\cc{uchar}
 < 0)$, where the left-hand side is zero-extended so that it can
-never be negative.  In most cases the fix is to simply use the
-signed type instead.
+never be negative.  In most cases the fix is to use the signed type
+instead.
 
-Using a signed integer in bounds checking needs extra cautious.  As
+Using a signed integer in bounds checking requires caution, too.  As
 shown in \autoref{f:ax25-sign}, limiting the upper bound of signed
 $n$ with $n > 16$ will be bypassed for a negative $n$, which could
 lead to an integer error if $n$ is used as an array index or ``size''
@@ -48,16 +71,20 @@ is usually to compare $n$ with 0 or change its type to unsigned.
 
 Using \cc{char} as an array index is a common mistake, since a
 character can easily go negative when the value is beyond 127,
-leading to an out-of-bounds access.  This bug pattern has appeared
-in many applications, including bash (CA-1996-22) and recently
-lighttpd (CVE-2011-4362, found by \sys).  The fix is to simply
-change the type to unsigned.
+leading to an out-of-bounds access.  This bug pattern appeared
+in many applications, including bash (CA-1996-22) and
+lighttpd (CVE-2011-4362, found by \sys).  The fix is to
+change \cc{char} to \cc{unsigned char}.
 
-A tricky variant of this bug pattern, which happened to the Apache
-web server (CVE-2009-0023), is using the result of $\cc{tolower}(c)$
-as the array index, without noticing that in POSIX \cc{tolower}
-returns a signed \cc{int}.  The Linux kernel's \cc{tolower} returns
-an unsigned \cc{char} and does not have the problem.
+A tricky variant of this bug pattern is using the result of
+$\cc{tolower}(c)$ as an array index, where $\cc{tolower}(c)$ converts
+the character $c$ to the corresponding lower-case letter if $c$ is
+an upper-case letter, or returns $c$ otherwise.  In POSIX \cc{tolower}
+returns a signed \cc{int}; if an adversary provides some $c > 127$,
+$\cc{tolower}(c)$ returns $c$, which is sign-extended to a negative
+value and causes a buffer underflow.  This happened to the
+Apache web server (CVE-2009-0023).  The Linux kernel's \cc{tolower}
+returns an \cc{unsigned char} and does not have the problem.
 
 Oversized shifting bit the ext4 file system (CVE-2009-4307),
 as we have discussed in \autoref{s:eval:linux}.
@@ -66,25 +93,3 @@ The fix is to check the shifting amount before the shift.
 
 %ABI on 64-bit S/390, PowerPC, SPARC, and MIPS
 %and 32-bit system call parameters~\cite[CVE-2009-0029]{cve}
-
-\subsection{Blacklist}
-
-
-Another error-prone check is using an oversized shift like $(1 \shl
-n) = 0$ to detect a large $n$.  As mentioned in \autoref{s:sema:sec},
-its value will never be 0 on architectures like x86, which fails
-the check.  The C compiler may even rewrite the check as a no-op.
-\sys does not consider the check as a valid checking idiom.
-
-The imperfect check $x \times_u y <_u x$ does not always lead to a security vulnerability.
-Imagine $\cc{maxnum} \times_u 16 <_u \cc{maxnum}$ is used as an
-overflow check in \autoref{f:bridge}, where $\cc{maxnum} \times_u
-16$ is the allocation size.
-\cc{maxnum} has to be at least $2^{28}$ to
-overflow $\cc{maxnum} \times 16$, and the product must be greater
-than or equal to that to bypass the check $\cc{maxnum} \times_u 16
-<_u \cc{maxnum}$.  Allocating $2^{28}$ bytes (i.e., 256~MB) is
-possible in a user-space application, but unlikely to succeed in
-the Linux kernel with \cc{kmalloc}, which imposes a relatively small
-limit~\cite[\chapterautorefname~8]{ldd3}.  In that case, \sys
-would report a false error.

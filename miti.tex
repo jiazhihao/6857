@@ -7,13 +7,13 @@ in C code.
 \subsection{Compiler Checking}
 
 It would be useful to have the compiler check and warn against
-integer errors, so that developers can easily notice these bugs and
-fix them at compile time.  Ideally, the check should not slow down
+integer errors, so that developers can fix these bugs
+at compile time.  Ideally, the check should not slow down
 the compilation too much, and the false error rate should be kept low,
 so that developers are willing to enable the check.
-
-Due to the above two concerns, it is unlikely to directly integrate
-our solver-based approach into a compiler.  A pragmatic workaround
+%
+Due to the above two concerns, one cannot directly integrate
+\sys's solver-based approach into a compiler.  A pragmatic workaround
 could be to match and warn against the common error patterns
 summarized in \autoref{s:common}, which can be done efficiently
 with a low false error rate.
@@ -28,14 +28,14 @@ true or false due to type range limits.
 %its high false rate.
 %
 Clang has a similar option called \cc{-Wtautological-compare}.
-
+%
 We test these features by running latest versions of both compilers
 against three simple error patterns extracted from the bugs discovered
 by \sys.  The result as shown in \autoref{f:cmp-stat}.  GCC cannot
 find any of them with \cc{-Wall}; it can find two with \cc{-Wextra}
 or \cc{-Wtype-limits}, but these options are usually turned off by
 developers due to high false error rate.  Clang can find one of them
-without any special option.
+without any special options.
 %
 %Neither of the compilers can detect the third error pattern, which
 %is simply a variation of the second one.
@@ -48,7 +48,7 @@ compilers and improve their compile-time checking mechanism.
 \input{data/cmp-stat}
 \caption{Applying GCC and Clang to checking three simple integer
 error patterns.  GCC can detect two, but only when \cc{-Wextra} is
-given.  Clang can detect one without any special option.}
+given.  Clang can detect one without any special options.}
 \label{f:cmp-stat}
 \end{figure}
 
@@ -73,93 +73,3 @@ However, the trick does not work if the call is written in forms
 like \cc{kmalloc(header_size + count * size)}, or the allocation
 size is already computed before being passed to \cc{kmalloc}, such
 as in \autoref{f:bridge}.
-
-
-\subsection{Alternative Integer Semantics}
-
-Wrapping is the default behavior in languages like Java.
-GCC provides the option \cc{-fwrapv} to enforce wrapping semantics
-for signed integers in C code.  The Linux kernel is compiled with a
-slightly different option \cc{-fno-strict-overflow}, to prevent GCC
-from optimizing away checks with signed integers (e.g., $x + 1 <
-x$) and pointers (e.g., $p + \mathit{len} < p$).
-These options reduce the risk of unwanted optimizations.
-
-A different strategy is trapping.  Ada raises an exception at run
-time for out-of-range values.  For C, GCC provides the option
-\cc{-ftrapv} to insert overflow checks for signed integer operations
-in the generated code; any violation will cause a trap at run time.
-This is extended by Clang via \cc{-fcatch-undefined-behavior} for
-more undefined integer operations such as oversized shifts, and by
-other compiler patches~\cite{brumley:rich, ioc} even for unsigned
-integer overflows.  They are useful for detecting integer errors
-at run time.
-
-The main concern of enabling trapping semantics for production code
-is that it introduces false alarms at run time, while there is no
-convenient way for developers to provide fine-grained error handlers
-if such an alarm is raised.  It also incurs noticeable runtime
-overhead~\cite{ioc}, given the prevalence of integer operations.
-
-\subsection{Using an Integer Library}
-
-Another approach to secure the code is to enforce the use of an integer
-library with error checks, such as CERT's
-IntegerLib~\cite[INT03-C]{seacord:secure-c}.  For example, developers
-change their code by calling a library function $\cc{addsl}(x, y)$
-for addition of two signed long integers $x$ and $y$.  The library
-then performs sanity checks at run time, and invokes a preset error
-handler if an integer error happens.
-
-SafeInt~\cite{safeint} is a C++ template class widely used in Microsoft
-products and Mozilla Firefox.  It eases the adoption and allows to write
-the intuitive expression $x + y$ via operator overloading in C++;
-developers need to declare $x$ and $y$ as the \cc{SafeInt<long>}
-type.
-
-The underlying integer library is trusted to be implemented correctly.
-Unfortunately, integer errors have recently been discovered in both
-IntegerLib and SafeInt~\cite{ioc}.  Developers who adopt these
-integer libraries should be aware any such issues.
-%Below is IntegerLib's \cc{addsl} implementation.
-%
-%\input{code/addsl}
-%We believe that there are two issues in the above code.
-%
-%First, \cc{sizeof(int)} should be \cc{sizeof(signed long)}, otherwise
-%the code would trigger false alarms on a 64-bit system.  Second,
-%the code relies on undefined behavior, i.e., signed overflow of
-%\cc{lhs+rhs}, to defend against overflow.  A compiler may rewrite
-%the code in unexpected ways.
-
-
-\subsection{Language Design}
-
-Developers would benefit from language support for specifying precise
-lower and upper bounds of variables.  For example, Ada allows to
-define a ranged subtype, e.g., integers from 0 to 9.  The runtime
-will raise an exception for any attempt to storing an out-of-range
-value to variables of that subtype, and developers are responsible
-for handling the exception.  There is a similar proposal that adds
-ranged integers to the C language~\cite{ranged-c}.
-
-Another option is to use infinitely ranged integers, aka bignum,
-if the code is not performance critical.  Scripting languages such
-as Python and Ruby have built-in bignum support.  Using bignum is
-generally more immune to integer errors since it does not wrap,
-although the underlying bignum implementation, often written in C,
-may contain vulnerabilities.  CVE-2011-0188 is a recent example in
-Ruby's bignum, where an improper truncation may cause a buffer
-overflow.
-%shown as below.
-%\input{code/ruby}
-
-We suspect that removing unsigned types from the language would
-not help reduce the risk of integer errors.  For example, Java
-supports only signed integers.  However, its binary search
-implementation contained an integer bug, which was not fixed until
-JDK~6~\cite{java-bsearch}.  The buggy code calculates the midpoint
-using $(\cc{low} + \cc{high})/2$, which will become negative for
-large $\cc{low}$ and $\cc{high}$.  A correct version is $\cc{low}
-+ (\cc{high}-\cc{low})/2$.  In the C language one may simply declare
-$\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
