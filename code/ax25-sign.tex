@@ -5,7 +5,7 @@
 \PY{p}{\PYZob{}}
     \PY{k+kt}{char} \PY{n}{devname}\PY{p}{[}\PY{n}{IFNAMSIZ}\PY{p}{]}\PY{p}{;}
     \PY{p}{.}\PY{p}{.}\PY{p}{.}
-    \PY{c+cm}{/* assume optlen = 0xffffffff */}
+    \PY{c+cm}{/* consider optlen = 0xffffffff */}
     \PY{c+cm}{/* optlen is treated as unsigned: $2^{32}-1$ */}
     \PY{k}{if} \PY{p}{(}\PY{n}{optlen} \PY{o}{<} \PY{k}{sizeof}\PY{p}{(}\PY{k+kt}{int}\PY{p}{)}\PY{p}{)}
         \PY{k}{return} \PY{o}{-}\PY{n}{EINVAL}\PY{p}{;}

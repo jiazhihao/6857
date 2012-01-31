@@ -7,42 +7,51 @@ The evaluation tries to answer the following questions.
 Is \sys effective in discovering integer errors in practice?
 \item
 How complete are \sys's reports?
+\item
+How long does it take to analyze a large system such
+as the Linux kernel?
 \end{itemize}
 
-All the experiments are conducted on a 64-bit Ubuntu Linux machine
+All the experiments were conducted on a 64-bit Ubuntu Linux machine
 equipped with Intel 3.2~G HZ CPU and 24~GB memory.
 
-\subsection{Case Study: Linux}
+\subsection{New Bugs}
 \label{s:eval:linux}
 
-We periodically run \sys against the source code of the mainline
-Linux kernel and submit patches to the kernel developers.  \sys has
-discovered more than 50 integer errors in a wide range of kernel
-subsystems, including the core kernel, drivers, file systems, and
-network protocols.
+We applied \sys to the source code of the latest Linux kernel,
+as well as two popular user-space applications, lighttpd and OpenSSH,
+and submitted patches to the developers according to \sys's reports.
+The developers confirmed and fixed more than 50 integer errors in
+the Linux kernel, 1 in lighttpd, and 4 in OpenSSH.
+%
+The results show that \sys is effective in finding new integer
+errors, and the developers are willing to fix them.
 
-\autoref{f:data:linux} summarizes our experience.  Each line
-represents a patchset that fixes one or more integer errors; the
+We use the Linux kernel for a case study.  \autoref{f:data:linux}
+summarizes integer errors \sys discovered in its source code.
+Each line represents a patch that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
-organize the patchsets based on the source directories.  Most
+organize the patches based on the source directories.  Most
 columns are self-explanatory.  ``Description'' shows the attack
 vector and what values are infected.  ``\# of prev. fixes'' shows
 the number of previous commits that tried to fix the same error but
-didn't do it correctly.  ``Patch accepted?'' shows how the kernel
-developers respond to our patches, in one of the following cases.
+did it incorrectly.  ``Patch accepted?'' shows how the kernel
+developers respond to our patches:
 \begin{itemize}
 \item
 \ok: the kernel developers accepted the patch;
 ``modified'' means that they modified our patch for inclusion.
 \item
 acked: the kernel developers acknowledged the patch, but they
-did not apply it for unknown reason.
+did not apply it for unknown reasons.
 \item
 fixed: the bug was already fixed in some repository other than the
-mainline when \sys discovered it, so we withdraw our patch.
+mainline when \sys discovered it, so we withdrew our patch.
 \end{itemize}
 We omit patches that did not receive any further response.
-\xw{say \sys is effective}
+The kernel developers also incorrectly modified three of the patches
+we submitted; they withdrew these modifications after discussion on the
+mailing list.
 
 \begin{figure*}
 \centering
@@ -51,7 +60,7 @@ We omit patches that did not receive any further response.
 \caption{Integer errors discovered by \sys in the latest Linux
 kernel source trees.  Each line is a patchset that tries to fix one
 or more bugs (the number is in the ``Error'' column if more than
-one).  For each patchset, we list the corresponding component, the
+one).  For each patch, we list the corresponding subsystem, the
 error operation with the number of bugs, the security impact, a
 description of the attack vector and affected values, the number
 of previous commits that did not to fix the same problem correctly,
@@ -59,77 +68,96 @@ and how the kernel developers respond to the patchset.}
 \label{f:data:linux}
 \end{figure*}
 
+\subsubsection{Distribution}
+
+The integer errors \sys found span a wide range of kernel subsystems,
+including the core kernel, drivers, file systems, and network protocols.
+The core kernel has fewer integer errors, since it does not
+interact with the outside as frequently as the rest of the kernel.
+
+Multiplication appears to be the most error-prone operation, which
+is often used for calculating allocation size such as $\cc{count}
+\times \cc{sizeof}(...)$, especially if \cc{count} can be controlled
+by an adversary.
+
+Surprisingly,  a simple tautological comparison $<_u 0$,
+comparing an unsigned integer with 0 (usually for error handling),
+affected several subsystems.
+One driver (wl128x) contains 36 such bugs alone, effectively
+disabling almost its entire error handling paths.
+
 \subsubsection{Impact}
 
-Error-handling related bugs would make the kernel behave in
-unanticipated ways, though they are hard to be exploited from the
-outside.  Most of these bugs are a simple tautological comparison.
-One driver (wl128x) contains 36 such bugs alone, effectively disabling
-almost its entire error handling mechanism.
-
-An interesting non-trivial bug is due to specification misread in
-CAN, where \sys detects a tautological comparison:
-\begin{align*}
-((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
-\end{align*}
-The intent of the code is to test whether the error counter has
-reached certain level but did it in a wrong way.  However, this
-comparison will never be true because the left-hand side is at most
-127.  The fix is to read the right bit according to the specification,
-via $\cc{errc}\ \&\ \cc{0x80}$.
-
-Timing issues, as mostly seen in network protocols, would confuse
-user-space applications with a wrong timeout.
-
-The vulnerabilities that allow out-out-bounds writes (i.e., buffer
+The integer errors that allow out-of-bounds writes (i.e., buffer
 overflow) would break the integrity of the kernel and potentially
 allow privilege escalation.  They can be exploited via local access,
 disk (malformed filesystem), and network.  We see a large portion
 of \cc{ioctl} since it is error-prone and biased by \sys's ranking
-heuristics.  We also have an interesting vulnerability in the sound
-subsystem; it can be exploited via plugging in a malicious USB audio
+heuristics.
+%
+There is also an interesting vulnerability in the sound subsystem;
+an adversary can exploit it by plugging in a malicious USB audio
 device that responds with bogus sampling rates, leading to kernel
 hang, DoS, and buffer overflow.
 
-Two cases (in xen and sctp, respectively) turn out to be non-exploitable.
-The kernel developers still apply our patches for clarification and
+Integer errors cause timing bugs in several network protocol
+implementations.  For example, a user-space application tries to
+set a large timeout value, but the value could overflow and end up
+with a small timeout.
+
+Error-handling related integer errors would make the kernel behave in
+unanticipated ways, though they are hard to exploit by an adversary.
+Most of these bugs are simple tautological comparisons.
+%
+Below is an interesting non-trivial case found in CAN.
+\begin{align*}
+((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
+\end{align*}
+The intent of the code is to test whether the error counter \cc{errc}
+has reached certain level.  However, this
+comparison will never be true because the left-hand side is at most
+127.  The fix is to read the right bit according to the specification,
+via $\cc{errc}\ \&\ \cc{0x80}$.
+
+Two cases (in xenbus and sctp) turned out to be not exploitable.
+The kernel developers still applied our patches for clarification and
 reliability improvement.
 
-\subsubsection{Bad Patches}
+\subsubsection{Bad Fixes}
 
-\sys discovers 7 integer errors that were previously known but fixed
-incorrectly, one of which was fixed three times, still ending up
-with buggy code.  Here we count the incorrect patches that were
-committed into the mainline repository, not to mention those
-bad patches proposed in the mailing list.
-%Actually the kernel developers challenged three of our submitted patches,
-%and proposed different solutions, all of which have been proven wrong
-%and withrawn.
-
-It is interesting that two cases were reported on the CVE list,
-which we expect to have been reviewed comprehensively by the
-community.  We describe them below.
+\sys discovered 7 integer errors that were previously known but
+fixed incorrectly.  One of them was fixed three times before our
+patch was accepted.
+The ``\# of prev. fixes'' column in \autoref{f:data:linux} counts
+the incorrect patches that were committed into the mainline repository;
+those only proposed on the mailing list are not included.
+%
+It is interesting that two bad patches were committed to fix
+vulnerabilities reported on the CVE list, which received extensive
+review.  We describe them below.
 
 \paragraph{CVE-2008-3526 (sctp).}
 Below is the fix that performs a sanity check on \cc{key_len} to
-avoid an integer overflow and possible heap overflow.
+avoid an integer overflow and possible heap overflow if
+\cc{key_len} is large.
 \input{code/sctp-bad}
-If \cc{key_len} can get large, this sanity check does not actually
-work.  Consider $\cc{key_len} = \cc{0xf0000000}$, i.e., $\cc{INT_MAX}
-+ 1$.  The left-hand side is then $-1$.  Notice that the right-hand
-side is unsigned, thus the comparison is unsigned, too, and the
-left-hand side value $-1$ is treated as $2^{32} - 1$, which bypasses
-the check.
+This sanity check in fact does not work.  Consider $\cc{key_len} =
+\cc{0xffffffff}$ (i.e., \cc{UINT_MAX}).
+The result of the left-hand side of the check is then \cc{0x80000000}.
+Since \cc{key_len} is unsigned,  the left-hand side result
+is also treated as unsigned, $2^{31}$, which bypasses the check.
 
-Fortunately, after discussing with the kernel developers, we come
-to a conclusion that \cc{key_len} cannot become that large with
-input either from user space or network.  This CVE-2008-3526 is not
-exploitable, and the previous commit is unnecessary.  Our patch is
+After discussion with the kernel developers, we came to the conclusion
+that \cc{key_len} could not become that large with input from either
+user space or network by an adversary.  CVE-2008-3526 is not
+exploitable, and the previous commit is unnecessary.  Our patch was
 applied to clarify the case.
 
 \paragraph{CVE-2009-4307 (ext4).}
-Below is the fix to avoid a division-by-zero DoS via a crafted
-\cc{s_log_groups_per_flex} value from disk.
+Below is the fix that performs a sanity check
+on the \cc{s_log_groups_per_flex} value, which is read from disk,
+to prevent a division-by-zero DoS attack when the value is large
+and the result of the shift becomes zero.
 \input{code/ext4-bad}
 The sanity check $(\cc{groups_per_flex} < 2)$ relies on undefined
 behavior, an oversized shift.  This would lead to two potential
@@ -137,68 +165,52 @@ issues.
 
 First, when \cc{s_log_groups_per_flex} is set to a corrupted value
 like 36, $\cc{groups_per_flex} = 1 \shl 36$ is essentially $1 \shl
-4 = 16$ on x86, rather than 0.  This will bypass the check, leaving
-the two values \cc{s_log_groups_per_flex} and \cc{groups_per_flex}
-inconsistent.
+4 = 16$ on x86.  This will bypass the check, leaving
+the two values \cc{s_log_groups_per_flex}~(36) and
+\cc{groups_per_flex}~(16) inconsistent.
 
 Second, the C compiler may rewrite undefined code in unexpected
 ways.  Consider the following equivalent sanity check (which was
 in the originally proposed patch), assuming \cc{groups_per_flex}
 is an unsigned integer.
 \input{code/ext4-badeqv}
-We compile the code using both Clang~3.0 and GCC~4.6, with optimization
-option \cc{-O2}.  Clang completely optimizes away the check
-$\cc{groups_per_flex} == 0$, since it considers the case impossible
-according to the C standard.  This would make the patched code as
-vulnerable as the original.  GCC~4.6 still keeps the check, but
+We compiled the code using both Clang~3.0 and GCC~4.6, with optimization
+option \cc{-O2}.  Clang optimizes away the check
+$\cc{groups_per_flex} == 0$, since it considers the case impossible,
+following the C standard.  This would make the patched code as
+vulnerable as the original.  GCC~4.6 keeps the check, but
 there is no guarantee that future versions will do the same.
-
-\subsubsection{Performance}
-
-To measure the performance, we run \sys against the Linux kernel
-3.2 source code, on 12 CPU cores in parallel.  We set the timeout
-to 5 seconds for each constraint solving.   \sys analyzes 8637 files,
-10 of which timeouts, and makes 411,851 solving queries.  The
-analysis (excluding compilation) takes 22 minutes to finish.
-
-\subsection{Case Study: User-Space Applications}
-
-Currently \sys's annotations and ranking heuristics are tailored
-for the Linux kernel.
-%
-We only run \sys against two popular user-space applications,
-lighttpd and OpenSSH.  The developers have promptly fixed 5 integer
-errors reported by \sys: 1 in lighttpd and 4 in OpenSSH.  We omit
-the details here.  See \autoref{s:common} for a summary of
-common error patterns.
 
 \subsection{Completeness Validation}
 
-We have collected 36 integer errors in the Linux kernel from the
+We collected 36 known integer errors in the Linux kernel from the
 CVE list~\cite{cve} in recent three years as a benchmark to evaluate
 \sys's completeness, as shown in \autoref{f:data:cve}.  They provide
-a fairly comprehensive coverage of the whole source tree.  For each
-case, we run \sys against both the original and the patched code
-snippets.  Ideally \sys should catch the bugs in the original code,
-while declare that the bug is fixed in the patched code.
+a comprehensive coverage of the whole source tree.
+%For each
+%case, we run \sys against both the original and the patched code
+%snippets.
+%Ideally \sys should catch the bugs in the original code,
+%and declare that the bug is fixed in the patched code.
+%
+\sys is able to find 34 (94\%) of the 36 integer errors.
+This shows that \sys's reports is fairly complete.
 
 \begin{figure*}
 \centering
 \footnotesize
 \input{data/cve}
 \caption{The result of applying \sys to integer errors in Linux
-kernel from the CVE list.  Each test case consists of two parts:
-the original and the patched code snippets.  We list the corresponding
-component, the error operations, whether \sys catches the expected
-bugs in the original code, and does not report the bug in the patched
-code.}
+kernel from the CVE list.  We list the corresponding
+subsystem, the error operations, whether \sys catches the expected
+bugs in the original code, and whether \sys determines that the bug
+is fixed in the patched code.}
 \label{f:data:cve}
 \end{figure*}
 
-\subsubsection{Missed Bugs}
+\subsubsection{Missed Bugs in Original Code}
 
-\sys is able to find 34 (94\%) out of the 36 integer errors, while
-misses only two cases.  We detail them below.
+\sys misses the following two cases.
 
 \paragraph{CVE-2009-4307 (ext4).}
 This bug is due to a possible division by zero that is caused by
@@ -212,43 +224,56 @@ This bug is due to an addition overflow that happens in an accumulation
 loop.  \sys cannot catch the bug since it unrolls the loop only
 once.
 
-\subsubsection{False and New Bugs}
+\subsubsection{False and New Bugs in Patched Code}
 
-When running against the patched code, \sys declares no bug in 29
-cases, timeouts in 1 case, and still reports errors in 6 cases.
-We analyze them below.
+We additional tested \sys on the patched code of these cases
+and expected that ideally \sys would not report any errors.
+The result is also shown in \autoref{f:data:cve}.
+\sys declares no bug in 29 of the 36 cases, timeouts in 1 case, and
+reports errors in 6 cases.
+%
+In these 6 cases,
+the patched code of CVE-2010-3873 (x25)
+contains additional integer errors that are covered by CVE-2010-4164,
+which \sys correctly identified;
+four cases contain either new errors or bad fixes,
+as we have shown in \autoref{s:eval:linux}.
+There is one false error in CVE-2011-4097 (oom), as detailed below.
 
-There is one false error in CVE-2011-4097 (oom).  Below is the code
-snippet.  It is used when the kernel is running out of memory, to
-compute a score for a process $p$ based on its memory consumption.
-If $p$ gets a higher score, it is more likely to be killed by the
-kernel in order to free more memory.
 \input{code/oom}
-The computation is basically to sum up the different numbers of
-memory pages $p$ takes, and divide the result by the total number
-of pages to get the ratio, which is scaled by 1000.  The patch
-changes the type of \cc{points} from \cc{int} to \cc{from} because
-\cc{points} could be large on 64-bit systems and multiplying it by
-1000 could overflow.  This results in a process one that consumes
-a lot of memory getting a low score; an innocent process would be
-killed instead.
+The code snippet
+computes a score proportional to process $p$'s memory consumption.
+It sums up different numbers of
+memory pages $p$ takes, divide the result by the total number
+of pages to get a ratio, and scale it by 1000.
+When the whole system is running out of memory,
+the kernel kills the process with the highest score
+to free more memory.
+
+The patch changes the type of \cc{points} from \cc{int} to \cc{long} because
+\cc{points} could be large on 64-bit systems; multiplying it by
+1000 could overflow and produce an incorrect score,
+causing an innocent process being killed.
 
 There is an implicit rule that the sum of these numbers of pages
 (e.g., from \cc{get_mm_rss}) is at most \cc{totalpages}, so the
 additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
-In the remaining five cases, the patched code of CVE-2010-3873 (x25)
-contains additional integer errors that are covered by CVE-2010-4164.
-The other four contain either new errors or wrong patches revealed
-by \sys, as we have shown in \autoref{s:eval:linux}.
+\subsection{Performance}
+\label{s:eval:perf}
 
-\subsection{Microbenchmark}
-\label{s:eval:micro}
+To measure the performance, we ran \sys against the Linux kernel
+3.2 source code, on a testing machine with 12 CPU cores.  We set the timeout
+to 5 seconds for each constraint solving query.   \sys analyzed
+8637 files, 10 of which timeouts, and made 411,851 solving queries.
+The predicate generation and constraint solving (excluding compilation)
+cost 22 minutes.  This shows that \sys can finish analyzing a large
+system within a reasonable amount of time.
 
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
-idioms for better performance.  Here we measure the solving time
-of three forms: division, multiplication, and overflow detection
+idioms for better performance.  We measured the solving time of three
+equivalent forms: division, multiplication, and overflow detection
 circuit, for both 32- and 64-integers, respectively.  The result
 is shown in \autoref{f:udiv}.  Each test is repeated 1000 times.
 For a single unsigned division operation this optimization can
@@ -257,9 +282,9 @@ achieve up to 2.5$\times$ speedup.
 \begin{figure}
 \centering
 \input{data/udiv}
-\caption{Solving time of $\uintmax(n) /_u x > y$ and two variant
-forms: $2n$-bit multiplication and the multiplication overflow
-detection circuit, measured in milliseconds, for both 32- and 64-bit
+\caption{Solving time of three unsigned multiplication checking forms:
+division, $2n$-bit multiplication, and the specialized overflow
+detection predicate, measured in milliseconds, for both 32- and 64-bit
 integers.}
 \label{f:udiv}
 \end{figure}

@@ -4,7 +4,7 @@ static int ax25_setsockopt(...,
 {
 	char devname[IFNAMSIZ];
 	...
-	/* assume optlen = 0xffffffff */
+	/* consider optlen = 0xffffffff */
 	/* optlen is treated as unsigned: $2^{32}-1$ */
 	if (optlen < sizeof(int))
 		return -EINVAL;

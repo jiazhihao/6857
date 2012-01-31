@@ -132,33 +132,29 @@ in further expressions.
 \item
 For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
 shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
-amount for 32-bit shifts, e.g., $1 \shl 32 = 1$.  This semantics
+amount for 32-bit shifts, e.g., $1 \shl 32 = 1 \shl 0 = 1$.  This semantics
 is also the behavior of ARM and MIPS processors.
 \end{itemize}
 \sys may miss integer errors that are not modeled by the above
 semantics.  Consider the expression $x / (1 \shl y)$, where $x$ and
 $y$ are unconstrained 32-bit integers.  \sys will be able to detect
-the oversized shift via error constraint $y \geq_u 32$.  However,
-it will miss the division-by-zero error, which is possible on PowerPC
-but not on x86.
+the oversized shift, but not the division by zero, since
+with \sys's default semantics $1 \shl y$ cannot be zero.
 
 \subsection{White Listing Idioms}
 \label{s:sema:whitelist}
 
-It is common in practice to use an overflowed result to perform
-an integer error check for $x +_u y$, where both $x$ and $y$ are
-$n$-bit unsigned integers, as follows:
+Developers often use overflowed results to defend against integer
+overflows.  \sys recognizes such idioms and avoid reporting them
+as integer errors, as listed in \autoref{f:whitelist}.  For example,
+given two $n$-bit unsigned integers $x$ and $y$, a popular overflow
+checking idiom is as follows:
 \begin{equation*}
 x +_u y <_u x.
 \end{equation*}
 This idiom is useful when the sum is needed later in the code.
-\sys recognizes such idioms listed in \autoref{f:whitelist} and
-does not consider them as integer errors.
-
-An equivalent non-overflow form of each overflowed check idiom is
-also shown for comparison.  Let $\uintmax(n)$ denote the largest
-$n$-bit unsigned integer, i.e., $2^n - 1$.  Below is a non-overflow
-version of addition overflow check:
+Let $\uintmax(n)$ denote the largest $n$-bit unsigned integer (i.e.,
+$2^n - 1$).  Below is an equivalent non-overflow form.
 \begin{equation*}
 \uintmax(n) -_u x >_u y.
 \end{equation*}

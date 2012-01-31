@@ -28,17 +28,20 @@ the predicates to a solver for satisfiability testing.}
 \label{s:gen:err}
 
 %From the definition in \autoref{s:sema:sec},
-\sys derives an error predicate for each integer operation.
-It is the negation of the corresponding security requirement,
+To find integer errors, \sys needs to detect integer operations
+that violate the corresponding security requirements.
+To do so, for each integer operation \sys derives
+the negation of its security requirement, namely error predicate,
 satisfying which implies an error.
 
 \paragraph{Arithmetic operations.}
-Take multiplication for an example.  Given two $n$-bit unsigned integers
-$x$ and $y$, the security requirement is that their product cannot overflow.
-There are several possible error predicates \sys could generate.
+Take multiplication for an example.  Given two $n$-bit unsigned
+integers $x$ and $y$, the security requirement is that their product
+cannot overflow $\uintmax(n)$.  There are several possible error
+predicates \sys could generate.
 A \naive form is:
 \begin{equation*}
-x \neq 0 \land \uintmax(n) /_u / x > y.
+x \neq 0 \land \uintmax(n) /_u x > y.
 \end{equation*}
 Another possible predicate is to use a $2n$-bit
 multiplier~\cite{molnar:catchconv}: extend $x$ and $y$ to $2n$ bits
@@ -48,13 +51,13 @@ product is 1.  This is conceptually equivalent to:
 x_{2n} \times y_{2n} > \uintmax(n).
 \end{equation*}
 Both forms would hurt the solver's performance noticeably
-(see \autoref{s:eval:micro} for a performance comparison).
+(see \autoref{s:eval:perf} for a performance comparison).
 %
 \sys reuses a specialized multiplication overflow detection predicate
 from the Boolector constraint
 solver~\cite[\chapterautorefname~3.5]{brummayer:phd}, which can be
-solved far more efficiently The detail implementation of the predicate
-is beyond the scope of this paper.
+solved far more efficiently.  The detailed implementation of the
+predicate is beyond the scope of this paper.
 
 \paragraph{Shift.}
 The error predicate \sys generates for a $n$-bit shift operation
@@ -275,7 +278,7 @@ opportunity.
 
 In practice we find out that this memory model works well for \sys.
 It does not require sophisticated analysis across the whole kernel
-and achieves good performance.  See \xw{eval}.
+and achieves good performance (see \autoref{s:eval:perf}).
 
 \if 0
 \begin{figure}
@@ -324,7 +327,7 @@ constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
 with the multiplication overflow detection predicate, as described
 in \autoref{s:gen:err}.
 %
-\autoref{s:eval:micro} will show a microbenchmark of the three
+\autoref{s:eval:perf} will show a microbenchmark of the three
 operations.
 
 \subsection{Limitations}
