@@ -49,8 +49,16 @@ than or equal to that to bypass the check $\cc{maxnum} \times_u 16
 possible in a user-space application, but unlikely to succeed in
 the Linux kernel with \cc{kmalloc}, which imposes a relatively small
 limit~\cite[\chapterautorefname~8]{ldd3}.
-Nevertheless, developers should avoid using the dangerous form for
-better reliability.
+Nevertheless, developers should avoid using the dangerous overflow
+checking form for better reliability.
+
+Another broken multiplication overflow checking form is $x_{32}
+\times y_{32} <_u z_{64}$, where $x, y$ are 32-bit integers and $z$
+is a 64-bit bound.  The intention is to perform the comparison as
+64-bit integers to avoid overflow.  However, the multiplication on
+the left-hand side would overflow 32-bit integers \emph{before}
+being extended to 64~bits.  The fix is to convert $x$ and $y$ to
+64-bit integers before the multiplication.
 
 Using an unsigned integer for return value checking is often a mistake,
 since in practice negative return values are used for error status.
