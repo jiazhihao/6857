@@ -55,7 +55,18 @@ given.  Clang can detect one without any special options.}
 \subsection{Replacing Allocation Calls}
 
 Integer errors that affect allocation size are particularly dangerous,
-as discussed in \autoref{s:rank}.  The grsecurity patch~\cite{grsecurity}
+as discussed in \autoref{s:rank}.
+We plan to develop a tool to prevent integer errors
+in such cases at run time.
+The idea is to extend the C compiler
+to insert checks for integer operations that calculate allocation sizes.
+If any of the checks fails at run time,
+the inserted code forces the corresponding allocation call to return
+\cc{NULL}, which we assume is handled by existing code
+as out of memory.
+
+\if 0
+The grsecurity patch~\cite{grsecurity}
 for the Linux kernel addresses the issue by replacing
 \cc{kmalloc} with a macro of the same name.
 %
@@ -73,3 +84,4 @@ However, the trick does not work if the call is written in forms
 like \cc{kmalloc(header_size + count * size)}, or the allocation
 size is already computed before being passed to \cc{kmalloc}, such
 as in \autoref{f:bridge}.
+\fi
