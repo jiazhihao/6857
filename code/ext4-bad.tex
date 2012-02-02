@@ -2,6 +2,7 @@
     \PY{n}{sbi}\PY{o}{-}\PY{o}{>}\PY{n}{s\PYZus{}log\PYZus{}groups\PYZus{}per\PYZus{}flex} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;} \PY{c+cm}{/* from disk */}
     \PY{n}{groups\PYZus{}per\PYZus{}flex} \PY{o}{=} \PY{l+m+mi}{1} \PY{o}{<}\PY{o}{<} \PY{n}{sbi}\PY{o}{-}\PY{o}{>}\PY{n}{s\PYZus{}log\PYZus{}groups\PYZus{}per\PYZus{}flex}\PY{p}{;}
 
+    \PY{c+cm}{/* patched check */}
     \PY{k}{if} \PY{p}{(}\PY{n}{groups\PYZus{}per\PYZus{}flex} \PY{o}{<} \PY{l+m+mi}{2}\PY{p}{)} \PY{p}{\PYZob{}}
         \PY{n}{sbi}\PY{o}{-}\PY{o}{>}\PY{n}{s\PYZus{}log\PYZus{}groups\PYZus{}per\PYZus{}flex} \PY{o}{=} \PY{l+m+mi}{0}\PY{p}{;}
         \PY{k}{return} \PY{l+m+mi}{1}\PY{p}{;}

@@ -63,9 +63,9 @@ source code for integer errors.
 The key challenge facing \sys is knowing what are actual integer
 errors.  For example, one could classify any signed-to-unsigned
 integer conversion from a possibly negative value as an
-error~\cite{brumley:rich, moy:prefix, seacord:secure-c}.  However,
+error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}.  However,
 such sign conversions are so widely used in C code that doing so
-would cause a flood of false errors~\cite{moy:prefix}.  Developers
+would cause a flood of false errors~\cite{moy:z3prefix}.  Developers
 even count on integer overflows such as $x + y < x$ for the correctness
 of their programs.  \sys needs an integer semantics that recognizes
 commonly used code patterns while still effectively catches integer

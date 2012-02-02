@@ -62,7 +62,7 @@ being extended to 64~bits.  The fix is to convert $x$ and $y$ to
 
 Using an unsigned integer for return value checking is often a mistake,
 since in practice negative return values are used for error status.
-The obviously wrong check $(\cc{uint} < 0)$ occured in several
+The obviously wrong check $(\cc{uint} < 0)$ occurred in several
 drivers and even in the core kernel.  A trickier form is $(\cc{uchar}
 < 0)$, where the left-hand side is zero-extended so that it can
 never be negative.  In most cases the fix is to use the signed type

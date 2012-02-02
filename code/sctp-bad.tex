@@ -1,5 +1,6 @@
 \begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
-\PY{c+c1}{// \PYZus{}\PYZus{}u32 key\PYZus{}len}
+\PY{c+cm}{/* function parameter: \PYZus{}\PYZus{}u32 key\PYZus{}len */}
+\PY{c+cm}{/* patched check */}
 \PY{k}{if} \PY{p}{(}\PY{n}{INT\PYZus{}MAX} \PY{o}{-} \PY{n}{key\PYZus{}len} \PY{o}{<} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{sctp\PYZus{}auth\PYZus{}bytes}\PY{p}{)}\PY{p}{)}
     \PY{k}{return} \PY{n+nb}{NULL}\PY{p}{;}
 \PY{n}{key} \PY{o}{=} \PY{n}{kmalloc}\PY{p}{(}\PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{sctp\PYZus{}auth\PYZus{}bytes}\PY{p}{)}

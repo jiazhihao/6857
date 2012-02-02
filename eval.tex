@@ -4,11 +4,13 @@
 The evaluation tries to answer the following questions.
 \begin{itemize}
 \item
-Is \sys effective in discovering integer errors in practice?
+Is \sys effective in discovering new integer errors in practice?
 \item
 How complete are \sys's reports?
 \item
-How long does it take to analyze a large system such
+How many false errors are in \sys's reports?
+\item
+How long does it take \sys to analyze a large system such
 as the Linux kernel?
 \end{itemize}
 
@@ -39,18 +41,16 @@ did it incorrectly.  ``Patch accepted?'' shows how the kernel
 developers respond to our patches:
 \begin{itemize}
 \item
-\ok: the kernel developers accepted the patch;
-``modified'' means that they modified our patch for inclusion.
-\item
-acked: the kernel developers acknowledged the patch, but they
-did not apply it for unknown reasons.
+\ok: the kernel developers accepted the patch.
+The optional ``modified'' means that they modified our patch for inclusion;
+otherwise they applied our patch without modifications.
 \item
 fixed: the bug was already fixed in some repository other than the
 mainline when \sys discovered it, so we withdrew our patch.
 \end{itemize}
 We omit patches that did not receive any further response.
 The kernel developers also incorrectly modified three of the patches
-we submitted; they withdrew these modifications after discussion on the
+we proposed; they withdrew these modifications after discussion on the
 mailing list.
 
 \begin{figure*}
@@ -115,8 +115,9 @@ Below is an interesting non-trivial case found in CAN.
 \end{align*}
 The intent of the code is to test whether the error counter \cc{errc}
 has reached certain level.  However, this
-comparison will never be true because the left-hand side is at most
-127.  The fix is to read the right bit according to the specification,
+comparison will never be true because the left-hand side of the test,
+which extracts 7 bits, is at most
+$2^7 - 1 = 127$.  The fix is to read the right bit according to the specification,
 via $\cc{errc}\ \&\ \cc{0x80}$.
 
 Two cases (in xenbus and sctp) turned out to be not exploitable.
@@ -124,13 +125,17 @@ The kernel developers still applied our patches for clarification and
 reliability improvement.
 
 \subsubsection{Bad Fixes}
+\label{s:eval:bad}
 
 \sys discovered 7 integer errors that were previously known but
-fixed incorrectly.  One of them was fixed three times before our
-patch was accepted.
+fixed incorrectly.
 The ``\# of prev. fixes'' column in \autoref{f:data:linux} counts
 the incorrect patches that were committed into the mainline repository;
 those only proposed on the mailing list are not included.
+
+
+\xw{show one case. drm?}
+
 %
 It is interesting that two bad patches were committed to fix
 vulnerabilities reported on the CVE list, which received extensive
@@ -182,9 +187,11 @@ vulnerable as the original.  GCC~4.6 keeps the check, but
 there is no guarantee that future versions will do the same.
 
 \subsection{Completeness Validation}
+\label{s:eval:complete}
 
 We collected 36 known integer errors in the Linux kernel from the
-CVE list~\cite{cve} in recent three years as a benchmark to evaluate
+CVE list~\cite{cve} in recent three years (excluding those found
+by \sys for fairness) as a benchmark to evaluate
 \sys's completeness, as shown in \autoref{f:data:cve}.  They provide
 a comprehensive coverage of the whole source tree.
 %For each
@@ -208,8 +215,6 @@ is fixed in the patched code.}
 \label{f:data:cve}
 \end{figure*}
 
-\subsubsection{Missed Bugs in Original Code}
-
 \sys misses the following two cases.
 
 \paragraph{CVE-2009-4307 (ext4).}
@@ -224,9 +229,11 @@ This bug is due to an addition overflow that happens in an accumulation
 loop.  \sys cannot catch the bug since it unrolls the loop only
 once.
 
-\subsubsection{False and New Bugs in Patched Code}
+\subsection{False Errors}
 
-We additional tested \sys on the patched code of these cases
+To evaluate how many false errors are in \sys's reports,
+We first tested \sys on the patched code of these CVE cases
+in \autoref{s:eval:complete},
 and expected that ideally \sys would not report any errors.
 The result is also shown in \autoref{f:data:cve}.
 \sys declares no bug in 29 of the 36 cases, timeouts in 1 case, and
@@ -260,13 +267,17 @@ There is an implicit rule that the sum of these numbers of pages
 additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
+\hc{describe experience on the whole kernel, e.g.,
+how many hours spent on find the first bugs?  how many warnings
+inspected?}
+
 \subsection{Performance}
 \label{s:eval:perf}
 
 To measure the performance, we ran \sys against the Linux kernel
-3.2 source code, on a testing machine with 12 CPU cores.  We set the timeout
+3.2 source code, with 12 CPU cores.  We set the timeout
 to 5 seconds for each constraint solving query.   \sys analyzed
-8637 files, 10 of which timeouts, and made 411,851 solving queries.
+8637 files, 10 of which timed out, and made 411,851 solving queries.
 The predicate generation and constraint solving (excluding compilation)
 cost 22 minutes.  This shows that \sys can finish analyzing a large
 system within a reasonable amount of time.
