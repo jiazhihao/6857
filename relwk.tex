@@ -3,47 +3,88 @@
 
 This section relates \sys to existing work.
 
-\paragraph{Semantics.}
-\sys's integer semantics differs from that used in previous integer
-error detection tools in the following ways.
+\paragraph{Detecting integer errors via constraint solving.}
 
-First, it formalizes error constraints in a pragmatic way: rather
-than imposing constraints on every conversion~\cite{brumley:rich,
-moy:prefix, seacord:secure-c}, it catches tautological comparisons
-and negative counts instead.  Otherwise, the output would be flooded
-by noisy, innocuous conversion warnings~\cite{moy:prefix}.
+Several integer error detection tools use constraint solving
+techniques.  The closest work is a static analysis tool inside
+Microsoft that detects integer overflows in C/C++ code~\cite{moy:z3prefix}.
+This tool imposes stricter restrictions than \sys.
+Consider the conversions below.
+\begin{Verbatim}
+	unsigned int a = -1;
+	int b = a;
+\end{Verbatim}
+The Microsoft tool will issue a warning at the first line,
+since based on $a$'s type it assumes $a \geq 0$, which is not satisfied;
+it will also issue a warning at the second line,
+since $a$'s value $2^{32} - 1$ is not in the range of 32-bit signed integers
+(at most $2^{31} - 1$).
+The authors of the tool reported that these benign operations caused
+most false warnings when applying the tool to some Microsoft code
+base~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
+One could discard all such warnings, at the price of
+missing real bugs.
+\sys uses a more pragmatic integer semantics;
+for the above two conversions it warns only if $a, b$ are used in
+tautological comparisons or negative counts (see \autoref{s:sema:sec}).
+\sys also additionally catches oversized shifts while the Microsoft tool does not.
 
-Second, as pointed out in \autoref{s:sema:eqv}, integer semantics
-is \emph{not} preserved by the compiler during optimizations.  While
-\sys is designed to avoid their destructive rewriting, tools that
-detect integer errors on instrumented binary at run time will suffer
-from this problem and not be able to extract correct
-constraints~\cite{molnar:catchconv, intscope}.
+The Microsoft tool is implemented using the PREfix
+engine~\cite{bush:prefix}.  It simulates execution along possible
+code paths within a function, until enumerating all paths or reaching
+the user-configured maximum number of paths.
+%
+\sys generates path predicates along the control flow
+to filter out infeasible code paths.
+Compared to PREfix, \sys's algorithm is simpler
+and tailored for integer error detection, for example, moving
+predicates out of loops~(see \autoref{s:gen:path}) and rewriting
+error-before-check patterns~(see \autoref{s:gen:opt}).
 
-The AIR model~\cite{air} provides a different approach of loosing
-integer constraints.  In their model, it is acceptable to delay
-catching integer semantic violations, as long as the program's
-behavior is the same as if all integers were infinitely ranged.
-However, developers may intentionally use overflow operations like
-$x + y < x$ to defend against integer errors; treating integers as
-infinitely ranged would observe a different behavior, which could
-be amended using \sys's white list shown in \autoref{s:sema:whitelist}.
+The Microsoft tool implements approximations for multiplication
+overflow checks, because the authors observed many timeouts in their
+constraint solver.  \sys does precise bit-level reasoning
+since we did not experience the issue.
 
-\paragraph{Analysis techniques.}
+%First, 
+%it formalizes error constraints in a pragmatic way: rather
+%than imposing constraints on every conversion~\cite{brumley:rich,
+%moy:z3prefix, seacord:secure-c}, it catches tautological comparisons
+%and negative counts instead.  Otherwise, the output would be flooded
+%by noisy, innocuous conversion warnings~\cite{moy:z3prefix}.
 
-Constraint solving has been proven to be effective for bug detection,
-as it offers precise bit-level reasoning of programs.  \sys, as
-well as previous tools such as PREfix~\cite{moy:prefix} and
-Saturn~\cite{xie:saturn}, benefits from this technique.  In addition,
-\sys proposes a set of optimizations tailored for integer error
-detection, as shown in \autoref{s:gen:opt}.
 
-A simple integer error detection approach is to extend the type
-system to distinguish trusted and untrusted integers, and then
+Symbolic model checking tools systematically explore code paths
+for integer errors by treating input as symbolic values and pruning
+infeasible paths via constraint solving.  Examples include
+KLEE~\cite{cadar:klee},
+LLBMC~\cite{llbmc},
+SmartFuzz~\cite{molnar:catchconv},
+and
+IntScope~\cite{intscope}.
+Applying these tools to the Linux kernel is challenging.  One would
+have to model hardware devices, otherwise the corresponding driver
+code will not load or function correctly.  The environment and
+constraints are so complex that one may also have to split
+individual modules for model checking~\cite{engler:vs}.  These
+changes require too much manual effort, especially given the
+large number of drivers and the rapid code changes in the Linux
+kernel.
+
+%Constraint solving has been proven to be effective for bug detection,
+%as it offers precise bit-level reasoning of programs.  \sys, as
+%well as previous tools such as PREfix~\cite{moy:z3prefix} and
+%Saturn~\cite{xie:saturn}, benefits from this technique.  In addition,
+%\sys proposes a set of optimizations tailored for integer error
+%detection, as shown in \autoref{s:gen:opt}.
+
+\paragraph{Other integer error detection techniques.}
+A simple static integer error detection approach is to extend the
+type system to distinguish trusted and untrusted integers, and then
 perform taint analysis to warn untrusted integers used in sensitive
-sinks~\cite{cqual, lclint}.  Since path conditions (e.g., sanity
-checks) are not tracked, such tools would report false errors on
-all correctly fixed code.
+sinks~\cite{cqual, lclint}.  Since this approach does not track
+path conditions (e.g., sanity checks), such tools would report false
+errors on all correctly fixed code.
 
 The range checker from Stanford's metacompiler~\cite{range-checker}
 eliminates cases where a user-controlled value is checked against
@@ -52,6 +93,13 @@ is used in a Microsoft's tool based on PREfast~\cite{prefast}.  This
 approach will miss integer errors due to incorrect bounds since
 they do not perform precise reasoning.
 
+GCC provides the option \cc{-ftrapv} to insert overflow checks for
+signed integer operations in the generated code; any violation in
+these overflow checks will cause a trap at run time.
+%
+Clang's \cc{-fcatch-undefined-behavior} option covers more undefined
+integer operations such as oversized shifts.
+%
 Dynamic integer error detection tools,
 including
 RICH~\cite{brumley:rich},
@@ -60,8 +108,7 @@ IOC~\cite{ioc},
 blip~\cite{blip},
 and
 IntPatch~\cite{intpatch},
-extend GCC's \cc{-ftrapv} to insert trap code during compilation for
-run time checking.
+extend the C compiler to insert checks for more integer operations.
 %
 An alternative approach is to instrument binary executable files,
 such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
@@ -69,77 +116,74 @@ such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
 The advantage of these tools is that they have a lower false error rate.
 Using them to find integer errors requires input that can trigger
 those bugs, and thus it is in general difficult to achieve a high
-coverage.
+coverage compared to symbolic model checking tools.
 
-Symbolic model checking tools systematically explore code paths by
-treating input as symbolic values and pruning infeasible paths via
-constraint solving.  Examples include
-KLEE~\cite{cadar:klee},
-LLBMC~\cite{llbmc},
-Catchconv~\cite{molnar:catchconv},
-and
-IntScope~\cite{intscope}.
-Applying these tools to the Linux kernel is challenging.  One would
-have to model hardware devices, otherwise the corresponding driver
-code will not load or function correctly.  The environment and
-constraints are so complex that one may also have to split
-individual modules for model checking~\cite{engler:vs}.  These
-preparations require too much manual effort, especially given the
-large number of drivers and the rapid code changes in the Linux
-kernel.
+As pointed out in \autoref{s:sema:eqv}, integer semantics
+is \emph{not} preserved by compiler optimizations.
+While \sys is designed to avoid destructive optimizations, tools that
+work on binary executable files, either symbolic or not,
+will suffer from this problem and be unable to extract
+precise integer security requirements.
 
-\paragraph{OS testing tools.}
-OS testing tools that target on finding bugs in particular kernel
-subsystems are a complement to \sys.
+\paragraph{Language support.}
 
-System call fuzzers such as Trinity~\cite{trinity} and
-iknowthis~\cite{iknowthis} perform stress testing to detect
-Linux kernel bugs that can be triggered via system calls.
+According to the C standard, signed integer overflows are undefined,
+which allows the C compiler to rewrite the code in arbitrary ways.
+GCC provides the option \cc{-fwrapv} to enforce the wrapping semantics
+for signed integers.  The Linux kernel is compiled with a slightly
+different option \cc{-fno-strict-overflow}, to prevent GCC from
+optimizing away checks with signed integers (e.g., $x + 1 < x$) and
+pointers (e.g., $p + \mathit{len} < p$).  These options reduce the
+risk of undesirable optimizations.
 
-FiSC~\cite{fisc:yang} and \textsc{eXplode}~\cite{explode:yang}
-explore file system code via model checking to detect bugs that can
-be triggered by malformed file systems.
-%
-Rubio-Gonz\'alez et al.~\cite{eio} have developed a static analysis
-tool that detects incorrect error code in file system implementations.
-
-Carburizer~\cite{kadav:tolerating} analyzes driver code to find
-potential bugs that can be triggered by misbehaved hardware devices.
-\sys trusts most hardware devices and filters out the corresponding
-integer errors, as we have explained in \autoref{s:rank}.  One could
-disable the filter in \sys to find such bugs for improving reliability
-of device code.
-
-\subsection{Alternative Integer Semantics}
-
-Wrapping is the default behavior in languages like Java.
-GCC provides the option \cc{-fwrapv} to enforce wrapping semantics
-for signed integers in C code.  The Linux kernel is compiled with a
-slightly different option \cc{-fno-strict-overflow}, to prevent GCC
-from optimizing away checks with signed integers (e.g., $x + 1 <
-x$) and pointers (e.g., $p + \mathit{len} < p$).
-These options reduce the risk of unwanted optimizations.
-
-A different strategy is trapping.  Ada raises an exception at run
-time for out-of-range values.  For C, GCC provides the option
-\cc{-ftrapv} to insert overflow checks for signed integer operations
-in the generated code; any violation will cause a trap at run time.
-This is extended by Clang via \cc{-fcatch-undefined-behavior} for
-more undefined integer operations such as oversized shifts, and by
-other compiler patches~\cite{brumley:rich, ioc} even for unsigned
-integer overflows.  They are useful for detecting integer errors
-at run time.
-
-The main concern of enabling trapping semantics for production code
-is that it introduces false alarms at run time, while there is no
+Developers may also compile their code with the \cc{-ftrapv} option
+using GCC, to enable traps for signed integer overflows at run time,
+and write a signal handler to deal with the trap.
+The main concern of enabling traps for production code
+is that it introduces false alarms at run time, and there is no
 convenient way for developers to provide fine-grained error handlers
 if such an alarm is raised.  It also incurs noticeable runtime
 overhead~\cite{ioc}, given the prevalence of integer operations.
 
-\subsection{Using an Integer Library}
+The AIR model~\cite{air} provides a different approach of loosing
+integer constraints.  In the AIR model, it is acceptable to delay
+catching integer semantic violations and raising traps, as long as the program's
+behavior is the same as if all integers were infinitely ranged.
+Developers, however, may intentionally use overflow operations like
+$x + y < x$ to defend against integer errors; treating integers as
+infinitely ranged would result in a different behavior.
 
-Another approach to secure the code is to enforce the use of an integer
-library with error checks, such as CERT's
+Developers would benefit from language support for specifying precise
+lower and upper bounds of variables.  For example, Ada allows to
+define a ranged subtype (e.g., integers from 0 to 9).  The runtime
+will raise an exception for any attempt to storing an out-of-range
+value to variables of that subtype, and developers are responsible
+for handling the exception.  There is a similar proposal that adds
+ranged integers to the C language~\cite{ranged-c}.
+
+Another option is to use infinitely ranged integers (i.e., bignum),
+if the code is not performance critical.  Scripting languages such
+as Python and Ruby have built-in bignum support.  Using bignum is
+generally more immune to integer errors since it does not wrap,
+although the underlying bignum implementation, often written in C,
+may contain integer vulnerabilities (e.g., CVE-2011-0188,
+in Ruby's bignum implementation).
+%shown as below.
+%\input{code/ruby}
+
+%We suspect that removing unsigned types from the language would
+%not help reduce the risk of integer errors.  For example, Java
+%supports only signed integers.  However, its binary search
+%implementation contained an integer bug, which was not fixed until
+%JDK~6~\cite{java-bsearch}.  The buggy code calculates the midpoint
+%using $(\cc{low} + \cc{high})/2$, which will become negative for
+%large $\cc{low}$ and $\cc{high}$.  A correct version is $\cc{low}
+%+ (\cc{high}-\cc{low})/2$.  In the C language one may simply declare
+%$\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
+
+\paragraph{Integer libraries.}
+To avoid integer errors, another approach is to enforce the use of
+an integer library with error checks, such as CERT's
 IntegerLib~\cite[INT03-C]{seacord:secure-c}.  For example, developers
 change their code by calling a library function $\cc{addsl}(x, y)$
 for addition of two signed long integers $x$ and $y$.  The library
@@ -154,8 +198,7 @@ type.
 
 The underlying integer library is trusted to be implemented correctly.
 Unfortunately, integer errors have recently been discovered in both
-IntegerLib and SafeInt~\cite{ioc}.  Developers who adopt these
-integer libraries should be aware any such issues.
+IntegerLib and SafeInt~\cite{ioc}.
 %Below is IntegerLib's \cc{addsl} implementation.
 %
 %\input{code/addsl}
@@ -168,33 +211,20 @@ integer libraries should be aware any such issues.
 %the code in unexpected ways.
 
 
-\subsection{Language Design}
+\paragraph{OS testing tools.}
+OS testing tools aim at finding kernel bugs triggered by external input,
+including system calls~(e.g., Trinity~\cite{trinity} and
+iknowthis~\cite{iknowthis}) and malformed file systems~(e.g.,
+FiSC~\cite{fisc:yang} and \textsc{eXplode}~\cite{explode:yang}).
+They are not designed specifically for finding integer errors
+but complement \sys.
 
-Developers would benefit from language support for specifying precise
-lower and upper bounds of variables.  For example, Ada allows to
-define a ranged subtype, e.g., integers from 0 to 9.  The runtime
-will raise an exception for any attempt to storing an out-of-range
-value to variables of that subtype, and developers are responsible
-for handling the exception.  There is a similar proposal that adds
-ranged integers to the C language~\cite{ranged-c}.
+%Rubio-Gonz\'alez et al.~\cite{eio} have developed a static analysis
+%tool that detects incorrect error code in file system implementations.
 
-Another option is to use infinitely ranged integers, aka bignum,
-if the code is not performance critical.  Scripting languages such
-as Python and Ruby have built-in bignum support.  Using bignum is
-generally more immune to integer errors since it does not wrap,
-although the underlying bignum implementation, often written in C,
-may contain vulnerabilities.  CVE-2011-0188 is a recent example in
-Ruby's bignum, where an improper truncation may cause a buffer
-overflow.
-%shown as below.
-%\input{code/ruby}
-
-We suspect that removing unsigned types from the language would
-not help reduce the risk of integer errors.  For example, Java
-supports only signed integers.  However, its binary search
-implementation contained an integer bug, which was not fixed until
-JDK~6~\cite{java-bsearch}.  The buggy code calculates the midpoint
-using $(\cc{low} + \cc{high})/2$, which will become negative for
-large $\cc{low}$ and $\cc{high}$.  A correct version is $\cc{low}
-+ (\cc{high}-\cc{low})/2$.  In the C language one may simply declare
-$\cc{low}$ and $\cc{high}$ as unsigned integers to avoid the problem.
+Carburizer~\cite{kadav:tolerating} analyzes driver code to find
+potential bugs that can be triggered by misbehaved hardware devices.
+\sys trusts most hardware devices and filters out the corresponding
+integer errors, as we have explained in \autoref{s:rank}.  One could
+disable the filter in \sys to find such bugs for improving reliability
+of device code.
