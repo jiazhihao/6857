@@ -20,21 +20,22 @@ signed or unsigned integers, respectively.
 \paragraph{Addition \& subtraction \& multiplication.}
 The result of an additive or multiplicative operation should fall
 in the predefined range.  For example,
-$\cc{maxnum}\times_u 16$ causes an integer error if $\cc{maxnum} =
-\cc{0xf0000000}$, because the expected product $2^{32}\times
+$\cc{0xf0000000}\times_u 16$ is insecure,
+because the expected product $2^{32}\times
 3\times 5$ is out of the range of $32$-bit unsigned integers~($0$
 to $2^{32} - 1$).
 
 \paragraph{Division.}
-A division operation causes an integer error if the divisor is 0.
-Additionally, signed division $-2^{n-1} /_s {-1}$ may lead to an integer
-error, because the expected quotient $2^{n-1}$ is not in
+The divisor should be non-zero,
+and the result should fall in the predefined range.
+Particularly, $-2^{n-1} /_s {-1}$ is insecure,
+because the expected quotient $2^{n-1}$ is out of
 the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
 and at most $n-1$.  Otherwise, the operation is undefined according
-to the C standard.  As for 32-bit integers, $1 \shl 32$ yields 1
+to the C standard.  For example, for 32-bit integers, $1 \shl 32$ yields 1
 on x86 and 0 on PowerPC.  \sys considers the operation as an integer
 error.
 
@@ -71,15 +72,15 @@ An integer that should always be non-negative is to be negative.
 Such conceptually non-negative cases including array indices and
 ``size'' function parameters.
 
-\autoref{f:ax25-sign} shows such an example in the Linux kernel.
+\autoref{f:ax25-sign} shows an example in the Linux kernel.
 The third parameter of $\cc{copy_from_user}(\cc{dst}, \cc{src},
 \cc{size})$ should be non-negative since it indicates the number
 of bytes to be copied from user space to kernel.  However, an
 adversary could supply $-1$ for \cc{optlen} from user space, which
 will bypass both sanity checks because the value is interpreted as
-unsigned in the first comparison and signed in the second.  \cc{optlen}
-is later used in the call to \cc{copy_from_user} as the size
-parameter, which flags an integer error since \cc{optlen} is negative.
+unsigned in the first comparison and signed in the second.  
+The negative \cc{optlen} is later used in the call to \cc{copy_from_user}
+as the size parameter, which flags an integer error.
 
 \begin{figure}
 \centering
@@ -101,7 +102,7 @@ the machine instruction level may have different integer semantics.
 For example, $\cc{maxnum}\times_u 16$ and $\cc{maxnum} \shl 4$ are
 identical instructions, but the former expression causes an integer
 error if \cc{maxnum} is large, while the latter one is considered
-always safe.  \sys assumes that the developer has chosen the
+always secure.  \sys assumes that the developer has chosen the
 intended integer operation.
 
 Any compiler optimization that rewrites
