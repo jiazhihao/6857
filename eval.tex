@@ -267,9 +267,17 @@ There is an implicit rule that the sum of these numbers of pages
 additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
-\hc{describe experience on the whole kernel, e.g.,
-how many hours spent on find the first bugs?  how many warnings
-inspected?}
+The false error rate, recompensed by the raking heuristic described in Section
+\ref{s:rank}, is practical in analyzing large scale systems. In our experience
+with the Linux kernel, \sys reports 3350 warnings in which the overflowed
+results are used for memory allocation. We inspected 97 of them in detail,
+focusing on operands that come from untrusted sources. It took us roughly 12
+hours to discover the first batch of 6 exploitable bugs in the latest kernel.
+The other 91 warnings are either harmless overflows or false warnings.
+Most of the false warnings are due to imprecise inter-procedure range analysis
+or lack of domain-specific knowledge.
+
+% first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
 
 \subsection{Performance}
 \label{s:eval:perf}
