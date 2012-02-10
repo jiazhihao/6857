@@ -27,7 +27,7 @@ If an adversary supplies a large \cc{maxnum}, say
 overflow the 32-bit unsigned integer range and result in \cc{size}
 being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
-are not correctly limited.  In this case \cc{buf} is allocated as
+are incorrectly limited.  In this case \cc{buf} is allocated as
 a zero-length buffer; any further access into \cc{buf} is out of
 bounds and may cause a kernel panic (i.e., denial-of-service).
 Furthermore, the adversary may control the out-of-bounds writes
@@ -105,7 +105,7 @@ constraint annotations to filter out infeasible cases.
 \sys identified more than 60 integer errors in the Linux kernel,
 the lighttpd web server, and OpenSSH, which were confirmed and fixed
 by the developers.  It also reveals that even two previously known
-CVE cases were not fixed correctly.
+CVE cases were fixed incorrectly.
 %
 We evaluate \sys's completeness by running it against 36 known
 integer errors in the Linux kernel from the past three years; \sys
