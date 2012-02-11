@@ -37,9 +37,9 @@ the user-configured maximum number of paths.
 \sys generates path predicates along the control flow
 to filter out infeasible code paths.
 Compared to PREfix, \sys's algorithm is simpler
-and tailored for integer error detection, for example, moving
-predicates out of loops~(see \autoref{s:gen:path}) and rewriting
-error-before-check patterns~(see \autoref{s:gen:opt}).
+and tailored for integer error detection.  For example, it allows
+for moving predicates out of loops~(see \autoref{s:gen:path}) and
+rewriting error-before-check patterns~(see \autoref{s:gen:opt}).
 
 The Microsoft tool implements approximations for multiplication
 overflow checks, because the authors observed many timeouts in their
