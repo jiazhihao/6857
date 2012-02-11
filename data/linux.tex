@@ -7,6 +7,12 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& ioctl: \cc{kmalloc} size
 	& --
 	& \ok \\
+\hspace{1em} nouveau
+	& cmp
+	& logic error
+	& spec misread
+	& --
+	& \ok \\
 \hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB read
@@ -103,10 +109,10 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& disk: \cc{groups_per_flex}
 	& 1 (CVE-2009-4307)
 	& \ok \\
-\hspace{1em} nifs2
-	& $\times_u$
+\hspace{1em} nilfs2
+	& $\times_u$ (2)
 	& OOB read
-	& ioctl: \cc{vmalloc} size
+	& ioctl: \cc{kmalloc}/\cc{vmalloc} size
 	& --
 	& \ok \\
 \hspace{1em} xfs
