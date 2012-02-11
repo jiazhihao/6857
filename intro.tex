@@ -61,15 +61,18 @@ This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
 %
 The key challenge facing \sys is knowing what are actual integer
-errors.  For example, one could classify any signed-to-unsigned
-integer conversion from a possibly negative value as an
-error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}.  However,
-such sign conversions are so widely used in C code that doing so
-would cause a flood of false errors~\cite{moy:z3prefix}.  Developers
-even count on integer overflows such as $x + y < x$ for the correctness
-of their programs.  \sys needs an integer semantics that recognizes
-commonly used code patterns while still effectively catches integer
 errors.
+For example, some previous tools
+rigidly classify any signed-to-unsigned integer conversion from a
+possibly negative value as an error~\cite{brumley:rich, moy:z3prefix,
+seacord:secure-c}; such sign conversions are so widely used in C
+code that doing so would cause a flood of noisy false
+errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
+Developers even count on integer overflows
+such as $x + y < x$ for the correctness of their programs,
+which \sys should not consider as errors.
+\sys needs an integer semantics that recognizes commonly used code
+patterns while still effectively catches integer errors.
 %Conceptually, any integer operation that may produce a
 %result different from the infinitely ranged mathematical counterpart
 %flags a potential integer error~\cite{air}.
@@ -102,7 +105,7 @@ To further reduce false errors, \sys asks users to provide a white
 list of overflow checking idioms, as well as additional range
 constraint annotations to filter out infeasible cases.
 
-\sys identified more than 60 integer errors in the Linux kernel,
+\sys identified \nrbugs integer errors in the Linux kernel,
 the lighttpd web server, and OpenSSH, which were confirmed and fixed
 by the developers.  It also reveals that even two previously known
 CVE cases were fixed incorrectly.

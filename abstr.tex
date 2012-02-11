@@ -5,11 +5,11 @@ because they allow exploits such as buffer overflow
 and privilege escalation.
 %
 This paper presents \sys, a static analysis tool that detects
-integer errors in system programs.  It generates predicates
+integer errors in C programs.  It generates predicates
 from source code and user annotations, and feeds them into
 a constraint solver for deciding satisfiability.
 %
-\sys identified more than 60 integer errors in the Linux kernel,
+\sys identified \nrbugs integer errors in the Linux kernel,
 the lighttpd web server, and OpenSSH, which were confirmed
 and fixed by the developers.
 
