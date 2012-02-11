@@ -42,19 +42,18 @@ error.
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are often seen in C
 code, and they can be found by invoking GCC with \cc{-Wconversion}.
-\sys does not consider such a conversion as an integer error, unless
-its result is used in one of the following two cases:
+\sys does not impose any restrictions on a conversion,
+unless its result is used in one of the following two cases:
 
-\paragraph{$(1)$ Tautological comparison.}
-A comparison is always true or false due to an integer conversion,
-which means that the result from the conversion voids one of the
-branches.
+\paragraph{$(1)$ Comparison.}
+A comparison should not be always true or false
+due to an integer conversion, which disables part of the control flow.
 
 For example, in \autoref{f:ext4} the call to \cc{ext4_split_extent}
 returns a signed integer, which will be negative on error.  However,
 the return value is converted to an unsigned integer for comparison,
 leading to a stale expression $\cc{allocated} <_u 0$ that always
-evaluates to false.
+evaluates to false and disables the error handling.
 
 \begin{figure}
 \centering
@@ -67,10 +66,9 @@ error handling logic.}
 \label{f:ext4}
 \end{figure}
 
-\paragraph{$(2)$ Negative count.}
-An integer that should always be non-negative is to be negative.
-Such conceptually non-negative cases including array indices and
-``size'' function parameters.
+\paragraph{$(2)$ Non-negative value.}
+A variable that represents a data size or an array index should be
+non-negative.
 
 \autoref{f:ax25-sign} shows an example in the Linux kernel.
 The third parameter of $\cc{copy_from_user}(\cc{dst}, \cc{src},
