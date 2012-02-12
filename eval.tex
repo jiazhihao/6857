@@ -108,8 +108,8 @@ with a small timeout.
 Error-handling related integer errors would make the kernel behave in
 unanticipated ways, though they are hard to exploit by an adversary.
 Most of these bugs are simple tautological comparisons.
-%
-Below is an interesting non-trivial case found in CAN.
+\sys also found two logic bugs that were not caused by integer conversions.
+Below is one example in CAN.
 \begin{align*}
 ((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
 \end{align*}
@@ -120,9 +120,9 @@ which extracts 7 bits, is at most
 $2^7 - 1 = 127$.  The fix is to read the right bit according to the specification,
 via $\cc{errc}\ \&\ \cc{0x80}$.
 
-Two cases (in xenbus and sctp) turned out to be not exploitable.
-The kernel developers still applied our patches for clarification and
-reliability improvement.
+Two integer errors (in xenbus and sctp) turned out
+to be non-exploitable.  The kernel developers still applied our
+patches for clarification and reliability improvement.
 
 \subsubsection{Bad Fixes}
 \label{s:eval:bad}

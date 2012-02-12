@@ -46,8 +46,9 @@ code, and they can be found by invoking GCC with \cc{-Wconversion}.
 unless its result is used in one of the following two cases:
 
 \paragraph{$(1)$ Comparison.}
-A comparison should not be always true or false
-due to an integer conversion, which disables part of the control flow.
+A comparison should not be always true or false (i.e., tautological
+comparison) due to an integer conversion, which disables part of
+the control flow.
 
 For example, in \autoref{f:ext4} the call to \cc{ext4_split_extent}
 returns a signed integer, which will be negative on error.  However,
