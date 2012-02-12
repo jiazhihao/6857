@@ -26,20 +26,22 @@ One could discard all such warnings, at the price of
 missing real bugs.
 \sys uses a more pragmatic integer semantics;
 for the above two conversions it warns only if $a, b$ are used in
-tautological comparisons or negative counts (see \autoref{s:sema:sec}).
+tautological comparisons or non-negative values (see \autoref{s:sema:sec}).
 \sys also additionally catches oversized shifts while the Microsoft tool does not.
 
 The Microsoft tool is implemented using the PREfix
 engine~\cite{bush:prefix}.  It simulates execution along possible
-code paths within a function, until enumerating all paths or reaching
-the user-configured maximum number of paths.
+code paths within a function, until reaching
+the user-configured maximum number of paths (or finishing all paths
+if the number of paths is small).
 %
-\sys generates path predicates along the control flow
-to filter out infeasible code paths.
+%\sys generates path predicates along the control flow
+%to filter out infeasible code paths.
 Compared to PREfix, \sys's algorithm is simpler
-and tailored for integer error detection.  For example, it allows
-for moving predicates out of loops~(see \autoref{s:gen:path}) and
-rewriting error-before-check patterns~(see \autoref{s:gen:opt}).
+and covers all paths in a loop-free program.
+It is also tailored for integer error detection.  For example, \sys
+allows for moving predicates out of loops~(see \autoref{s:gen:path})
+and rewriting error-before-check patterns~(see \autoref{s:gen:opt}).
 
 The Microsoft tool implements approximations for multiplication
 overflow checks, because the authors observed many timeouts in their
