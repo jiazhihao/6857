@@ -85,12 +85,12 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& --
 	& \ok \\
 \cc{drivers:xen} \\
-\hspace{1em} gntdev
-	& $\times_u$ (5)
-	& OOB write
-	& ioctl: \cc{kmalloc} size
-	& --
-	& fixed \\
+%\hspace{1em} gntdev
+%	& $\times_u$ (5)
+%	& OOB write
+%	& ioctl: \cc{kmalloc} size
+%	& --
+%	& fixed \\
 \hspace{1em} xenbus
 	& $+_u$
 	& N/A
@@ -99,11 +99,11 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& \ok modified \\
 \cc{fs} \\
 \hspace{1em} ext4
-	& cmp
-	& logic error
-	& $<_u 0$: error handling
-	& --
-	& fixed \\
+%	& cmp
+%	& logic error
+%	& $<_u 0$: error handling
+%	& --
+%	& fixed \\
 	& \shl
 	& DoS
 	& disk: \cc{groups_per_flex}
@@ -128,13 +128,19 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& $\leq_u 0$: error handling
 	& --
 	& \ok \\
-\cc{mm} \\
-\hspace{1em} vmscan
-	& cmp
-	& logic error
-	& $<_u 0$: overflow check
-	& --
-	& fixed \\
+%\hspace{1em} relayfs
+%	& $\times_u$ (2)
+%	& OOB write
+%	& ioctl: \cc{kmalloc} size
+%	& --
+%	& fixed \\ 
+%\cc{mm} \\
+%\hspace{1em} vmscan
+%	& cmp
+%	& logic error
+%	& $<_u 0$: overflow check
+%	& --
+%	& fixed \\
 \cc{net} \\
 \hspace{1em} ax25
 	& $\times_u$ (8)

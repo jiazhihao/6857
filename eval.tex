@@ -39,15 +39,16 @@ vector and what values are infected.  ``\# of prev. fixes'' shows
 the number of previous commits that tried to fix the same error but
 did it incorrectly.  ``Patch accepted?'' shows how the kernel
 developers respond to our patches:
-\begin{itemize}
-\item
-\ok: the kernel developers accepted the patch.
+%\begin{itemize}
+%\item
+\ok means that they accepted the patch.
 The optional ``modified'' means that they modified our patch for inclusion;
 otherwise they applied our patch without modifications.
-\item
-fixed: the bug was already fixed in some repository other than the
-mainline when \sys discovered it, so we withdrew our patch.
-\end{itemize}
+%\item
+%fixed: the bug was already fixed in some repository other than the
+%mainline when \sys discovered it, so we withdrew our patch.
+%\end{itemize}
+
 We omit patches that did not receive any further response.
 The kernel developers also incorrectly modified three of the patches
 we proposed; they withdrew these modifications after discussion on the
