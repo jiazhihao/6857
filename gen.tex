@@ -232,23 +232,22 @@ Without the rewriting, \sys would consider the subtraction between
 two black-box integers, and report an error.
 
 \paragraph{Memory model.}
-\sys employs a simple memory model: a load instruction may return
-an arbitrary value (unless it has a range predicate).
-It relies on LLVM's load elimination
-algorithm to merge load instructions that will return the same
-value.
-
-There are two problems when directly applying LLVM's load elimination
-algorithm.
+\sys employs a simple memory model: a value returned from a load
+instruction is unconstrained~(unless the value has a range predicate).
 %
-First, the algorithm optimizes for performance and tends to delay
-load instructions.  This would result in multiple load instructions,
-often spanned in several branches, that are in fact identical.
+In other words, \sys considers two values from different load
+instructions unrelated.
 %
-Second, the algorithm depends on LLVM's pointer analysis algorithm,
-which is over-conservative.  For example, XXX.
+To improve precision, \sys needs to merge load instructions that
+will return the same value.
 
-\sys addresses the problems by hoisting every load instruction to
+Directly applying LLVM's load elimination algorithm does not work
+well, because the algorithm optimizes for performance and tends to
+delay load instructions.  This would result in multiple load
+instructions, often spanned in several branches, that are in fact
+identical.
+%
+\sys addresses the problem by hoisting every load instruction to
 the earliest possible point within the function.  The hope is that
 those load instructions will be moved up and put closed to each
 other, so that the load elimination algorithm can easily merge them
@@ -258,13 +257,13 @@ Consider a load instruction $L$ that loads from pointer $p$.  $L$ is
 safe to move across its previous instruction $I$ if:
 \begin{itemize}
 \item $I$ does not write to any memory location, or
-\item $I$ writes to pointer $q$, while $p$ and $q$ never point to the
+\item $I$ writes to pointer $q$, and $p$ and $q$ never point to the
 same memory location (i.e., they do not alias).
 \end{itemize}
 
 If $L$ is already the first instruction in a non-entry block and
 there are multiple predecessors that jump to $I$, \sys tries to
-move $L$ up to the common ancestor.  \sys repeatedly hoists $L$
+move $L$ up to their common ancestor block.  \sys repeatedly hoists $L$
 until it is unsafe to do so or $L$ reaches the entry block of the
 function.
 
@@ -276,7 +275,7 @@ programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
 to aggressively push load instructions ahead for more elimination
 opportunity.
 
-In practice we find out that this memory model works well for \sys.
+In practice this memory model works well for \sys.
 It does not require sophisticated analysis across the whole kernel
 and achieves good performance (see \autoref{s:eval:perf}).
 
