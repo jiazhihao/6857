@@ -49,10 +49,12 @@ otherwise they applied our patch without modifications.
 %mainline when \sys discovered it, so we withdrew our patch.
 %\end{itemize}
 
-We omit patches that did not receive any further response.
-The kernel developers also incorrectly modified three of the patches
+The kernel developers incorrectly modified three of the patches
 we proposed; they withdrew these modifications after discussion on the
 mailing list.
+%
+We omit \nrbugsnoresp patches that did not receive any further response
+and \nrbugsbyothers integer errors simultaneously fixed by others.
 
 \begin{figure*}
 \centering
@@ -109,7 +111,9 @@ with a small timeout.
 Error-handling related integer errors would make the kernel behave in
 unanticipated ways, though they are hard to exploit by an adversary.
 Most of these bugs are simple tautological comparisons.
-\sys also found two logic bugs that were not caused by integer conversions.
+
+\sys also found two logic bugs due to specification misread rather
+than integer conversions.
 Below is one example in CAN.
 \begin{align*}
 ((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
@@ -267,14 +271,16 @@ There is an implicit rule that the sum of these numbers of pages
 additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
-The false error rate, recompensed by the raking heuristic described in Section
-\ref{s:rank}, is practical in analyzing large scale systems. In our experience
-on the whole Linux kernel, \sys reports 3350 warnings in which the overflowed
-results are used for memory allocation. We inspected 97 of them in detail,
-focusing on operands that come from untrusted sources. It took us roughly 12
-hours to discover the first batch of 6 exploitable bugs in the latest kernel.
+%The false error rate, recompensed by the raking heuristic described in Section
+%\ref{s:rank}, is practical in analyzing large scale systems. In our experience
+%on the whole Linux kernel
+When applying \sys to the whole Linux kernel,
+it warned 3350 integer errors used for calculating
+memory allocation size.  We inspected 97 of them,
+where values came from untrusted sources. It took us roughly 12
+hours to discover the first batch of 6 exploitable bugs.
 The other 91 warnings are either harmless overflows or false warnings.
-Most of the false warnings are due to imprecise inter-procedure range analysis
+Most of the false warnings are due to neither imprecise range analysis
 or lack of domain-specific knowledge.
 
 % first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
