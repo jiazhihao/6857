@@ -1,89 +1,102 @@
-\begin{tabular}{llllll} \toprule
-Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \\ \midrule
+\begin{tabular}{lllll} \toprule
+Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \cc{drivers:drm} \\
 \hspace{1em} crtc
 	& $\times_u$
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} nouveau
 	& cmp
 	& logic error
 	& spec misread
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB read
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 %\hspace{1em} vmwgfx
 	& $\times_u$
 	& OOB write
 	& ioctl: VRAM size requested
 	& 2
-	& \ok \\
+%	& \ok
+\\
 \cc{drivers:input} \\
 \hspace{1em} cma3000_d0x
 	& cmp
 	& logic error
 	& $<_u 0$: error handling
 	& --
-	& \ok \\
+%	& \ok
+\\
 \cc{drivers:media} \\
 \hspace{1em} uvc
 	& $\times_u$
 	& OOB read
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} wl128x
 	& cmp (36)
 	& logic error
 	& $<_u 0$: error handling
 	& --
-	& \ok \\
+%	& \ok
+\\
 \cc{drivers:mtd} \\
 \hspace{1em} pmc551
 	& cmp
 	& logic error
 	& $\leq_u 0$: error handling
 	& --
-	& \ok \\
+%	& \ok
+\\
 \cc{drivers:scsi} \\
 \hspace{1em} iscsi_tcp
 	& $\times_u$
 	& OOB write
 	& network: \cc{kmalloc} size
 	& --
-	& \ok modified \\
+%	& \ok modified
+\\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& 1
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} olpc_dcon
 	& cmp
 	& logic error
 	& $\cc{(int)u8} = -1$: error handling
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} vt6655
 	& $\times_u$ (2)
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} vt6656
 	& $\times_u$ (2)
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \cc{drivers:xen} \\
 %\hspace{1em} gntdev
 %	& $\times_u$ (5)
@@ -96,7 +109,8 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& N/A
 	& not exploitable
 	& --
-	& \ok modified \\
+%	& \ok modified
+\\
 \cc{fs} \\
 \hspace{1em} ext4
 %	& cmp
@@ -108,26 +122,35 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& DoS
 	& disk: \cc{groups_per_flex}
 	& 1 (CVE-2009-4307)
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} nilfs2
-	& $\times_u$ (2)
+	& $\times_u$
 	& OOB read
-	& ioctl: \cc{kmalloc}/\cc{vmalloc} size
+	& ioctl: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
+	& $\times_u$
+	& OOB read
+	& ioctl: \cc{vmalloc} size
+	& --
+\\
 \hspace{1em} xfs
 	& $\times_u$
 	& OOB write
 	& disk: \cc{kmalloc} size
 	& 1
-	& \ok \\
+%	& \ok
+\\
 \cc{kernel} \\
 \hspace{1em} auditsc
 	& cmp
 	& logic error
 	& $\leq_u 0$: error handling
 	& --
-	& \ok \\
+%	& \ok
+\\
 %\hspace{1em} relayfs
 %	& $\times_u$ (2)
 %	& OOB write
@@ -147,62 +170,72 @@ Subsystem & Error & Impact & Description & \# of prev. fixes & Patch accepted? \
 	& timer
 	& {ioctl}/{setsockopt}: T1/T2/T3/idle timers
 	& --
-	& \ok modified \\
+%	& \ok modified
+\\
 %\hspace{1em} ax25
 	& $\times_u$ (4)
 	& timer
 	& {setsockopt}: T1/T2/T3/idle timers
 	& 1
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} can
 	& cmp
 	& logic error
 	& spec misread %error counter state
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} irda
 	& $\times_s$
 	& timer
 	& {getsockopt}: watchdog timer
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} netfilter
 	& $-_u$ (2)
 	& output
 	& wrong timeout value sent out
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} netrom
 	& $\times_u$ (4)
 	& timer
 	& {setsockopt}: T1/T2/T4/idle timers
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} rps
 	& $\times_u$
 	& OOB write
 	& sysfs: \cc{vmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \hspace{1em} sctp
 	& $\times_u$
 	& timer
 	& {setsockopt}: autoclose timer
 	& 3
-	& \ok \\
+%	& \ok
+\\
 %\hspace{1em} sctp
 	& $+_u$
 	& N/A
 	& not exploitable
 	& 1 (CVE-2008-3526)
-	& \ok \\
+%	& \ok
+\\
 \cc{sound} \\
 \hspace{1em} usb
 	& $\times_u$
 	& OOB write
 	& usb: \cc{kmalloc} size
 	& --
-	& \ok \\
+%	& \ok
+\\
 \bottomrule
 \end{tabular}
 

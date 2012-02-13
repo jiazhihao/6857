@@ -23,8 +23,8 @@ equipped with Intel 3.2~G HZ CPU and 24~GB memory.
 We applied \sys to the source code of the latest Linux kernel,
 as well as two popular user-space applications, lighttpd and OpenSSH,
 and submitted patches to the developers according to \sys's reports.
-The developers confirmed and fixed more than 50 integer errors in
-the Linux kernel, 1 in lighttpd, and 4 in OpenSSH.
+The developers confirmed and fixed \nrbugslinux integer errors in
+the Linux kernel, \nrbugslighttpd in lighttpd, and \nrbugsopenssh in OpenSSH.
 %
 The results show that \sys is effective in finding new integer
 errors, and the developers are willing to fix them.
@@ -37,24 +37,27 @@ organize the patches based on the source directories.  Most
 columns are self-explanatory.  ``Description'' shows the attack
 vector and what values are infected.  ``\# of prev. fixes'' shows
 the number of previous commits that tried to fix the same error but
-did it incorrectly.  ``Patch accepted?'' shows how the kernel
-developers respond to our patches:
+did it incorrectly. 
+%``Patch accepted?'' shows how the kernel
+%developers respond to our patches:
 %\begin{itemize}
 %\item
-\ok means that they accepted the patch.
-The optional ``modified'' means that they modified our patch for inclusion;
-otherwise they applied our patch without modifications.
+%\ok means that they accepted the patch.
+%The optional ``modified'' means that they modified our patch for inclusion;
+%otherwise they applied our patch without modifications.
 %\item
 %fixed: the bug was already fixed in some repository other than the
 %mainline when \sys discovered it, so we withdrew our patch.
 %\end{itemize}
 
-The kernel developers incorrectly modified three of the patches
-we proposed; they withdrew these modifications after discussion on the
-mailing list.
+The kernel developers modified 3 patches we submitted for inclusion;
+they applied the rest of our patches without modifications.
+%incorrectly modified three of the patches
+%we proposed; they withdrew these modifications after discussion on the
+%mailing list.
 %
 We omit \nrbugsnoresp patches that did not receive any further response
-and \nrbugsbyothers integer errors simultaneously fixed by others.
+and \nrbugsbyothers patches simultaneously submitted by others.
 
 \begin{figure*}
 \centering
