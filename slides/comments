@@ -1,0 +1,22 @@
+further study warnings
+- false warnings: due to tool's inherent limitation like alias
+- unexploitable warnings: due to malicious hardware
+- interprocedual warnings: either need more precise ranges or the caller could go wrong
+
+sinking
+- briefly explain why it's correct
+
+more verfication tools
+- astree
+
+presentation
+============
+
+make clear that the security requirement for x * y is
+- y == 0 or x < UINT_MAX / y
+or
+- x_2n * y_2n <= UINT_MAX
+
+make clear that 1 << n never yields 0 because
+1) 1 << n != 0 if n < 32
+2) undefined   if n >= 32
