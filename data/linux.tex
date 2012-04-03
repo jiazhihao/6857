@@ -38,6 +38,12 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 %	& \ok
 \\
 \cc{drivers:media} \\
+\hspace{1em} lgdt330x
+	& cmp
+	& logic error
+	& $<_u 0$: error handling
+	& --
+\\
 \hspace{1em} uvc
 	& $\times_u$
 	& OOB read
@@ -235,6 +241,12 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 	& usb: \cc{kmalloc} size
 	& --
 %	& \ok
+\\
+\hspace{1em}
+	& $\times_u$
+	& OOB read
+	& usb: \cc{kmalloc} size
+	& --
 \\
 \bottomrule
 \end{tabular}
