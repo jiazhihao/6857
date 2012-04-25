@@ -4,12 +4,23 @@
 This section discusses mitigating integer errors
 in C code.
 
-\subsection{Overflow-aware Integer Type}
+\subsection{NaN Semantic}
 
-Integer NaN.
+modular arithmetic is to blame (could talk about saturation arithemtic
+as well).
 
-rationale: programmers don't need to check integer overflows
-everywhere.
+rationale: programmers forget to check integer overflows,
+or use wrong bounds.  automate the checking.
+
+We propose an new integer type that follows the NaN semantic: an
+integer value becomes NaN once it overflows and remains NaN in
+future computation.
+
+choose $2^n-1$ as the NaN.
+
+$\cc{isNaN}(x)$.
+
+focus on allocation size, but the type is general.
 
 e1000.
 
@@ -19,17 +30,23 @@ microbenchmark.
 
 \subsection{Safe Array Allocator}
 
+\xw{could move this part to an ealier point}
+
+Multiplication for calculating allocation size seems particularly
+prone to integer errors, particularly in the forms of \cc{kmalloc}\cc{(n
+* size, ...)} if the code does not correctly bound \cc{n}.
+
 \cc{kmalloc_array}.
 
-\cc{calloc}.
-
-\subsection{Manual Sanity Checking}
+\subsection{TBD}
 
 Windows seems to enforce unsigned integers in kernel.
 
-builtins?
+overflow builtins?
 
-libraries?
+integer libraries?
+
+buggy allocators?
 
 \if 0
 

@@ -34,10 +34,11 @@ the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
-and at most $n-1$.  Otherwise, the operation is undefined according
-to the C standard.  For example, for 32-bit integers, $1 \shl 32$ yields 1
-on x86 and 0 on PowerPC.  \sys considers the operation as an integer
-error.
+and at most $n-1$, otherwise the operation is undefined according
+to the C standard.
+%For example, for 32-bit integers, $1 \shl 32$ yields 1
+%on x86 and 0 on PowerPC.
+\sys considers an oversized shift as an integer error.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are often seen in C
