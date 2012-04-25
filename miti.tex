@@ -1,8 +1,37 @@
-\section{Future Work}
+\section{Mitigation Strategies}
 \label{s:miti}
 
-This section discusses future work on mitigating integer errors
+This section discusses mitigating integer errors
 in C code.
+
+\subsection{Overflow-aware Integer Type}
+
+Integer NaN.
+
+rationale: programmers don't need to check integer overflows
+everywhere.
+
+e1000.
+
+performance overhead.
+
+microbenchmark.
+
+\subsection{Safe Array Allocator}
+
+\cc{kmalloc_array}.
+
+\cc{calloc}.
+
+\subsection{Manual Sanity Checking}
+
+Windows seems to enforce unsigned integers in kernel.
+
+builtins?
+
+libraries?
+
+\if 0
 
 \subsection{Compiler Checking}
 
@@ -64,6 +93,8 @@ If any of the checks fails at run time,
 the inserted code forces the corresponding allocation call to return
 \cc{NULL}, which we assume is handled by existing code
 as out of memory.
+
+\fi
 
 \if 0
 The grsecurity patch~\cite{grsecurity}
