@@ -168,6 +168,8 @@ To address the problem, \sys generates a new predicate $n <_s 0$
 outside the loop, by substituting the loop variable $i$ with its
 exit value $n$ in the predicate $i <_s 0$.
 
+\if 0
+
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
 
@@ -199,6 +201,8 @@ Currently we annotate its range as $[0, 1024]$; otherwise \sys would
 report an addition overflow for on expressions like $\cc{argc} + 1$.
 
 %handle sysctl interface.
+
+\fi
 
 
 \subsection{Code Rewriting}
