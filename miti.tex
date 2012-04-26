@@ -4,7 +4,7 @@
 This section discusses mitigating integer errors
 in C code.
 
-\subsection{NaN Semantic}
+\subsection{NaN Semantics}
 
 modular arithmetic is to blame (could talk about saturation arithemtic
 as well).
@@ -12,7 +12,7 @@ as well).
 rationale: programmers forget to check integer overflows,
 or use wrong bounds.  automate the checking.
 
-We propose an new integer type that follows the NaN semantic: an
+We propose an new integer type that follows NaN semantics: an
 integer value becomes NaN once it overflows and remains NaN in
 future computation.
 
