@@ -24,10 +24,10 @@ most false warnings when applying the tool to some Microsoft code
 base~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
 One could discard all such warnings, at the price of
 missing real bugs.
-\sys uses a more pragmatic integer semantics;
+\sys uses more pragmatic integer semantics;
 for the above two conversions it warns only if $a, b$ are used in
-tautological comparisons or non-negative values (see \autoref{s:sema:sec}).
-\sys also additionally catches oversized shifts while the Microsoft tool does not.
+tautological comparisons or in non-negative types (see \autoref{s:sema:sec}).
+\sys additionally catches oversized shifts while the Microsoft tool does not.
 
 The Microsoft tool is implemented using the PREfix
 engine~\cite{bush:prefix}.  It simulates execution along possible
@@ -117,14 +117,14 @@ such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
 %
 The advantage of these tools is that they have a lower false error rate.
 Using them to find integer errors requires input that can trigger
-those bugs, and thus it is in general difficult to achieve a high
+those bugs, and thus it is in general difficult to achieve high
 coverage compared to symbolic model checking tools.
 
 As pointed out in \autoref{s:sema:eqv}, integer semantics
-is \emph{not} preserved by compiler optimizations.
+are \emph{not} preserved by compiler optimizations.
 While \sys is designed to avoid destructive optimizations, tools that
 work on binary executable files, either symbolic or not,
-will suffer from this problem and be unable to extract
+will suffer from this problem and will be unable to extract
 precise integer security requirements.
 
 \paragraph{Language support.}
@@ -148,17 +148,18 @@ if such an alarm is raised.  It also incurs noticeable runtime
 overhead~\cite{ioc}, given the prevalence of integer operations.
 
 The AIR model~\cite{air} provides a different approach of loosing
+\nz{i don't understand what "loosing" means here}
 integer constraints.  In the AIR model, it is acceptable to delay
 catching integer semantic violations and raising traps, as long as the program's
 behavior is the same as if all integers were infinitely ranged.
 Developers, however, may intentionally use overflow operations like
 $x + y < x$ to defend against integer errors; treating integers as
-infinitely ranged would result in a different behavior.
+infinitely ranged would result in different behavior.
 
 Developers would benefit from language support for specifying precise
-lower and upper bounds of variables.  For example, Ada allows to
-define a ranged subtype (e.g., integers from 0 to 9).  The runtime
-will raise an exception for any attempt to storing an out-of-range
+lower and upper bounds of variables.  For example, Ada allows
+defining a ranged subtype (e.g., integers from 0 to 9).  The runtime
+will raise an exception on any attempt to store an out-of-range
 value to variables of that subtype, and developers are responsible
 for handling the exception.  There is a similar proposal that adds
 ranged integers to the C language~\cite{ranged-c}.
