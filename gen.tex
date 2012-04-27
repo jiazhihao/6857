@@ -1,13 +1,16 @@
 \section{Design}
 \label{s:gen}
 
-Given the LLVM intermediate
-representation~(IR) compiled from source code, \sys generates a set
-of predicates for each integer operation, and feeds them into the
+To find integer errors, \sys first compiles the C source code to the
+LLVM intermediate representation~(IR).  \sys then examines the IR to
+find integer operations, and for each operation, \sys generates a
+set of predicates on the program's variables that would have to be
+true in order for that integer operation to have an error.  Finally,
+\sys feeds the constraints for each integer operation into the
 Boolector constraint solver for deciding satisfiability.  If the
 solver answers ``satisfiable'' with an assignment of variables,
-there is a potential integer error that could be triggered with that assignment.
-The workflow is shown in \autoref{f:flow}.
+there is a potential integer error that could be triggered with
+that assignment.  This workflow is shown in \autoref{f:flow}.
 
 \nz{Should range predicates go here too?}
 
@@ -86,29 +89,34 @@ the Linux kernel, we annotate the ``size'' parameters in functions like \cc{memc
 \subsection{Path Predicate Generation}
 \label{s:gen:path}
 
-\sys generates a path predicate for each integer operation from the
-control flow, to encode all the branching conditions along the
-execution path.  Satisfying the path predicate means that the integer
-operation is reachable from the start of the function that contains
-the operation.  The path predicate is used to filter out infeasible
-paths.
+\sys generates a path predicate for each integer operation, that encodes
+the constraints on the variables that arise from preceeding operations
+in the function's control flow.  These constraints arise from two general
+sources: assignments to variables by preceding operations, and conditional
+branches along the execution path.  Satisfying the path predicate with
+a given set of variable assignments means that the integer operation is
+reachable from the start of its function with those variable values.
+The path predicate is used to filter out integer errors that cannot
+happen due to previous statements in a function, such as assignments or
+explicit overflow checks.
 
 Let's consider loop-free programs first.
 %
 We use \autoref{f:ax25-sign} as an example.  The control flow of
 the code is shown in \autoref{f:cfg}.  There are two sanity checks
 on \cc{optlen} before it reaches the call to \cc{copy_from_user}.
-For clarification purpose \cc{optlen} is numbered every time it is
+For clarification purposes, \cc{optlen} is numbered every time it is
 assigned a new value~\cite[\chapterautorefname~8.11]{whale}.  Our
 goal is to evaluate the path predicate for the call to \cc{copy_from_user}.
 
 The basic algorithm works as follows.  Since there is no loop, the
 path predicate of the call to \cc{copy_from_user} is simply the
 logical OR of the predicates from each of its predecessors, namely
-\textsc{If-True} and \textsc{If-False}.  For each predecessor, the
-predicate is a logical AND of three parts: the branching condition,
-possible assignment(s) in the predecessor, and the path predicate
-of that predecessor.  Here both \textsc{If-True} and \textsc{If-False}
+\textsc{If-True} and \textsc{If-False}.  For each of those two blocks,
+the predicate is a logical AND of three parts: the branching condition
+(for the transition from that block to \cc{copy_from_user}), the
+assignment(s) in that block, and the path predicate
+of that block.  Both \textsc{If-True} and \textsc{If-False}
 unconditionally jump to \cc{copy_from_user}, so their branching
 conditions are simply true, which can be ignored.  Now we have the
 following path predicate:
@@ -120,8 +128,8 @@ following path predicate:
 \lor & ((\optlen_1 = \optlen_0) \land \pc(\textsc{If-False})).
 \end{align*}
 
-Recursively apply the algorithm to \textsc{If-True} and \textsc{If-False},
-and we obtain the fully expanded result:
+By recursively applying the same algorithm to \textsc{If-True} and
+\textsc{If-False}, we obtain the fully expanded result:
 %
 \begin{align*}
 & ((\optlen_1 = 16) \land (\optlen_0 >_s 16)
@@ -130,10 +138,11 @@ and we obtain the fully expanded result:
      & \; \land \neg(\optlen_0 <_u 4)).
 \end{align*}
 
-One can feed the logical AND of the path predicate and the error
-predicate (i.e., $\cc{optlen}_1 <_s 0$) into the solver, which
-will reply with an assignment that triggers the error: for example,
-$\cc{optlen}_0 = -1$.
+After computing the path predicate, \sys feeds the logical AND of the
+path predicate and the error predicate (i.e., $\cc{optlen}_1 <_s 0$) into
+the solver to determine whether the integer operation can have an error.
+In this case, the solver will reply with an assignment that triggers
+the error: for example, $\cc{optlen}_0 = -1$.
 
 \begin{figure}
 \centering
@@ -150,6 +159,7 @@ predicate generation algorithm unrolls each loop once and ignores
 branching edges that jump back in the control flow,
 so as to restrict the size of the path predicate
 and reduce the solving time.
+This trades off soundness for performance.
 The complete algorithm is listed in \autoref{f:path-cstr}.
 
 \begin{figure}
@@ -158,7 +168,7 @@ The complete algorithm is listed in \autoref{f:path-cstr}.
 \label{f:path-cstr}
 \end{figure}
 
-To alleviate missing predicates due to loop unrolling,
+To partially alleviate missing predicates due to loop unrolling,
 \sys tries to move predicates within a loop to the outside scope.
 Consider the following loop.
 \input{code/loop}
