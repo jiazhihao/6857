@@ -220,14 +220,15 @@ report an addition overflow for on expressions like $\cc{argc} + 1$.
 \subsection{Code Rewriting}
 \label{s:gen:opt}
 
-\sys performs a series of code transformations and rewrites code
-for reducing false errors and improving performance.
+In order to reduce false errors and to improve performance,
+\sys performs a series of code transformations to rewrite
+the LLVM IR code for each function.
 
 \paragraph{Pointer arithmetic.}
 \sys represents each pointer or memory address as a symbolic
 expression~\cite{engelen:symbolic}, and tries to simplify it if
 possible.  \sys considers a pointer expression that it fails to simplify
-as a black-box integer, which can be any value within its range.
+as an unconstrained integer, which can be any value within its range.
 Consider the code snippet below.
 %
 \input{code/pid-ptrsub}
@@ -235,7 +236,7 @@ Consider the code snippet below.
 The offset of \cc{pidmap} in the structure \cc{pid_namespace} is 4
 bytes (i.e., the size of \cc{kref}), thus \sys represents the address
 \cc{pid_ns->pidmap} as $\cc{pid_ns} + 4$.  Here \sys considers \cc{pid_ns}
-as a black box since no further information is available.
+to be an unconstrained value, since no further information is available.
 
 In addition, assuming the size of each element of \cc{pidmap} is 8
 bytes, \sys represents the address \cc{\&pid_ns->pidmap[i]} as
@@ -244,15 +245,17 @@ $\cc{pid_ns} + 4 + i \times 8$; in this example we have $i =
 the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 4 + i \times 8) - (\cc{pid_ns} + 4) = i \times 8$.
 %
-Without the rewriting, \sys would consider the subtraction between
-two black-box integers, and report an error.
+Without this rewriting, \sys would have considered \cc{off} to be
+the result of a subtraction between two unconstrained integers, and
+would have reported an error.
 
 \paragraph{Memory model.}
 \sys employs a simple memory model: a value returned from a load
 instruction is unconstrained~(unless the value has a range predicate).
+\nz{Range predicates have not been defined yet.}
 %
 In other words, \sys considers two values from different load
-instructions unrelated.
+instructions to be unrelated.
 %
 To improve precision, \sys needs to merge load instructions that
 will return the same value.
@@ -280,7 +283,7 @@ same memory location (i.e., they do not alias).
 If $L$ is already the first instruction in a non-entry block and
 there are multiple predecessors that jump to $I$, \sys tries to
 move $L$ up to their common ancestor block.  \sys repeatedly hoists $L$
-until it is unsafe to do so or $L$ reaches the entry block of the
+until it is either unsafe to do so or $L$ reaches the entry block of the
 function.
 
 \sys also adopts an aliasing assumption: a pointer passed as a
@@ -315,11 +318,11 @@ multiplication $x \times_u y$ overflows, the product \cc{size} is
 not used before the check.
 \input{code/error-before-use}
 
-To avoid warning against such cases, \sys pushes every
+To avoid generating a warning in such cases, \sys pushes every
 integer operation down to the latest possible point along the control
 flow, so that the result is computed only when it is needed.  The
-detail of the algorithm is omitted since it is similar to load
-hoisting, except that it runs towards the opposite direction, and
+details of this algorithm are omitted since it is similar to load
+hoisting, except that it pushes code in the opposite direction, and
 does not need to consider memory loads and stores.
 
 In the above example, \sys will move the integer operation $x
@@ -328,11 +331,11 @@ In the above example, \sys will move the integer operation $x
 
 \paragraph{Error checking idiom.}
 
-When generating path predicates some integer
-operations like division significantly slows down the constraint
-solver~\cite{brummayer:perf}.  Many of such cases occur in integer
+When generating path predicates, some integer
+operations, such as division, can significantly slow down the constraint
+solver~\cite{brummayer:perf}.  Many such cases occur in integer
 error checks like $\cc{if}\ (N /_u x > y)$, where $N$ is a constant
-and $x, y$ are $n$-bit integers.  \sys recognizes such idioms and
+and $x$ and $y$ are $n$-bit integers.  \sys recognizes such idioms and
 rewrites them to avoid the slow operations, as follows.
 
 \sys first zero-extends $x$ and $y$ from $n$ to $2n$ bits, as
@@ -342,8 +345,8 @@ constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
 with the multiplication overflow detection predicate, as described
 in \autoref{s:gen:err}.
 %
-\autoref{s:eval:perf} will show a microbenchmark of the three
-operations.
+This rewriting speeds up constraint solving, as demonstrated in
+\autoref{s:eval:perf}.
 
 \subsection{Limitations}
 \label{s:gen:limit}

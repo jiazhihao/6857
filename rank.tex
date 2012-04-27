@@ -1,9 +1,9 @@
 \section{Ranking}
 \label{s:rank}
 
-\sys may report a long list of errors.  We are only interested in
-those serious ones.  We consider an integer error as serious if the
-result is either controlled from untrusted sources or used at
+\sys may report a long list of potential errors.  We are only interested
+in serious errors.  We consider an integer error as serious if the
+result is either computed based on untrusted sources, or is used in
 sensitive sinks.  Such sources and sinks are generally specific to
 the system being analyzed.  This section discuss them in the context
 of the Linux kernel.
@@ -20,13 +20,15 @@ calls, virtual file systems like \cc{sysfs}, or kernel functions
 like \cc{copy_from_user}), received from network, and read from
 disk.
 %\xw{Xen: Dom0 input from DomU?}
-The kernel usually needs to perform sanity checks on these data to
+The kernel usually needs to perform sanity checks on this data to
 avoid being tricked by an adversary.
 
 Two most notable error-prone channels are \cc{ioctl} and \cc{setsockopt},
 due to their infamous irregular interfaces and pervading implementations
 in device drivers and network protocols.  \sys pays special attention
 to integer errors that could happen in their calling context.
+\nz{What does "in their calling context" mean?}
+\nz{What does "pays special attention" mean?}
 
 In general, hardware devices are considered trusted.  Driver code
 often does not validate the response data from hardware.  According
@@ -41,10 +43,11 @@ exploit the kernel~\cite{usb:buffer-overflow}.
 
 \subsection{Sensitive Sink}
 
-Sensitive sinks include branching conditions that make logic
-decisions, data escaping from the kernel to the outside, and data
+Sensitive sinks include control flow decisions based on the outcome
+of an integer operation, data escaping from the kernel to the
+outside \nz{what does this mean?}, and data
 sizes for allocation and I/O communication.  An erroneous integer
-value used in such places are more likely to damage the system.
+value used in such places is more likely to damage the system.
 
 \subsection{Annotation}
 
