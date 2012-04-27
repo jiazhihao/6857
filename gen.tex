@@ -9,6 +9,8 @@ solver answers ``satisfiable'' with an assignment of variables,
 there is a potential integer error that could be triggered with that assignment.
 The workflow is shown in \autoref{f:flow}.
 
+\nz{Should range predicates go here too?}
+
 The central challenge is reducing the complexity of these predicates,
 so that the solver can run efficiently.  This section describes how
 \sys generates the predicates.
@@ -69,8 +71,8 @@ As defined \autoref{s:sema:sec}, \sys deals with conversions
 in the following two cases.
 
 To detect tautological comparisons, \sys derives a predicate from
-each comparison.  If the predicate is trivially true or false
-resulted from an integer conversion within that function, \sys
+each comparison.  If the predicate is trivially true or false,
+and it resulted from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
 For a value $x$ that should be conceptually non-negative (i.e.,

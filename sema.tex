@@ -9,7 +9,7 @@ the white list of code patterns that \sys explicitly allows.
 \subsection{Secure Integer Operations}
 \label{s:sema:sec}
 
-\sys assumes two's complement~\cite[\S4.2.1]{intel:vol1},
+\sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
 An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
@@ -72,9 +72,8 @@ error handling logic.}
 \end{figure}
 
 \paragraph{$(2)$ Non-negative value.}
-A variable that is used as a data size \nz{how do you know if something
-is used as a data size?  annotations?} or an array index should be
-non-negative.
+A variable that is used as a data size (as specified using annotations,
+which we describe later) or an array index should be non-negative.
 
 \autoref{f:ax25-sign} shows an example in the Linux kernel.
 The third parameter of $\cc{copy_from_user}(\cc{dst}, \cc{src},

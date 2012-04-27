@@ -73,7 +73,7 @@ rigidly classify any signed-to-unsigned integer conversion from a
 possibly negative value as an error~\cite{brumley:rich, moy:z3prefix,
 seacord:secure-c}; such sign conversions are so widely used in C
 code that doing so would cause a flood of noisy false
-errors~\cite[\S6.2]{moy:z3prefix}.
+errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
 Developers even intentionally count on integer overflows
 such as $x + y < x$ for the correctness of their programs~\cite{ioc},
 which \sys should not consider as errors.
