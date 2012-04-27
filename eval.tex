@@ -15,7 +15,8 @@ as the Linux kernel?
 \end{itemize}
 
 All the experiments were conducted on a 64-bit Ubuntu Linux machine
-with an Intel Core i7-980 3.3~GHz CPU and 24~GB of memory.
+with an Intel Core i7-980 3.3~GHz CPU and 24~GB of memory.  The
+processor has 6 cores, and each core has 2 hardware threads.
 
 \subsection{New Bugs}
 \label{s:eval:linux}
@@ -248,7 +249,7 @@ we first tested \sys on the patched code of these CVE cases
 in \autoref{s:eval:complete},
 and expected that ideally \sys would not report any errors.
 The result is also shown in \autoref{f:data:cve}.
-\sys declares no bug in 29 of the 36 cases, timeouts in 1 case, and
+\sys declares no bug in 29 of the 36 cases, times out in 1 case, and
 reports errors in 6 cases.
 %
 In these 6 cases,
@@ -279,6 +280,10 @@ There is an implicit rule that the sum of these numbers of pages
 additions never overflow.  \sys does not understand the rule and
 reports false errors on these additions.
 
+\nz{replace the next paragraph with Haogang's more detailed
+  analysis, starting with 400k+ total reports, and going down
+  to ~700 errors with alloc sinks, etc.}
+
 %The false error rate, recompensed by the raking heuristic described in Section
 %\ref{s:rank}, is practical in analyzing large scale systems. In our experience
 %on the whole Linux kernel
@@ -296,13 +301,15 @@ or lack of domain-specific knowledge.
 \subsection{Performance}
 \label{s:eval:perf}
 
-To measure the performance, we ran \sys against the Linux kernel
-3.2 source code, with 12 CPU cores.  We set the timeout
+To measure the running time of \sys, we ran \sys against the source
+code for Linux kernel 3.2.  We set the timeout
 to 5 seconds for each constraint solving query.   \sys analyzed
 8637 files, 10 of which timed out, and made 411,851 solving queries.
 The predicate generation and constraint solving (excluding compilation)
 cost 22 minutes.  This shows that \sys can finish analyzing a large
 system within a reasonable amount of time.
+\nz{report number of individual query timeouts, in addition to the
+  number of files that had 1 or more timeouts.}
 
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
 idioms for better performance.  We measured the solving time of three
