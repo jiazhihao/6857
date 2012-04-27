@@ -15,12 +15,13 @@ as the Linux kernel?
 \end{itemize}
 
 All the experiments were conducted on a 64-bit Ubuntu Linux machine
-equipped with Intel 3.2~G HZ CPU and 24~GB memory.
+with an Intel Core i7-980 3.3~GHz CPU and 24~GB of memory.
 
 \subsection{New Bugs}
 \label{s:eval:linux}
 
-We applied \sys to the source code of the latest Linux kernel,
+We applied \sys to the source code of the latest Linux kernel
+\nz{what is "latest"?},
 as well as two popular user-space applications, lighttpd and OpenSSH,
 and submitted patches to the developers according to \sys's reports.
 The developers confirmed and fixed \nrbugslinux integer errors in
@@ -58,8 +59,9 @@ modifications.
 %mailing list.
 %
 %We omit \nrpatchesnoresp patches that did not receive any further response.
-We omit \nrbugsbyothers integer errors that were simultaneously
-fixed by others.
+We also discovered an additional \nrbugsbyothers integer errors that
+were concurrently discovered by others; these errors are not included
+in \autoref{f:data:linux}.
 
 \begin{figure*}
 \centering
@@ -82,33 +84,33 @@ including the core kernel, drivers, file systems, and network protocols.
 The core kernel has fewer integer errors, since it does not
 interact with the outside as frequently as the rest of the kernel.
 
-Multiplication appears to be the most error-prone operation, which
-is often used for calculating allocation size such as $\cc{count}
-\times \cc{sizeof}(...)$, especially if \cc{count} can be controlled
-by an adversary.
+Multiplication appears to be the most error-prone operation; it is
+often used for calculating allocation size, such as $\cc{count}
+\times \cc{sizeof}(...)$.  This is error-prone if \cc{count} can
+be controlled by an adversary.
 
 Surprisingly,  a simple tautological comparison $<_u 0$,
 comparing an unsigned integer with 0 (usually for error handling),
 affected several subsystems.
 One driver (wl128x) contains 36 such bugs alone, effectively
-disabling almost its entire error handling paths.
+disabling most of its error handling paths.
 
 \subsubsection{Impact}
 
-The integer errors that allow out-of-bounds writes (i.e., buffer
+Integer errors that allow out-of-bounds writes (i.e., buffer
 overflow) would break the integrity of the kernel and potentially
 allow privilege escalation.  They can be exploited via local access,
-disk (malformed filesystem), and network.  We see a large portion
-of \cc{ioctl} since it is error-prone and biased by \sys's ranking
-heuristics.
+disk (malformed filesystem), and network.  We see a large number of
+errors in \cc{ioctl}, since it is error-prone and biased by \sys's
+ranking heuristics.
 %
 There is also an interesting vulnerability in the sound subsystem;
 an adversary can exploit it by plugging in a malicious USB audio
 device that responds with bogus sampling rates, leading to kernel
-hang, DoS, and buffer overflow.
+hang, DoS, and overflow a buffer.
 
 Integer errors cause timing bugs in several network protocol
-implementations.  For example, a user-space application tries to
+implementations.  For example, a user-space application can try to
 set a large timeout value, but the value could overflow and end up
 with a small timeout.
 
@@ -116,8 +118,8 @@ Error-handling related integer errors would make the kernel behave in
 unanticipated ways, though they are hard to exploit by an adversary.
 Most of these bugs are simple tautological comparisons.
 
-\sys also found two logic bugs due to specification misread rather
-than integer conversions.
+\sys also found two logic bugs that were caused by programmer
+confusion rather than integer conversions.
 Below is one example in CAN.
 \begin{align*}
 ((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
@@ -194,11 +196,13 @@ following the C standard.  This would make the patched code as
 vulnerable as the original.  GCC~4.6 keeps the check, but
 there is no guarantee that future versions will do the same.
 
+\nz{What is the correct fix?  s_log_groups_per_flex>=32}
+
 \subsection{Completeness Validation}
 \label{s:eval:complete}
 
 We collected 36 known integer errors in the Linux kernel from the
-CVE list~\cite{cve} in recent three years (excluding those found
+CVE list~\cite{cve} over the last three years (excluding those found
 by \sys for fairness) as a benchmark to evaluate
 \sys's completeness, as shown in \autoref{f:data:cve}.  They provide
 a comprehensive coverage of the whole source tree.
@@ -208,7 +212,7 @@ a comprehensive coverage of the whole source tree.
 %Ideally \sys should catch the bugs in the original code,
 %and declare that the bug is fixed in the patched code.
 %
-\sys is able to find 34 (94\%) of the 36 integer errors.
+\sys is able to find 34 out of the 36 integer errors (94\%).
 This shows that \sys's report is fairly complete.
 
 \begin{figure*}
@@ -227,7 +231,7 @@ is fixed in the patched code.}
 
 \paragraph{CVE-2009-4307 (ext4).}
 This bug is due to a possible division by zero that is caused by
-an oversized left shift on PowerPC.  \sys is able to catch the
+an oversized left shift on PowerPC\@.  \sys is able to catch the
 oversized shift, but not the division by zero, because in \sys's
 semantics a left shift never produces zero, as discussed in
 \autoref{s:sema:def}.
@@ -240,7 +244,7 @@ once.
 \subsection{False Errors}
 
 To evaluate how many false errors are in \sys's reports,
-We first tested \sys on the patched code of these CVE cases
+we first tested \sys on the patched code of these CVE cases
 in \autoref{s:eval:complete},
 and expected that ideally \sys would not report any errors.
 The result is also shown in \autoref{f:data:cve}.
