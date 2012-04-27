@@ -12,8 +12,6 @@ solver answers ``satisfiable'' with an assignment of variables,
 there is a potential integer error that could be triggered with
 that assignment.  This workflow is shown in \autoref{f:flow}.
 
-\nz{Should range predicates go here too?}
-
 The central challenge is reducing the complexity of these predicates,
 so that the solver can run efficiently.  This section describes how
 \sys generates the predicates.
@@ -180,7 +178,6 @@ To address the problem, \sys generates a new predicate $n <_s 0$
 outside the loop, by substituting the loop variable $i$ with its
 exit value $n$ in the predicate $i <_s 0$.
 
-\if 0
 
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
@@ -213,8 +210,6 @@ Currently we annotate its range as $[0, 1024]$; otherwise \sys would
 report an addition overflow for on expressions like $\cc{argc} + 1$.
 
 %handle sysctl interface.
-
-\fi
 
 
 \subsection{Code Rewriting}
