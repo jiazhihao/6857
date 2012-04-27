@@ -9,7 +9,7 @@ the white list of code patterns that \sys explicitly allows.
 \subsection{Secure Integer Operations}
 \label{s:sema:sec}
 
-\sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
+\sys assumes two's complement~\cite[\S4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
 An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
@@ -17,19 +17,19 @@ with the most significant bit indicating the sign.  An operation
 may have a subscript $s$ or $u$ to indicate whether it operates on
 signed or unsigned integers, respectively.
 
-\paragraph{Addition \& subtraction \& multiplication.}
-The result of an additive or multiplicative operation should fall
-in the predefined range.  For example,
+\paragraph{Addition, subtraction, and multiplication.}
+The arithmetic result of an additive or multiplicative operation should fall
+in the range of the result type.  For example,
 $\cc{0xf0000000}\times_u 16$ is insecure,
-because the expected product $2^{32}\times
+because the expected arithmetic product $2^{32}\times
 3\times 5$ is out of the range of $32$-bit unsigned integers~($0$
 to $2^{32} - 1$).
 
 \paragraph{Division.}
 The divisor should be non-zero,
-and the result should fall in the predefined range.
+and the arithmetic result should fall in the range of the result type.
 Particularly, $-2^{n-1} /_s {-1}$ is insecure,
-because the expected quotient $2^{n-1}$ is out of
+because the expected arithmetic quotient $2^{n-1}$ is out of
 the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
 
 \paragraph{Shift.}
@@ -60,6 +60,9 @@ evaluates to false and disables the error handling.
 \begin{figure}
 \centering
 \input{code/ext4}
+\nz{What's the error in this code sequence?  Regardless of what
+the if statement does, the convert\_to\_initialized function
+returns the same thing -- the value of {\tt allocated}.}
 \vspace{-1em}
 \caption{An integer error in the ext4 filesystem of the Linux kernel.
 Since \cc{allocated} is declared as \cc{unsigned int}, the test
@@ -69,7 +72,8 @@ error handling logic.}
 \end{figure}
 
 \paragraph{$(2)$ Non-negative value.}
-A variable that represents a data size or an array index should be
+A variable that is used as a data size \nz{how do you know if something
+is used as a data size?  annotations?} or an array index should be
 non-negative.
 
 \autoref{f:ax25-sign} shows an example in the Linux kernel.
@@ -79,6 +83,8 @@ of bytes to be copied from user space to kernel.  However, an
 adversary could supply $-1$ for \cc{optlen} from user space, which
 will bypass both sanity checks because the value is interpreted as
 unsigned in the first comparison and signed in the second.  
+\nz{Why is \cc{optlen} treated differently in the two if statements?
+Explain C rules.}
 The negative \cc{optlen} is later used in the call to \cc{copy_from_user}
 as the size parameter, which flags an integer error.
 
@@ -98,12 +104,13 @@ oops in the subsequent \cc{copy_from_user} call.}
 \label{s:sema:eqv}
 
 It is worth noting that two functionally equivalent operations at
-the machine instruction level may have different integer semantics.
+the machine instruction level may have different integer semantics
+in \sys.
 For example, $\cc{maxnum}\times_u 16$ and $\cc{maxnum} \shl 4$ are
 identical instructions, but the former expression causes an integer
 error if \cc{maxnum} is large, while the latter one is considered
-always secure.  \sys assumes that the developer has chosen the
-intended integer operation.
+always secure.  \sys assumes that the developer uses the
+arithmetically intended integer operation. \nz{``intended'' is vague.}
 
 Any compiler optimization that rewrites
 $\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ will destroy the
@@ -135,6 +142,9 @@ For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
 shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
 amount for 32-bit shifts, e.g., $1 \shl 32 = 1 \shl 0 = 1$.  This semantics
 is also the behavior of ARM and MIPS processors.
+\nz{Why does this matter?  KINT semantics already flag an oversized
+shift as an error, so why do we need to continue reasoning about the
+precise value that an oversized shift expression will have?}
 \end{itemize}
 \sys may miss integer errors that are not modeled by the above
 semantics.  Consider the expression $x / (1 \shl y)$, where $x$ and
@@ -174,6 +184,10 @@ timer that expires after \cc{delay} ticks one often invokes
 number of ticks since the machine started.  \sys recognizes
 this idiom and ignores the addition \cc{jiffies + delay} that may
 theoretically overflow.
+\nz{What does this spec look like?  Do you literally allow the
+ASCII string ``jiffies + delay'', or do you allow a more general
+pattern?  How general?  ``jiffies + *''?  Or ``jiffies + *'' in
+the last argument of {\tt mod\_timer}?}
 
 \begin{figure}
 \centering

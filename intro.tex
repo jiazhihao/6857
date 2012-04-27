@@ -5,7 +5,7 @@ Integer errors, including arithmetic overflow, division-by-zero,
 oversized shift, lossy truncation, and sign misinterpretation, have
 emerged as a threat to systems security.  A 2007 MITRE
 study~\cite{christey:vuln} suggests that they are already ``number
-2 for OS vendor advisories'', only after buffer overflows.  A recent
+2 for OS vendor advisories'', second only to buffer overflows.  A recent
 survey~\cite{chen:kbugs} reviews the reported Linux kernel
 vulnerabilities in the Common Vulnerabilities and Exposures (CVE)
 list~\cite{cve} from 2010 to early 2011, and confirms the finding
@@ -13,11 +13,11 @@ that integer errors account for more than one third of the
 vulnerabilities that can be misused to corrupt the kernel and gain
 root privilege.
 
-\autoref{f:bridge} shows an example of integer errors (CVE-2006-5751)
+\autoref{f:bridge} shows an example of an integer error (CVE-2006-5751)
 in the Linux kernel.  The size for allocating \cc{buf} is computed
 from the multiplication of \cc{maxnum}, a value controlled by user
 space, and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
-32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
+a 32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
 integers, ranging from 0 to $2^{32} - 1$.  The developer's intention
 is to limit the values of \cc{maxnum} and \cc{size} to 256 and 4096,
 respectively.
@@ -33,12 +33,12 @@ bounds and may cause a kernel panic (i.e., denial-of-service).
 Furthermore, the adversary may control the out-of-bounds writes
 (i.e., buffer overflow) in a more elaborate way with carefully
 crafted input, so as to execute arbitrary code and gain root
-privilege.  A similar integer error was actually exploited to
-untether the iOS jailbreak~\cite{esser:ios}.
+privilege.  A similar integer error was actually exploited
+in the iOS jailbreak~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
-denial-of-service, buffer overflow, and privilege escalation we
-just mentioned, a problematic integer error may also lead to information
+denial-of-service, buffer overflow, and privilege escalation
+mentioned above, an integer error can also lead to information
 leakage, for example, if it is used to determine the number of data
 items to be copied from kernel to user space, raising privacy
 concerns.  It may cause more subtle logic bugs if the value is used
@@ -73,12 +73,12 @@ rigidly classify any signed-to-unsigned integer conversion from a
 possibly negative value as an error~\cite{brumley:rich, moy:z3prefix,
 seacord:secure-c}; such sign conversions are so widely used in C
 code that doing so would cause a flood of noisy false
-errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
+errors~\cite[\S6.2]{moy:z3prefix}.
 Developers even intentionally count on integer overflows
 such as $x + y < x$ for the correctness of their programs~\cite{ioc},
 which \sys should not consider as errors.
-\sys needs an integer semantics that recognizes commonly used code
-patterns while still effectively catches integer errors.
+\sys needs integer semantics that recognize commonly used code
+patterns while still effectively catch integer errors.
 %Conceptually, any integer operation that may produce a
 %result different from the infinitely ranged mathematical counterpart
 %flags a potential integer error~\cite{air}.
@@ -87,18 +87,18 @@ A second challenge is to precisely reason about integer operations
 on every code path.  Given the semantics of an integer operation,
 \sys needs to determine whether the control flow can reach that
 operation while simultaneously violating the semantics.  For
-example, in \autoref{f:bridge} \sys should conclude that an overflowed
+example, in \autoref{f:bridge}, \sys should conclude that an overflowed
 product \cc{size} will bypass the sanity check and reach the
 \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
 Linux kernel.  \sys needs to finish scanning the source code in a
 reasonable amount of time.  \sys also should rank reported integer
-errors and remove unlikely ones for human inspection if the bug
+errors for human inspection, and remove unlikely ones if the bug
 list is long.
 
-\sys addresses these challenges with three ideas: a practical integer
-semantics that defines integer errors, a precise analysis algorithm
+\sys addresses these challenges with three ideas: practical integer
+semantics that define integer errors, a precise analysis algorithm
 that performs bit-level reasoning per function, and a set of ranking
 criteria that estimate the security impacts of possible integer
 errors.  \sys accept C source code as input, and inspects each
