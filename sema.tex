@@ -51,24 +51,21 @@ A comparison should not be always true or false (i.e., tautological
 comparison) due to an integer conversion, which disables part of
 the control flow.
 
-For example, in \autoref{f:ext4} the call to \cc{ext4_split_extent}
-returns a signed integer, which will be negative on error.  However,
-the return value is converted to an unsigned integer for comparison,
-leading to a stale expression $\cc{allocated} <_u 0$ that always
-evaluates to false and disables the error handling.
+For example, in \autoref{f:vmscan-sign} the intent was to reset the
+value of \cc{total_scan} if the addition overflows and its value
+goes negative.  However, the type of \cc{total_scan} is unsigned,
+and thus the comparison $\cc{total_scan} <_u 0$ always evaluates
+to false and disables the error handling.
 
 \begin{figure}
 \centering
-\input{code/ext4}
-\nz{What's the error in this code sequence?  Regardless of what
-the if statement does, the convert\_to\_initialized function
-returns the same thing -- the value of {\tt allocated}.}
+\input{code/vmscan-sign}
 \vspace{-1em}
-\caption{An integer error in the ext4 filesystem of the Linux kernel.
-Since \cc{allocated} is declared as \cc{unsigned int}, the test
-$(\cc{allocated} < 0)$ will always be false, which breaks the
-error handling logic.}
-\label{f:ext4}
+\caption{An integer error in \cc{mm/vmscan.c} of the Linux kernel.
+Since \cc{total_scan} is declared as \cc{unsigned long}, the overflow
+test $(\cc{total_scan} < 0)$ will always be false, which breaks the
+error handling.}
+\label{f:vmscan-sign}
 \end{figure}
 
 \paragraph{$(2)$ Non-negative value.}

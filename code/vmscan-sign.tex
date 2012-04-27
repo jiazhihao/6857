@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PY{k}{struct} \PY{n}{shrinker} \PY{o}{*}\PY{n}{shrinker} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{k+kt}{unsigned} \PY{k+kt}{long} \PY{k+kt}{long} \PY{n}{delta} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{k+kt}{unsigned} \PY{k+kt}{long} \PY{n}{total\PYZus{}scan} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{k+kt}{unsigned} \PY{k+kt}{long} \PY{n}{max\PYZus{}pass} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+\PY{n}{total\PYZus{}scan} \PY{o}{+}\PY{o}{=} \PY{n}{delta}\PY{p}{;}
+\PY{k}{if} \PY{p}{(}\PY{n}{total\PYZus{}scan} \PY{o}{\PYZlt{}} \PY{l+m+mi}{0}\PY{p}{)} \PY{p}{\PYZob{}}
+    \PY{n}{printk}\PY{p}{(}\PY{n}{KERN\PYZus{}ERR} \PY{l+s}{"}\PY{l+s}{shrink\PYZus{}slab: \PYZpc{}pF negative }\PY{l+s}{"}
+           \PY{l+s}{"}\PY{l+s}{objects to delete nr=\PYZpc{}ld}\PY{l+s+se}{\PYZbs{}n}\PY{l+s}{"}\PY{p}{,}
+           \PY{n}{shrinker}\PY{o}{-}\PY{o}{\PYZgt{}}\PY{n}{shrink}\PY{p}{,} \PY{n}{total\PYZus{}scan}\PY{p}{)}\PY{p}{;}
+    \PY{n}{total\PYZus{}scan} \PY{o}{=} \PY{n}{max\PYZus{}pass}\PY{p}{;}
+\PY{p}{\PYZcb{}}
+\end{Verbatim}
