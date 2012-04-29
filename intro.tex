@@ -22,8 +22,8 @@ integers, ranging from 0 to $2^{32} - 1$.  The developer's intention
 is to limit the values of \cc{maxnum} and \cc{size} to 256 and 4096,
 respectively.
 
-If an adversary supplies a large \cc{maxnum}, say
-\cc{0xf0000000}, however, the multiplication $\cc{maxnum} \times 16$ would
+If an adversary supplies a large \cc{maxnum}, say $2^{31}$,
+however, the multiplication $\cc{maxnum} \times 16$ would
 overflow the 32-bit unsigned integer range and result in \cc{size}
 being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
