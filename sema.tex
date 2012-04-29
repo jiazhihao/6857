@@ -40,8 +40,9 @@ to the C standard.
 \sys considers an oversized shift as an integer error.
 
 \paragraph{Conversion.}
-Lossy truncations and sign conversions are often seen in C
-code, and they can be found by invoking GCC with \cc{-Wconversion}.
+Lossy truncations and sign conversions are common practice seen in
+C code.  Therefore,
+%, and they can be found by invoking GCC with \cc{-Wconversion}.
 \sys does not impose any restrictions on a conversion,
 unless its result is used in one of the following cases:
 
@@ -50,21 +51,23 @@ A comparison should not be always true or false (i.e., tautological
 comparison) due to an integer conversion, which otherwise would
 disable part of the control flow.
 
-For example, in \autoref{f:vmscan-sign} the intent of the code was
-to reset the value of \cc{total_scan} if the addition overflows and
-its value goes negative.  However, the type of \cc{total_scan} is
-unsigned, and thus the comparison $\cc{total_scan} <_u 0$ always
-evaluates to false and disables the error handling.
+For example, in \autoref{f:olpc-sign} the intent of the comparison
+$\cc{status == -1}$ was to check whether \cc{read_status} returns
+${-1}$.  However, since the function returns an unsigned 8-bit
+integer, \cc{status} is non-negative.  Consequently,
+the comparison always evaluates to false, which disables the error
+handling.
 
 \begin{figure}
 \centering
-\input{code/vmscan-sign}
+\input{code/olpc-sign}
 \vspace{-1em}
-\caption{An integer error in \cc{mm/vmscan.c} of the Linux kernel.
-Since \cc{total_scan} is declared as \cc{unsigned long}, the overflow
-test $(\cc{total_scan} < 0)$ will always be false, which breaks the
-error handling.}
-\label{f:vmscan-sign}
+\caption{An integer error in the OLPC secondary display controller
+driver of the Linux kernel.  Since \cc{->read_status()} returns an
+unsigned 8-bit integer, the value of \cc{status} is in the range
+$[0, 255]$.  Comparing \cc{status} with ${-1}$ will always be false,
+which breaks the error handling.}
+\label{f:olpc-sign}
 \end{figure}
 
 \paragraph{$(2)$ Array index.}
