@@ -3,7 +3,6 @@ static int ax25_setsockopt(...,
 	char __user *optval, int optlen)
 {
 	char devname[IFNAMSIZ];
-	...
 	/* consider optlen = 0xffffffff */
 	/* optlen is treated as unsigned: $2^{32}-1$ */
 	if (optlen < sizeof(int))

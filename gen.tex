@@ -69,18 +69,18 @@ $y$ is the number of bits to shift.
 
 \paragraph{Conversion.}
 As defined \autoref{s:sema:sec}, \sys deals with conversions
-in the following two cases.
+in the following cases.
 
 To detect tautological comparisons, \sys derives a predicate from
 each comparison.  If the predicate is trivially true or false,
 and it resulted from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
-For a value $x$ that should be conceptually non-negative (i.e.,
-array indices and ``size'' function parameters), the error predicate
-\sys generates is simply $x <_s 0$.
-\sys implements a front-end plugin to recognize array indices.  \sys requires
-user-provided annotations on ``size'' function parameters.  As for
+For an array index $x$, \sys generates an error predicate $x <_s 0$.
+\sys implements a front-end plugin to recognize array indices.
+
+Similarly, for a data size $x$, \sys generates an error predicate $x <_s 0$.
+\sys requires user-provided annotations on ``size'' function parameters.  As for
 the Linux kernel, we annotate the ``size'' parameters in functions like \cc{memcpy},
 \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
 

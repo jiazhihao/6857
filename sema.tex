@@ -44,18 +44,18 @@ to the C standard.
 Lossy truncations and sign conversions are often seen in C
 code, and they can be found by invoking GCC with \cc{-Wconversion}.
 \sys does not impose any restrictions on a conversion,
-unless its result is used in one of the following two cases:
+unless its result is used in one of the following cases:
 
 \paragraph{$(1)$ Comparison.}
 A comparison should not be always true or false (i.e., tautological
-comparison) due to an integer conversion, which disables part of
-the control flow.
+comparison) due to an integer conversion, which otherwise would
+disable part of the control flow.
 
-For example, in \autoref{f:vmscan-sign} the intent was to reset the
-value of \cc{total_scan} if the addition overflows and its value
-goes negative.  However, the type of \cc{total_scan} is unsigned,
-and thus the comparison $\cc{total_scan} <_u 0$ always evaluates
-to false and disables the error handling.
+For example, in \autoref{f:vmscan-sign} the intent of the code was
+to reset the value of \cc{total_scan} if the addition overflows and
+its value goes negative.  However, the type of \cc{total_scan} is
+unsigned, and thus the comparison $\cc{total_scan} <_u 0$ always
+evaluates to false and disables the error handling.
 
 \begin{figure}
 \centering
@@ -68,19 +68,25 @@ error handling.}
 \label{f:vmscan-sign}
 \end{figure}
 
-\paragraph{$(2)$ Non-negative value.}
-A variable that is used as a data size (as specified using annotations,
-which we describe later) or an array index should be non-negative.
+\paragraph{$(2)$ Array index.}
+An array index should be non-negative,
+otherwise it would lead to out-of-bounds access.
 
-\autoref{f:ax25-sign} shows an example in the Linux kernel.
-The third parameter of $\cc{copy_from_user}(\cc{dst}, \cc{src},
-\cc{size})$ should be non-negative since it indicates the number
-of bytes to be copied from user space to kernel.  However, an
-adversary could supply $-1$ for \cc{optlen} from user space, which
-will bypass both sanity checks because the value is interpreted as
-unsigned in the first comparison and signed in the second.  
-\nz{Why is \cc{optlen} treated differently in the two if statements?
-Explain C rules.}
+\paragraph{$(3)$ Data size.}
+A data size should be non-negative, otherwise it would be misinterpreted
+as a large positive value and lead to out-of-bounds access.
+
+\autoref{f:ax25-sign} shows an example of a negative size in the
+Linux kernel.  The third parameter of $\cc{copy_from_user}$ should
+be non-negative since it indicates the number of bytes to be copied
+from user space to kernel.  However, an adversary could supply
+${-1}$ for \cc{optlen} from user space, which will bypass both
+sanity checks:
+according C conversion rules, \cc{optlen} is interpreted as positive
+in the first comparison because the type of the right-hand side
+\cc{sizeof(int)} is unsigned, while it is still considered as
+negative in the second comparison because the type of the right-hand
+side \cc{IFRAMESIZ} is signed.
 The negative \cc{optlen} is later used in the call to \cc{copy_from_user}
 as the size parameter, which flags an integer error.
 
@@ -88,11 +94,12 @@ as the size parameter, which flags an integer error.
 \centering
 \input{code/ax25-sign}
 \vspace{-1em}
-\caption{An integer error (CVE-2009-2909) in the AX.25
-network protocol implementation of the Linux kernel.  A negative
-\cc{optlen} will bypass both sanity checks due to sign misinterpretation
- and trigger an kernel
-oops in the subsequent \cc{copy_from_user} call.}
+\caption{An integer error in the AX.25 network protocol implementation
+of the Linux kernel (CVE-2009-2909).  A negative \cc{optlen} will
+bypass both sanity checks due to sign misinterpretation and reach
+the \cc{copy_from_user} call, which interprets the negative value
+as a large positive integer and causes a stack overflow on architectures
+that do not prevent a large \cc{copy_from_user} size.}
 \label{f:ax25-sign}
 \end{figure}
 
