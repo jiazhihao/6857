@@ -54,7 +54,8 @@ disable part of the control flow.
 For example, in \autoref{f:olpc-sign} the intent of the comparison
 $\cc{status == -1}$ was to check whether \cc{read_status} returns
 ${-1}$.  However, since the function returns an unsigned 8-bit
-integer, \cc{status} is non-negative.  Consequently,
+integer, which is zero-extended to \cc{int} according to C's
+conversion rules, \cc{status} is non-negative.  Consequently,
 the comparison always evaluates to false, which disables the error
 handling.
 
