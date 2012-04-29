@@ -40,7 +40,7 @@ to the C standard.
 \sys considers an oversized shift as an integer error.
 
 \paragraph{Conversion.}
-Lossy truncations and sign conversions are common practice seen in
+Lossy truncations and sign conversions are common practice in
 C code.  Therefore,
 %, and they can be found by invoking GCC with \cc{-Wconversion}.
 \sys does not impose any restrictions on a conversion,
@@ -85,7 +85,7 @@ be non-negative since it indicates the number of bytes to be copied
 from user space to kernel.  However, an adversary could supply
 ${-1}$ for \cc{optlen} from user space, which will bypass both
 sanity checks:
-according C conversion rules, \cc{optlen} is interpreted as positive
+according C's conversion rules, \cc{optlen} is interpreted as positive
 in the first comparison because the type of the right-hand side
 \cc{sizeof(int)} is unsigned, while it is still considered as
 negative in the second comparison because the type of the right-hand
