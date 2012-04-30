@@ -20,7 +20,8 @@ integer family that provides NaN semantics: an integer value goes
 into error state (i.e., NaN) once it overflows, and remains NaN in
 future computation.
 
-The basic usage of NaN integers is to add a type qualifier \cc{nan}
+We implement NaN integers by modifying the Clang compiler.
+The basic usage is to add a type qualifier \cc{nan}
 to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
@@ -29,8 +30,16 @@ when used with an integer of type $\cc{nan}\ T$.
 \item
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
-The result value is NaN if any source operand is NaN.
 \end{itemize}
+Our modified compiler inserts error checks for every arithmetic or
+comparison operation of type $\cc{nan}\ T$, and sets the result to
+NaN if either any source operand is NaN or an integer error occurred
+during the operation.
+%
+The compiler then generates efficient overflow
+detection instructions depending on the architecture.  For example,
+on x86 the compiler may use the \cc{jno} instruction, which jumps
+if no overflow happened.
 
 \noindent
 The NaN integer API consists of two functions:
@@ -43,22 +52,49 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
 With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
-the allocation size and return \cc{NULL} if the size is NaN~(i.e.,
-the calculation overflowed).
+the allocation size, as follows.
+\input{code/malloc-nan}
+The modified \cc{malloc} would change the allocation size to a large
+value \cc{SIZE_MAX} if \cc{size} is NaN (i.e., the calculation
+overflowed).  We assume that \cc{libc_malloc(SIZE_MAX)} returns
+NULL due to a too large allocation size.
 
 Below is an example use case.
 \input{code/use-nan}
 In this way, programmers do not have to write any overflow checks
 when calculating the allocation size.
-\nz{should we show the internals of malloc to show how
-isnan/unnan are used?}
+
+We modified the e1000 driver in the Linux kernel to use NaN integers
+for all allocation sizes.
+\xw{changed XXX lines of code. the slowdown is negligible.
+still want to talk about infiniband?}
+
+We use \cc{x * y} as a microbenchmark to measure the runtime
+overhead introduced by the manual overflow check \cc{x != 0 \&\& y
+> UINT_MAX / x}, and that by the NaN integer's automated check
+inserted by the compiler, respectively.
+%
+The baselines are a simple multiplication and that followed by a
+\cc{malloc} call, noted as w/o and w/ \cc{malloc}, respectively.
+
+\autoref{f:data:nan-micro} shows the results:
+%
+w/o \cc{malloc}, the manual check incurs $7\times$ slowdown, while
+the slowdown using NaN integers is only $44.5\%$;
+%
+w/ \cc{malloc}, the slowdown numbers are $31\%$ and $3.8\%$,
+respectively.
+%
+We can see that the NaN integer checks are more efficient than
+manual checks.
 
 \begin{figure}
 \centering
 \small
 \input{data/nan-micro}
-\caption{Microbenchmark of performance overhead using manual overflow
-checks and NaN integers, measured in cycles.}
+\caption{Performance overhead of an multiplication \cc{n * size}, using
+manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and automated
+check via NaN integers, measured in cycles.}
 \label{f:data:nan-micro}
 \end{figure}
 
@@ -78,10 +114,6 @@ and wrap the original check with $\cc{nan}(\dots, \cc{true})$.
 \input{code/ib-nan}
 \fi
 
-choose $2^n-1$ as the NaN.
-
-
-e1000.
 
 \subsection{Safe Array Allocator}
 
