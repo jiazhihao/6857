@@ -175,16 +175,21 @@ on the \cc{s_log_groups_per_flex} value, which is read from disk,
 to prevent a division-by-zero DoS attack when the value is large
 and the result of the shift becomes zero.
 \input{code/ext4-bad}
-The sanity check $(\cc{groups_per_flex} < 2)$ relies on undefined
-behavior, an oversized shift.  This would lead to two potential
-issues.
+In the sanity check, the value of \cc{groups_per_flex} comes from
+a shift with a possible oversized amount.
+%This would lead to two potential
+%issues.
+%
+%First,
+For example, on x86
+when \cc{s_log_groups_per_flex} is set to a corrupted value like
+36, $\cc{groups_per_flex} = 1 \shl 36$ is essentially $1 \shl 4 =
+16$, since the shifting instruction truncates the amount to 5~bits.
+This will bypass the check, leaving the two values
+\cc{s_log_groups_per_flex}~(36) and \cc{groups_per_flex}~(16)
+inconsistent.
 
-First, when \cc{s_log_groups_per_flex} is set to a corrupted value
-like 36, $\cc{groups_per_flex} = 1 \shl 36$ is essentially $1 \shl
-4 = 16$ on x86.  This will bypass the check, leaving
-the two values \cc{s_log_groups_per_flex}~(36) and
-\cc{groups_per_flex}~(16) inconsistent.
-
+\if 0
 Second, the C compiler may rewrite undefined code in unexpected
 ways.  Consider the following equivalent sanity check (which was
 in the originally proposed patch), assuming \cc{groups_per_flex}
@@ -196,8 +201,11 @@ $\cc{groups_per_flex} == 0$, since it considers the case impossible,
 following the C standard.  This would make the patched code as
 vulnerable as the original.  GCC~4.6 keeps the check, but
 there is no guarantee that future versions will do the same.
+\fi
 
-\nz{What is the correct fix?  s_log_groups_per_flex>=32}
+CVE-2012-2100 was assigned to this imperfect fix after we submitted
+a patch, which performs the check
+$\cc{sbi->s_log_groups_per_flex} > 31$ before the shift.
 
 \subsection{Completeness Validation}
 \label{s:eval:complete}
