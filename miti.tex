@@ -38,7 +38,7 @@ The NaN integer API consists of the following functions.
 $\cc{bool}\ \cc{isnan}(\cc{nan}\ T x)$ \hfill (NaN testing) \\
 returns true if $x$ is NaN, or false otherwise.
 \item
-$T\ \cc{unnan}(\cc{nan}\ T x, T v))$ \hfill (integer casting) \\
+$T\ \cc{unnan}(\cc{nan}\ T x, T v)$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
 With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
