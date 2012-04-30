@@ -11,11 +11,9 @@ may forget to perform a check, or use wrong bounds that some inputs
 can bypass. \xw{reference results from eval.}
 
 Even for a simple multiplication \cc{n * size} that is often used
-as a \cc{malloc} size, programmers need a non-trivial check \cc{(nsize
+as a \cc{malloc} size, programmers need a non-trivial check \cc{(size
 \&\& n > SIZE_MAX / size)}.  When the expression gets more complex,
-such as \cc{a * b + c * d}, programmers would have to write checks for
-every arithemtic operation.
-
+programmers would have to write checks for every arithemtic operation.
 
 To automate integer error checking, we propose a new
 integer faimily that provides NaN semantics: an integer value goes
@@ -43,9 +41,14 @@ returns true if $x$ is NaN, or false otherwise.
 $T\ \cc{unnan}(\cc{nan}\ T x, T v))$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
+With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
+the allocation size and return \cc{NULL} if the size is NaN~(i.e.,
+the calculation overflowed).
 
-We modify \cc{malloc} to take an \cc{nan size_t} as the
-allocation size and return \cc{NULL} if the size is NaN.
+Below is an example use case.
+\input{code/use-nan}
+In this way, programmers do not have to write any overflow checks
+when calculating the allocation size.
 
 \begin{figure}
 \centering
@@ -55,19 +58,6 @@ allocation size and return \cc{NULL} if the size is NaN.
 checks and NaN integers, measured in cycles.}
 \label{f:data:nan-micro}
 \end{figure}
-
-\if 0
-
-Below is an example.
-\input{code/use-nan}
-In the multiplication \cc{c * sizeof(int)}, the type of \cc{n} is
-\cc{nan size_t}, so \cc{sizeof(int)} is promoted to \cc{nan size_t}.
-If the multiplication overflows, the value of \cc{bytes} becomes NaN.
-
-We also change \cc{malloc} to take an \cc{nan size_t} as the
-allocation size and return \cc{NULL} if the size is NaN.
-
-\fi
 
 \if 0
 Below is an example check in the infiniband driver.
@@ -89,10 +79,6 @@ choose $2^n-1$ as the NaN.
 
 
 e1000.
-
-performance overhead.
-
-microbenchmark.
 
 \subsection{Safe Array Allocator}
 
