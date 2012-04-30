@@ -182,25 +182,23 @@ exit value $n$ in the predicate $i <_s 0$.
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
 
-Since both error and path predicates are generated within a single
-function, \sys generates range predicate to propagate global
-information across functions for improving accuracy and reducing
-false errors.
+Error and path predicates are generated based on one function at a time,
+and do not capture constraints on arguments, return values, or memory
+locations that span multiple functions, which can lead to false error
+reports.  To mitigate this problem, \sys generates range predicates to
+propagate global constraints across functions.
 
-\sys represents ranges using two constant integers as the minimum
-and maximum values, respectively, for better performance.  If the
-range of a parameter $x$ is from 1 to 10, \sys generates the range
-predicates $x \geq 1 \land x \leq 10$.
-Otherwise, if \sys simply
-generates a path predicate along the call graph, the size of the
-path predicate grows exponentially, causing the solver to run for
-too long time.
+Tracking arbitrary predicates across functions can lead to complex
+predicates, which would not scale to a large system such as the Linux
+kernel.  Instead, \sys tracks range predicates across functions using
+two constant integers as the minimum and maximum values, respectively.
+If the range of a parameter $x$ is from 1 to 10, \sys generates the
+range predicates $x \geq 1 \land x \leq 10$.
 
 \sys implements the value range propagation algorithm for inferring
-ranges of function parameters, structure fields, and global
-variables~\cite{patterson:vrp}.  The detail of the algorithm is
-omitted here.  We manually reviewed and refined the
-output ranges.
+ranges of function parameters, return values, structure fields, and
+global variables~\cite{patterson:vrp}.  The detail of the algorithm is
+omitted here.  We manually reviewed and refined the output ranges.
 
 Some domain-specific range knowledge is required from users to
 reduce false errors.  For example, the C standard does not impose
@@ -208,6 +206,8 @@ any limit on the \cc{argc} parameter of the \cc{main} function, nor
 could the value range propagation algorithm infer that range.
 Currently we annotate its range as $[0, 1024]$; otherwise \sys would
 report an addition overflow for on expressions like $\cc{argc} + 1$.
+\nz{why does \cc{argc} show up in the kernel?  use sysctl example
+instead?}
 
 %handle sysctl interface.
 
@@ -247,7 +247,6 @@ would have reported an error.
 \paragraph{Memory model.}
 \sys employs a simple memory model: a value returned from a load
 instruction is unconstrained~(unless the value has a range predicate).
-\nz{Range predicates have not been defined yet.}
 %
 In other words, \sys considers two values from different load
 instructions to be unrelated.

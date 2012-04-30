@@ -32,13 +32,14 @@ operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 The result value is NaN if any source operand is NaN.
 \end{itemize}
 
-The NaN integer API consists of the following functions.
+\noindent
+The NaN integer API consists of two functions:
 \begin{itemize}
 \item
-$\cc{bool}\ \cc{isnan}(\cc{nan}\ T x)$ \hfill (NaN testing) \\
+$\cc{bool}\ \cc{isnan}(\cc{nan}\ T\; x)$ \hfill (NaN testing) \\
 returns true if $x$ is NaN, or false otherwise.
 \item
-$T\ \cc{unnan}(\cc{nan}\ T x, T v)$ \hfill (integer casting) \\
+$T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
 With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
@@ -49,6 +50,8 @@ Below is an example use case.
 \input{code/use-nan}
 In this way, programmers do not have to write any overflow checks
 when calculating the allocation size.
+\nz{should we show the internals of malloc to show how
+isnan/unnan are used?}
 
 \begin{figure}
 \centering
