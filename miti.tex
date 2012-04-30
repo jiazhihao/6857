@@ -20,8 +20,7 @@ integer family that provides NaN semantics: an integer value goes
 into error state (i.e., NaN) once it overflows, and remains NaN in
 future computation.
 
-We implement NaN integers by modifying the Clang compiler.
-The basic usage is to add a type qualifier \cc{nan}
+The basic usage of NaN integers is to add a type qualifier \cc{nan}
 to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
@@ -31,15 +30,17 @@ when used with an integer of type $\cc{nan}\ T$.
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 \end{itemize}
-Our modified compiler inserts error checks for every arithmetic or
+We implement NaN integers by modifying the Clang compiler.
+The compiler inserts error checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
 during the operation.
-%
-The compiler then generates efficient overflow
-detection instructions depending on the architecture.  For example,
-on x86 the compiler may use the \cc{jno} instruction, which jumps
-if no overflow happened.
+
+The compiler generates efficient overflow detection instructions
+for these checks, depending on the target architecture.  For example,
+to detect a multiplication overflow on x86, the compiler may only
+need to insert one \cc{jno} instruction after the multiplication,
+which jumps if no overflow happened.
 
 \noindent
 The NaN integer API consists of two functions:
