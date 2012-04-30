@@ -4,23 +4,68 @@
 This section discusses mitigating integer errors
 in C code.
 
-\subsection{NaN Semantics}
+\subsection{NaN Integer Semantics}
 
-modular arithmetic is to blame (could talk about saturation arithmetic
-as well).
-
-rationale: programmers forget to check integer overflows,
-or use wrong bounds.  automate the checking.
-
-We propose an new integer type that follows NaN semantics: an
-integer value becomes NaN once it overflows and remains NaN in
+Writing integer error checks is tedious and error-prone.  Programmers
+may forget to perform a check, or use wrong bounds that some inputs
+can bypass.  To automate integer error checking, we propose a new
+integer faimily that provides NaN semantics: an integer value goes
+into error state (i.e., NaN) once it overflows, and remains NaN in
 future computation.
+
+The basic usage of NaN integers is to add a type qualifier \cc{nan}
+to an actual integer type, such as \cc{nan size_t}.
+\begin{itemize}
+\item
+An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
+when used with an integer of type $\cc{nan}\ T$.
+\item
+The result type of an arithmetic or comparison operation with
+operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
+The result value is NaN if any source operand is NaN.
+\end{itemize}
+
+The NaN integer API consists of the following functions.
+\begin{itemize}
+\item
+$\cc{bool}\ \cc{isnan}(\cc{nan}\ T x)$ \hfill (NaN testing) \\
+returns true if $x$ is NaN, or false otherwise.
+\item
+$T\ \cc{unnan}(\cc{nan}\ T x, T v))$ \hfill (integer casting) \\
+returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
+\end{itemize}
+
+\if 0
+
+Below is an example.
+\input{code/use-nan}
+In the multiplication \cc{c * sizeof(int)}, the type of \cc{n} is
+\cc{nan size_t}, so \cc{sizeof(int)} is promoted to \cc{nan size_t}.
+If the multiplication overflows, the value of \cc{bytes} becomes NaN.
+
+We also change \cc{malloc} to take an \cc{nan size_t} as the
+allocation size and return \cc{NULL} if the size is NaN.
+
+\fi
+
+\if 0
+Below is an example check in the infiniband driver.
+\input{code/ib-check}
+In the check, \cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} are
+all directly from user space, and thus their values can be any
+(32-bit) integers.  Carefully crafted values would overflow the
+multiplications and addition at the right-hand side and bypass
+check.  To avoid overflows, one would need to write additional
+checks, such as:
+\input{code/ib-more}
+With NaN integers, one needs to change the type of
+\cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} to NaN integers,
+and wrap the original check with $\cc{nan}(\dots, \cc{true})$.
+\input{code/ib-nan}
+\fi
 
 choose $2^n-1$ as the NaN.
 
-$\cc{isNaN}(x)$.
-
-focus on allocation size, but the type is general.
 
 e1000.
 
