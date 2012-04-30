@@ -20,6 +20,7 @@
 }
 
 @misc{cve,
+	key = {Common Vulnerabilities and Exposures ({CVE})},
 	howpublished = {\url{http://cve.mitre.org/}},
 	title = {Common Vulnerabilities and Exposures ({CVE})},
 }
@@ -81,6 +82,7 @@
 }
 
 @techreport{us-cert:gcc,
+        author = {US-CERT\@},
 	note = {\url{http://www.kb.cert.org/vuls/id/162289}},
 	title = {{C} compilers may silently discard some wraparound checks},
 	institution = {US-CERT},
@@ -89,15 +91,15 @@
 	year = {2008}
 }
 
-@techreport{usb:buffer-overflow,
+@misc{usb:buffer-overflow,
+	author = {{MWR InfoSecurity}},
 	title = {{Linux} Kernel caiaq {USB} Drivers Buffer Overflow Vulnerability},
-	institution = {MWR InfoSecurity},
-	type = {Security Advisory},
-	number = {for CVE-2011-0712},
+	howpublished = {Security Advisory for CVE-2011-0712},
 	year = {2011},
 }
 
 @techreport{gcc:signed-overflow,
+        key = {assert},
 	note = {\url{http://gcc.gnu.org/bugzilla/show_bug.cgi?id=30475}},
 	title = {\cc{assert(int+100 > int)} optimized away},
 	institution = {GCC},
@@ -344,10 +346,12 @@
 	author = {Dave Jones},
 	howpublished = {\url{http://codemonkey.org.uk/projects/trinity/}},
 	title = {Trinity: A system call fuzzer},
+        year = {2012},
 }
 
 @misc{iknowthis,
 	author = {Tavis Ormandy},
 	howpublished = {\url{http://code.google.com/p/iknowthis/}},
 	title = {{iknowthis} {Linux} System Call Fuzzer},
+        year = {2011},
 }
