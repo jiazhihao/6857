@@ -147,9 +147,8 @@ convenient way for developers to provide fine-grained error handlers
 if such an alarm is raised.  It also incurs noticeable runtime
 overhead~\cite{ioc}, given the prevalence of integer operations.
 
-The AIR model~\cite{air} provides a different approach of loosing
-\nz{i don't understand what "loosing" means here}
-integer constraints.  In the AIR model, it is acceptable to delay
+The AIR model~\cite{air} delays integer errors until the error value
+is used.  In the AIR model, it is acceptable to delay
 catching integer semantic violations and raising traps, as long as the program's
 behavior is the same as if all integers were infinitely ranged.
 Developers, however, may intentionally use overflow operations like
