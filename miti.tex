@@ -13,10 +13,10 @@ can bypass. \xw{reference results from eval.}
 Even for a simple multiplication \cc{n * size} that is often used
 as a \cc{malloc} size, programmers need a non-trivial check \cc{(size
 \&\& n > SIZE_MAX / size)}.  When the expression gets more complex,
-programmers would have to write checks for every arithemtic operation.
+programmers would have to write checks for every arithmetic operation.
 
 To automate integer error checking, we propose a new
-integer faimily that provides NaN semantics: an integer value goes
+integer family that provides NaN semantics: an integer value goes
 into error state (i.e., NaN) once it overflows, and remains NaN in
 future computation.
 
