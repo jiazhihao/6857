@@ -100,9 +100,11 @@ as the size parameter, which flags an integer error.
 \caption{An integer error in the AX.25 network protocol implementation
 of the Linux kernel (CVE-2009-2909).  A negative \cc{optlen} will
 bypass both sanity checks due to sign misinterpretation and reach
-the \cc{copy_from_user} call, which interprets the negative value
-as a large positive integer and causes a stack overflow on architectures
-that do not prevent a large \cc{copy_from_user} size.}
+the \cc{copy_from_user} call, which interprets \cc{optlen}
+as a large positive integer.  Depending on the architecture-specific
+implementation, the consequences range from a silent failure, a
+kernel oops, to a stack overflow.
+}
 \label{f:ax25-sign}
 \end{figure}
 
