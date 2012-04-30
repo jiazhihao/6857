@@ -8,7 +8,16 @@ in C code.
 
 Writing integer error checks is tedious and error-prone.  Programmers
 may forget to perform a check, or use wrong bounds that some inputs
-can bypass.  To automate integer error checking, we propose a new
+can bypass. \xw{reference results from eval.}
+
+Even for a simple multiplication \cc{n * size} that is often used
+as a \cc{malloc} size, programmers need a non-trivial check \cc{(nsize
+\&\& n > SIZE_MAX / size)}.  When the expression gets more complex,
+such as \cc{a * b + c * d}, programmers would have to write checks for
+every arithemtic operation.
+
+
+To automate integer error checking, we propose a new
 integer faimily that provides NaN semantics: an integer value goes
 into error state (i.e., NaN) once it overflows, and remains NaN in
 future computation.
@@ -34,6 +43,18 @@ returns true if $x$ is NaN, or false otherwise.
 $T\ \cc{unnan}(\cc{nan}\ T x, T v))$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
+
+We modify \cc{malloc} to take an \cc{nan size_t} as the
+allocation size and return \cc{NULL} if the size is NaN.
+
+\begin{figure}
+\centering
+\small
+\input{data/nan-micro}
+\caption{Microbenchmark of performance overhead using manual overflow
+checks and NaN integers, measured in cycles.}
+\label{f:data:nan-micro}
+\end{figure}
 
 \if 0
 
