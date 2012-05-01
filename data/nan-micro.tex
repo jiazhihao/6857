@@ -1,11 +1,14 @@
-\begin{tabular}{rrrr}\toprule
-& no check & manual check & NaN integer \\
+\begin{tabular}{lr@{$\pm$}lr@{$\pm$}l}\toprule
+& \multicolumn{2}{c}{w/o \cc{malloc}} & \multicolumn{2}{c}{w \cc{malloc}} \\
 \midrule
-w/o \cc{malloc}
-&  3.001  & 24.033  & 4.336
+no check
+&  3.00 & 0.01 & 79.03  & 0.01
 \\
-w/ \cc{malloc}
-& 79.034 & 103.544 & 82.035
+manual check
+& 24.01 & 0.01 & 104.04 & 0.03
+\\
+NaN integer check
+& 4.05 & 0.17 & 82.03 & 0.05
 \\
 \bottomrule
 \end{tabular}
