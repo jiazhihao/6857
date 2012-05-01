@@ -61,7 +61,8 @@ from the Boolector constraint
 solver~\cite[\chapterautorefname~3.5]{brummayer:phd}, which can be
 solved far more efficiently without computing the product.  The
 detailed implementation of the predicate is beyond the scope of
-this paper.
+this paper.\fk{Can we delete the last sentence?  it doesn't see to be our
+  contribution; we seem to be exploiting features that Boolean has for this case.}
 
 \paragraph{Shift.}
 The OOB predicate \sys generates for a $n$-bit shift operation
@@ -206,7 +207,7 @@ full sets.
 The range table is consulted each time when a function accesses its arguments,
 uses values returned by a function call, loads from a structure member or
 global variables.  Within the function, value ranges are propagated using range
-arithmetics as described in ~\cite{range-analysis}.  When a value reaches an
+arithmetics~\cite{range-analysis}.  When a value reaches an
 external sink through argument passing, function returns, stores to structure
 members or global variables, the corresponding range table entry is updated by
 merging its previous range with the range of the incoming value. The algorithm
@@ -239,7 +240,7 @@ the LLVM IR code for each function.
 expression~\cite{engelen:symbolic}, and tries to simplify it if
 possible.  \sys considers a pointer expression that it fails to simplify
 as an unconstrained integer, which can be any value within its range.
-Consider the code snippet below.
+Consider the following code snippet:
 %
 \input{code/pid-ptrsub}
 %
