@@ -2,50 +2,52 @@
 \label{s:rank}
 
 \sys may report a long list of potential errors.  We are only interested
-in serious errors.  We consider an integer error as serious if the
-result is either computed based on untrusted sources, or is used in
-sensitive sinks.  Such sources and sinks are generally specific to
+in serious ones.  We consider an integer error as serious if the
+result is either computed based on untrusted inputs, or is used in
+sensitive sinks.  Such inputs and sinks are generally specific to
 the system being analyzed.  This section discuss them in the context
 of the Linux kernel.
 
-\subsection{Untrusted source}
+\subsection{Untrusted inputs}
 
-Untrusted sources are essentially all channels into the kernel from
-the outside, including data copied from user space (via system
-calls, virtual file systems like \cc{sysfs}, or kernel functions
-like \cc{copy_from_user}), received from network, and read from
-disk.
-%\xw{Xen: Dom0 input from DomU?}
-The kernel usually needs to perform sanity checks on this data to
-avoid being tricked by an adversary.
+Untrusted inputs are all channels into the kernel from the outside world,
+including data copied from the user space (via system calls, virtual file
+systems like \cc{sysfs}, or kernel functions like \cc{copy_from_user()}),
+received from the network, and read from disks. The kernel usually needs to
+perform sanity checks before using them. 
 
-Two most notable error-prone channels are \cc{ioctl} and \cc{setsockopt},
-due to their infamous irregular interfaces and pervading implementations
-in device drivers and network protocols.  \sys pays special attention
-to integer errors that could happen in their calling context.
-\nz{What does "in their calling context" mean?}
-\nz{What does "pays special attention" mean?}
-
-In general, hardware devices are considered trusted.  Driver code
-often does not validate the response data from hardware.  According
-to our initial experience, the driver developers are unlikely to
-accept patches that fix the validation.  Thus, \sys filters out
-integer errors caused by hardware,
-%\sys also trusts kernel module parameters for the same reason.
-%
-with the exception of USB devices.  Recent research has demonstrated
-how to develop a malicious USB device to plug in a Linux box and
+In general, hardware devices are considered trusted. Device drivers often do
+not validate the I/O response from the hardware. Thus, \sys excludes them from
+untrusted inputs, with the exception of USB devices.  Recent research has
+demonstrated how to develop a malicious USB device to plug in a Linux box and
 exploit the kernel~\cite{usb:buffer-overflow}.
 
-\subsection{Sensitive Sink}
+\sys propagates untrusted inputs across functions using an iterative algorithm
+similar to what we discussed in Section \ref{s:gen:range}. We manually annotate
+taint sources for the Linux kernel, which include system call arguments, the
+destination argument of \cc{copy_from_user()} and \cc{get_user()}. For network,
+file system and USB drivers, the return values of endian conversion functions
+(e.g. \cc{be32_to_cpu()}) are also marked as taint sources because the
+converting values are likely to originate from the network or disks.
 
-Sensitive sinks include control flow decisions based on the outcome
-of an integer operation, data escaping from the kernel to the
-outside \nz{what does this mean?}, and data
-sizes for allocation and I/O communication.  An erroneous integer
-value used in such places is more likely to damage the system.
 
-\subsection{Annotation}
+%Two most notable error-prone channels are \cc{ioctl} and \cc{setsockopt},
+%due to their infamous irregular interfaces and pervading implementations
+%in device drivers and network protocols.  \sys pays special attention
+%to integer errors that could happen in their calling context.
+%\nz{What does "in their calling context" mean?}
+%\nz{What does "pays special attention" mean?}
 
-\sys requires annotations to specify these sources and sinks.
-Currently we have 55 annotations for sources and sinks in the Linux kernel.
+
+\subsection{Sensitive Sinks}
+
+Sensitive sinks include sizes for memory allocation, data moving and I/O
+communication. For example, an erroneous integer value used in the size
+argument of \cc{kmalloc()}, \cc{copy_to_user()} or \cc{sock_alloc_send_skb()}
+is more likely to damage the system, yielding memory corruption or information
+leak. Currently we have 41 annotations for these sensitive sinks in the Linux
+kernel.
+
+In addition, control flow decisions based on the outcome of a buggy integer
+operation are prone to cause logical errors. \sys highlights these errors
+in its report as well.

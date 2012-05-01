@@ -199,8 +199,8 @@ the ranges of all integer-typed function parameters, return values, structure
 members and global variables. The algorithm maintains a global range table that
 maps each of the aforementioned external values to their ranges. Initially, all
 ranges are set to an empty set, except for values that originate from untrusted
-external sources, such as system call arguments, which are initialized to a
-full set.
+external sources, such as system call arguments, which are initialized to 
+full sets.
 
 The range table is consulted each time when a function accesses its arguments,
 uses values returned by a function call, loads from a structure member or
