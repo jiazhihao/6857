@@ -1,6 +1,10 @@
 \section{Mitigation Strategies}
 \label{s:miti}
 
+\fk{make clear that there are two new mitigation proposals.  i would lead with
+  the type.  this section needs a careful writing pass.  happy to do so one it
+  has been flushed out.}
+
 Writing integer error checks is tedious and error-prone.
 Even for a simple multiplication \cc{n * size} that is often used
 as the allocation size for an array, programmers would
@@ -37,6 +41,7 @@ during the operation.
 The compiler generates efficient overflow detection instructions
 for these checks, depending on the target architecture.  For example,
 to detect a multiplication overflow on x86, the compiler may only
+\fk{may? it inserts nor no inserts.}
 need to insert one \cc{jno} instruction after the multiplication,
 which jumps if no overflow happened.
 
@@ -82,12 +87,15 @@ as the result.
 %
 In w/o \cc{malloc} cases, the manual check incurs $7\times$ slowdown, while
 the slowdown using NaN integers is only $34.5\%$;
+\fk{don't switch between $\times$ and \%}
 %
 In w/ \cc{malloc} cases, the slowdown numbers are $31.6\%$ and $3.8\%$,
 respectively.
 %
 We can see that the NaN integer checks are more efficient than
 manual checks.
+\fk{Is the problem that programmers don't write checks because they are worried
+  about the performance impact?}
 
 \begin{figure}
 \centering
