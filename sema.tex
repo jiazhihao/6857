@@ -143,7 +143,7 @@ bypass both sanity checks due to sign misinterpretation and reach
 the \cc{copy_from_user} call, which interprets \cc{optlen}
 as a large positive integer.  Depending on the architecture-specific
 implementation, the consequences range from a silent failure, a
-kernel oops, to a stack overflow.
+kernel crash, to a stack overflow.
 }
 \label{f:ax25-sign}
 \end{figure}
