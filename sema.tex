@@ -1,43 +1,78 @@
 \section{Integer Semantics}
 \label{s:sema}
 
-We define \sys's integer semantics via the security requirement of
-each integer operation.  Any integer operation that violates the
-security requirement implies an error, unless the operation is in
-the white list of code patterns that \sys explicitly allows.
-
-\subsection{Secure Integer Operations}
-\label{s:sema:sec}
-
-\sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
+\sys assumes two's complement~\cite[4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
 An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
 an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.  An operation
-may have a subscript $s$ or $u$ to indicate whether it operates on
-signed or unsigned integers, respectively.
+with the most significant bit indicating the sign.
+
+\sys assumes that programmers expect the result of an $n$-bit
+arithemtic operation to equal to that of the corresponding mathematical
+($\infty$-bit) operation.
+In other words, the result should fall in the $n$-bit integer range.
+%
+Any out-of-range operation violates the expectation and implies an
+error, unless the operation is in the white list of code patterns
+that \sys explicitly allows (see \autoref{s:sema:whitelist}).
+
+\subsection{In-Range Integer Operations}
+\label{s:sema:sec}
+
+We describe the requirement of producing an in-range result for each
+integer operation, as listed in \autoref{f:in-range}.
+%
+An operation may have a subscript $s$ or $u$ to indicate whether
+it operates on signed or unsigned integers, respectively.
+
+\begin{figure}
+\small
+\centering
+\begin{tabular}{l@{ }l@{ }lll}\toprule
+\multicolumn{3}{l}{Operation} & In-range requirement \\
+\midrule
+$x +_s y$, & $x -_s y$, & $x \times_s y$
+& $x_{\infty}\ \textrm{op}\ y_{\infty} \in [-2^{n-1}, 2^{n-1}-1]$
+\\
+$x +_u y$, & $x -_u y$, & $x \times_u y$
+& $x_{\infty}\ \textrm{op}\ y_{\infty} \in [0, 2^n-1]$
+\\
+$x /_s y$ & &
+& $y \neq 0 \land (x \neq -2^{n-1} \lor y \neq -1) $
+\\
+$x /_u y$ & &
+& $y \neq 0$
+\\
+$ x \shl y$, & $x \shr y$ &
+& $y \in [0, n-1]$
+\\
+\bottomrule
+\end{tabular}
+\caption{In-range requirements of $n$-bit arithmetic operations.
+Both $x$ and $y$ are $n$-bit integers; $x_{\infty}, y_{\infty}$
+denote their $\infty$-bit mathematical integers.}
+\label{f:in-range}
+\end{figure}
 
 \paragraph{Addition, subtraction, and multiplication.}
-The arithmetic result of an additive or multiplicative operation should fall
-in the range of the result type.  For example,
-$2^{31}\times_u 16$ is insecure,
+The arithmetic result of an $n$-bit signed additive or multiplicative
+operation should fall in the range $[-2^{n-1}, 2^{n-1}-1]$,
+and that of an unsigned operation should fall in the range
+$[0, 2^{n}-1]$.
+For example,
+$2^{31}\times_u 16$ is not in range,
 because the expected arithmetic product $2^{35}$ is out of the range
-of $32$-bit unsigned integers~($0$ to $2^{32} - 1$).
+of $32$-bit unsigned integers.
 
 \paragraph{Division.}
-The divisor should be non-zero,
-and the arithmetic result should fall in the range of the result type.
-Particularly, $-2^{n-1} /_s {-1}$ is insecure,
-because the expected arithmetic quotient $2^{n-1}$ is out of
-the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
+The divisor should be non-zero.  Particularly, the signed division
+$-2^{n-1} /_s {-1}$ is not in range, because the expected arithmetic
+quotient $2^{n-1}$ is out of the $n$-bit signed integer range,
+which is at most $2^{n-1}-1$.
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
-and at most $n-1$, otherwise the operation is undefined according
-to the C standard.
-%For example, for 32-bit integers, $1 \shl 32$ yields 1
-%on x86 and 0 on PowerPC.
-\sys considers an oversized shift as an integer error.
+and at most $n-1$, as per the C standard~\cite[6.5.7]{c11}.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are common practice in
@@ -53,7 +88,7 @@ disable part of the control flow.
 
 For example, in \autoref{f:olpc-sign} the intent of the comparison
 $\cc{status == -1}$ was to check whether \cc{read_status} returns
-${-1}$.  However, since the function returns an unsigned 8-bit
+${-1}$ on error.  However, since the function returns an unsigned 8-bit
 integer, which is zero-extended to \cc{int} according to C's
 conversion rules, \cc{status} is non-negative.  Consequently,
 the comparison always evaluates to false, which disables the error
