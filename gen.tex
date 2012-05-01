@@ -27,20 +27,20 @@ the predicates to a solver for satisfiability testing.}
 \label{f:flow}
 \end{figure}
 
-\subsection{Error Predicate Generation}
-\label{s:gen:err}
+\subsection{Out-of-Bounds Predicate Generation}
+\label{s:gen:oob}
 
 %From the definition in \autoref{s:sema:sec},
 To find integer errors, \sys needs to detect integer operations
-that violate the corresponding security requirements.
+that violate the corresponding in-bounds requirements.
 To do so, for each integer operation \sys derives
-the negation of its security requirement, namely error predicate,
+the negation of its in-bounds requirement, namely out-of-bounds~(OOB) predicate,
 satisfying which implies an error.
 
 \paragraph{Arithmetic operations.}
 Take multiplication for an example.  Given two $n$-bit unsigned
-integers $x$ and $y$, the security requirement is that their product
-cannot overflow $\uintmax(n)$.  There are several possible error
+integers $x$ and $y$, the in-bounds requirement is that their product
+cannot overflow $\uintmax(n)$.  There are several possible OOB
 predicates \sys could generate.
 A \naive form is:
 \begin{equation*}
@@ -59,11 +59,12 @@ Both forms would hurt the solver's performance noticeably
 \sys reuses a specialized multiplication overflow detection predicate
 from the Boolector constraint
 solver~\cite[\chapterautorefname~3.5]{brummayer:phd}, which can be
-solved far more efficiently.  The detailed implementation of the
-predicate is beyond the scope of this paper.
+solved far more efficiently without computing the product.  The
+detailed implementation of the predicate is beyond the scope of
+this paper.
 
 \paragraph{Shift.}
-The error predicate \sys generates for a $n$-bit shift operation
+The OOB predicate \sys generates for a $n$-bit shift operation
 $x \shl y$ or $x \shr y$ is a simple comparison $y \geq n$, where
 $y$ is the number of bits to shift.
 
@@ -76,10 +77,10 @@ each comparison.  If the predicate is trivially true or false,
 and it resulted from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
-For an array index $x$, \sys generates an error predicate $x <_s 0$.
+For an array index $x$, \sys generates an OOB predicate $x <_s 0$.
 \sys implements a front-end plugin to recognize array indices.
 
-Similarly, for a data size $x$, \sys generates an error predicate $x <_s 0$.
+Similarly, for a data size $x$, \sys generates an OOB predicate $x <_s 0$.
 \sys requires user-provided annotations on ``size'' function parameters.  As for
 the Linux kernel, we annotate the ``size'' parameters in functions like \cc{memcpy},
 \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
@@ -137,7 +138,7 @@ By recursively applying the same algorithm to \textsc{If-True} and
 \end{align*}
 
 After computing the path predicate, \sys feeds the logical AND of the
-path predicate and the error predicate (i.e., $\cc{optlen}_1 <_s 0$) into
+path predicate and the OOB predicate (i.e., $\cc{optlen}_1 <_s 0$) into
 the solver to determine whether the integer operation can have an error.
 In this case, the solver will reply with an assignment that triggers
 the error: for example, $\cc{optlen}_0 = -1$.
@@ -170,7 +171,7 @@ To partially alleviate missing predicates due to loop unrolling,
 \sys tries to move predicates within a loop to the outside scope.
 Consider the following loop.
 \input{code/loop}
-\sys generates an error predicate $i <_s 0$ since $i$ is used
+\sys generates an OOB predicate $i <_s 0$ since $i$ is used
 as an array index.  Simply unrolling the loop once (i.e., $i = 0$)
 would make a false predicate $0 <_s 0$, which might miss a possible
 integer error (e.g., if the code does not correctly restrict $n$).
@@ -337,7 +338,7 @@ $x_{2n}$ and $y_{2n}$, respectively, and rewrites the check as
 multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a special
 constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
 with the multiplication overflow detection predicate, as described
-in \autoref{s:gen:err}.
+in \autoref{s:gen:oob}.
 %
 This rewriting speeds up constraint solving, as demonstrated in
 \autoref{s:eval:perf}.

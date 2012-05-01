@@ -3,24 +3,24 @@
 
 \sys assumes two's complement~\cite[4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
-An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
-an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.
+An $n$-bit signed integer is in the bounds $-2^{n-1}$ to $2^{n-1}-1$,
+with the most significant bit indicating the sign,
+while an $n$-bit unsigned integer is in the bounds $0$ to $2^n-1$.
 
 \sys assumes that programmers expect the result of an $n$-bit
 arithmetic operation to equal to that of the corresponding mathematical
 ($\infty$-bit) operation.
-In other words, the result should fall in the $n$-bit integer range.
+In other words, the result should fall in the $n$-bit integer bounds.
 %
-Any out-of-range operation violates the expectation and implies an
+Any out-of-bounds operation violates the expectation and implies an
 error, unless the operation is in the white list of code patterns
 that \sys explicitly allows (see \autoref{s:sema:whitelist}).
 
-\subsection{In-Range Integer Operations}
+\subsection{In-Bounds Integer Operations}
 \label{s:sema:sec}
 
-We describe the requirement of producing an in-range result for each
-integer operation, as listed in \autoref{f:in-range}.
+We describe the requirement of producing an in-bounds result for each
+integer operation, as listed in \autoref{f:in-bounds}.
 %
 An operation may have a subscript $s$ or $u$ to indicate whether
 it operates on signed or unsigned integers, respectively.
@@ -29,7 +29,7 @@ it operates on signed or unsigned integers, respectively.
 \small
 \centering
 \begin{tabular}{l@{ }l@{ }lll}\toprule
-\multicolumn{3}{l}{Integer operation} & In-range requirement \\
+\multicolumn{3}{l}{Integer operation} & In-bounds requirement \\
 \midrule
 $x +_s y$, & $x -_s y$, & $x \times_s y$
 & $x_{\infty}\ \textrm{op}\ y_{\infty} \in [-2^{n-1}, 2^{n-1}-1]$
@@ -48,26 +48,26 @@ $ x \shl y$, & $x \shr y$ &
 \\
 \bottomrule
 \end{tabular}
-\caption{In-range requirements of $n$-bit arithmetic operations.
+\caption{In-bounds requirements of $n$-bit arithmetic operations.
 Both $x$ and $y$ are $n$-bit integers; $x_{\infty}, y_{\infty}$
 denote their $\infty$-bit mathematical integers.}
-\label{f:in-range}
+\label{f:in-bounds}
 \end{figure}
 
 \paragraph{Addition, subtraction, and multiplication.}
 The arithmetic result of an $n$-bit signed additive or multiplicative
-operation should fall in the range $[-2^{n-1}, 2^{n-1}-1]$,
-and that of an unsigned operation should fall in the range
+operation should fall in $[-2^{n-1}, 2^{n-1}-1]$,
+and that of an unsigned operation should fall in
 $[0, 2^{n}-1]$.
 For example,
-$2^{31}\times_u 16$ is not in range,
-because the expected arithmetic product $2^{35}$ is out of the range
+$2^{31}\times_u 16$ is not in bounds,
+because the expected arithmetic product $2^{35}$ is out of the bounds
 of $32$-bit unsigned integers.
 
 \paragraph{Division.}
 The divisor should be non-zero.  Particularly, the signed division
-$-2^{n-1} /_s {-1}$ is not in range, because the expected arithmetic
-quotient $2^{n-1}$ is out of the $n$-bit signed integer range,
+$-2^{n-1} /_s {-1}$ is not in bounds, because the expected arithmetic
+quotient $2^{n-1}$ is out of the $n$-bit signed integer bounds,
 which is at most $2^{n-1}-1$.
 
 \paragraph{Shift.}
@@ -76,7 +76,7 @@ and at most $n-1$, as per the C standard~\cite[6.5.7]{c11}.
 %
 Unlike multiplication, \sys assumes that programmers are aware of
 the fact that a shift operation is lossy since it shifts some bits
-out.  Therefore, \sys considers $x \shl 1$ always in range, while
+out.  Therefore, \sys considers $x \shl 1$ always in bounds, while
 $x \times_u 2$ is not.
 
 \paragraph{Conversion.}
@@ -105,7 +105,7 @@ handling.
 \vspace{-1em}
 \caption{An integer error in the OLPC secondary display controller
 driver of the Linux kernel.  Since \cc{->read_status()} returns an
-unsigned 8-bit integer, the value of \cc{status} is in the range
+unsigned 8-bit integer, the value of \cc{status} is in the bounds
 $[0, 255]$.  Comparing \cc{status} with ${-1}$ will always be false,
 which breaks the error handling.}
 \label{f:olpc-sign}
@@ -151,7 +151,7 @@ kernel oops, to a stack overflow.
 \subsection{Equivalence}
 \label{s:sema:eqv}
 
-As explained in \autoref{s:sema:sec}, \sys imposes different in-range
+As explained in \autoref{s:sema:sec}, \sys imposes different in-bounds
 requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
 that they are functionally equivalent.
 Any compiler optimization that rewrites $x \times_u 2$ to $x \shl
