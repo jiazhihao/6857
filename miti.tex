@@ -1,18 +1,17 @@
 \section{Mitigation Strategies}
 \label{s:miti}
 
-This section discusses mitigating integer errors
-in C code.
+Writing integer error checks is tedious and error-prone.
+Even for a simple multiplication \cc{n * size} that is often used
+as the allocation size for an array, programmers would
+have to write a non-trivial overflow check like \cc{(size \&\& n >
+SIZE_MAX / size)}.  We contributed \cc{kmalloc_array(n, size)}
+to help perform the check, which landed in the Linux kernel v3.4-rc1.
 
-\subsection{NaN Integer Semantics}
-
-Writing integer error checks is tedious and error-prone.  Programmers
+\xw{to be revised.}
 may forget to perform a check, or use wrong bounds that some inputs
 can bypass. \xw{reference results from eval.}
-
-Even for a simple multiplication \cc{n * size} that is often used
-as a \cc{malloc} size, programmers need a non-trivial check \cc{(size
-\&\& n > SIZE_MAX / size)}.  When the expression gets more complex,
+When the expression gets more complex,
 programmers would have to write checks for every arithmetic operation.
 
 To automate integer error checking, we propose a new
@@ -114,27 +113,6 @@ With NaN integers, one needs to change the type of
 and wrap the original check with $\cc{nan}(\dots, \cc{true})$.
 \input{code/ib-nan}
 \fi
-
-
-\subsection{Safe Array Allocator}
-
-\xw{could move this part to an earlier point}
-
-Multiplication for calculating allocation size seems particularly
-prone to integer errors, particularly in the forms of \cc{kmalloc}\cc{(n
-* size, ...)} if the code does not correctly bound \cc{n}.
-
-\cc{kmalloc_array}.
-
-\subsection{TBD}
-
-Windows seems to enforce unsigned integers in kernel.
-
-overflow builtins?
-
-integer libraries?
-
-buggy allocator?
 
 \if 0
 
