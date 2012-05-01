@@ -21,12 +21,14 @@ processor has 6 cores, and each core has 2 hardware threads.
 \subsection{New Bugs}
 \label{s:eval:linux}
 
-We applied \sys to the source code of the latest Linux kernel
-\nz{what is "latest"?},
-as well as two popular user-space applications, lighttpd and OpenSSH,
-and submitted patches to the developers according to \sys's reports.
-The developers confirmed and fixed \nrbugslinux integer errors in
-the Linux kernel, \nrbugslighttpd in lighttpd, and \nrbugsopenssh in OpenSSH.
+We periodically applied \sys to the latest Linux kernel
+from November 2011 (v3.2) to April 2012 (v3.4-rc4),
+and submitted patches according to \sys's reports.
+The kernel developers confirmed and fixed \nrbugslinux integer errors.
+%
+We also applied \sys to two popular user-space applications, lighttpd
+and OpenSSH; the developers fixed \nrbugslighttpd and \nrbugsopenssh
+integer errors reported by \sys, respectively.
 %
 The results show that \sys is effective in finding new integer
 errors, and the developers are willing to fix them.
