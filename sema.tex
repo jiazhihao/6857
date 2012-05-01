@@ -1,43 +1,83 @@
 \section{Integer Semantics}
 \label{s:sema}
 
-We define \sys's integer semantics via the security requirement of
-each integer operation.  Any integer operation that violates the
-security requirement implies an error, unless the operation is in
-the white list of code patterns that \sys explicitly allows.
+\sys assumes two's complement~\cite[4.2.1]{intel:vol1},
+a de facto standard integer representation on modern architectures.
+An $n$-bit signed integer is in the bounds $-2^{n-1}$ to $2^{n-1}-1$,
+with the most significant bit indicating the sign,
+while an $n$-bit unsigned integer is in the bounds $0$ to $2^n-1$.
 
-\subsection{Secure Integer Operations}
+\sys assumes that programmers expect the result of an $n$-bit
+arithmetic operation to equal to that of the corresponding mathematical
+($\infty$-bit) operation.
+In other words, the result should fall in the $n$-bit integer bounds.
+%
+Any out-of-bounds operation violates the expectation and implies an
+error, unless the operation is in the white list of code patterns
+that \sys explicitly allows (see \autoref{s:sema:whitelist}).
+
+\subsection{In-Bounds Integer Operations}
 \label{s:sema:sec}
 
-\sys assumes two's complement~\cite[\chapterautorefname~4.2.1]{intel:vol1},
-a de facto standard integer representation on modern architectures.
-An $n$-bit unsigned integer is in the range $0$ to $2^n-1$, while
-an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
-with the most significant bit indicating the sign.  An operation
-may have a subscript $s$ or $u$ to indicate whether it operates on
-signed or unsigned integers, respectively.
+We describe the requirement of producing an in-bounds result for each
+integer operation, as listed in \autoref{f:in-bounds}.
+%
+An operation may have a subscript $s$ or $u$ to indicate whether
+it operates on signed or unsigned integers, respectively.
+
+\begin{figure}
+\small
+\centering
+\begin{tabular}{l@{ }l@{ }lll}\toprule
+\multicolumn{3}{l}{Integer operation} & In-bounds requirement \\
+\midrule
+$x +_s y$, & $x -_s y$, & $x \times_s y$
+& $x_{\infty}\ \textrm{op}\ y_{\infty} \in [-2^{n-1}, 2^{n-1}-1]$
+\\
+$x +_u y$, & $x -_u y$, & $x \times_u y$
+& $x_{\infty}\ \textrm{op}\ y_{\infty} \in [0, 2^n-1]$
+\\
+$x /_s y$ & &
+& $y \neq 0 \land (x \neq -2^{n-1} \lor y \neq -1) $
+\\
+$x /_u y$ & &
+& $y \neq 0$
+\\
+$ x \shl y$, & $x \shr y$ &
+& $y \in [0, n-1]$
+\\
+\bottomrule
+\end{tabular}
+\caption{In-bounds requirements of $n$-bit arithmetic operations.
+Both $x$ and $y$ are $n$-bit integers; $x_{\infty}, y_{\infty}$
+denote their $\infty$-bit mathematical integers.}
+\label{f:in-bounds}
+\end{figure}
 
 \paragraph{Addition, subtraction, and multiplication.}
-The arithmetic result of an additive or multiplicative operation should fall
-in the range of the result type.  For example,
-$2^{31}\times_u 16$ is insecure,
-because the expected arithmetic product $2^{35}$ is out of the range
-of $32$-bit unsigned integers~($0$ to $2^{32} - 1$).
+The arithmetic result of an $n$-bit signed additive or multiplicative
+operation should fall in $[-2^{n-1}, 2^{n-1}-1]$,
+and that of an unsigned operation should fall in
+$[0, 2^{n}-1]$.
+For example,
+$2^{31}\times_u 16$ is not in bounds,
+because the expected arithmetic product $2^{35}$ is out of the bounds
+of $32$-bit unsigned integers.
 
 \paragraph{Division.}
-The divisor should be non-zero,
-and the arithmetic result should fall in the range of the result type.
-Particularly, $-2^{n-1} /_s {-1}$ is insecure,
-because the expected arithmetic quotient $2^{n-1}$ is out of
-the range of $n$-bit signed integers~($-2^{n-1}$ to $2^{n-1}-1$).
+The divisor should be non-zero.  Particularly, the signed division
+$-2^{n-1} /_s {-1}$ is not in bounds, because the expected arithmetic
+quotient $2^{n-1}$ is out of the $n$-bit signed integer bounds,
+which is at most $2^{n-1}-1$.
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
-and at most $n-1$, otherwise the operation is undefined according
-to the C standard.
-%For example, for 32-bit integers, $1 \shl 32$ yields 1
-%on x86 and 0 on PowerPC.
-\sys considers an oversized shift as an integer error.
+and at most $n-1$, as per the C standard~\cite[6.5.7]{c11}.
+%
+Unlike multiplication, \sys assumes that programmers are aware of
+the fact that a shift operation is lossy since it shifts some bits
+out.  Therefore, \sys considers $x \shl 1$ always in bounds, while
+$x \times_u 2$ is not.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are common practice in
@@ -53,7 +93,7 @@ disable part of the control flow.
 
 For example, in \autoref{f:olpc-sign} the intent of the comparison
 $\cc{status == -1}$ was to check whether \cc{read_status} returns
-${-1}$.  However, since the function returns an unsigned 8-bit
+${-1}$ on error.  However, since the function returns an unsigned 8-bit
 integer, which is zero-extended to \cc{int} according to C's
 conversion rules, \cc{status} is non-negative.  Consequently,
 the comparison always evaluates to false, which disables the error
@@ -65,7 +105,7 @@ handling.
 \vspace{-1em}
 \caption{An integer error in the OLPC secondary display controller
 driver of the Linux kernel.  Since \cc{->read_status()} returns an
-unsigned 8-bit integer, the value of \cc{status} is in the range
+unsigned 8-bit integer, the value of \cc{status} is in the bounds
 $[0, 255]$.  Comparing \cc{status} with ${-1}$ will always be false,
 which breaks the error handling.}
 \label{f:olpc-sign}
@@ -111,54 +151,48 @@ kernel oops, to a stack overflow.
 \subsection{Equivalence}
 \label{s:sema:eqv}
 
-It is worth noting that two functionally equivalent operations at
-the machine instruction level may have different integer semantics
-in \sys.
-For example, $\cc{maxnum}\times_u 16$ and $\cc{maxnum} \shl 4$ are
-identical instructions, but the former expression causes an integer
-error if \cc{maxnum} is large, while the latter one is considered
-always secure.  \sys assumes that the developer uses the
-arithmetically intended integer operation. \nz{``intended'' is vague.}
-
-Any compiler optimization that rewrites
-$\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ will destroy the
-integer semantics.  Even worse, C compilers like GCC may completely
+As explained in \autoref{s:sema:sec}, \sys imposes different in-bounds
+requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
+that they are functionally equivalent.
+Any compiler optimization that rewrites $x \times_u 2$ to $x \shl
+1$ will destroy the integer semantics,
+%
+Even worse, C compilers like GCC may completely
 optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
-given.  To avoid the interference, \sys is designed to run before
-these optimizations.
+given.  To avoid the interference, \sys is designed to run with
+these optimizations disabled.
 
-\subsection{Default Semantics}
+\subsection{Overflow Semantics}
 \label{s:sema:def}
 
-Signed integer overflows and oversized shifts are undefined according
-to the C language standard.  In order to continue evaluating
-expressions like $x \times_s y + z$ after $x \times_s y$ overflows,
-\sys defines the default semantics for these integer operations, as
+Consider the C expression $a[x +_s y]$, where $a$ is an array and
+$x +_s y$ is an index.  \sys would catch $x +_s y$ if it overflows.
+On many architectures the overflowed index becomes a negative value
+(e.g., on x86).  To further catch the negative array index, \sys
+needs to continue evaluating $x +_s y$ even if it may overflow.
+However, signed overflow is undefined behavior in C.  To catch
+more integer errors, \sys thus defines the semantics for integer
+operations that the C standard specifies as undefined behavior, as
 follows:
 \begin{itemize}
 \item
-For $n$-bit signed arithmetic operations, \sys assumes the wrapping
-semantics as if they were unsigned (i.e., $\mod{2^n}$), which is
-the same as invoking GCC with the \cc{-fwrapv} option.
+The signed overflow wraps around using the two's complement.
 \item
-Division by zero is undefined.  \sys does not consider the result
-in further expressions.
-\item
-For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
-shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
-amount for 32-bit shifts, e.g., $1 \shl 32 = 1 \shl 0 = 1$.  This semantics
-is also the behavior of ARM and MIPS processors.
-\nz{Why does this matter?  KINT semantics already flag an oversized
-shift as an error, so why do we need to continue reasoning about the
-precise value that an oversized shift expression will have?}
+\sys truncates the shifting amount of an $n$-bit integer to $\log_2
+n$ bits, just like as x86 shift instructions.  For example, shifting
+a 32-bit integer by 32 bits is the same as by $\log_2 32 = 0$ bit,
+so we have $1 \shl 32 = 1 \shl 0 = 1$.
 \end{itemize}
-\sys may miss integer errors that are not modeled by the above
-semantics.  Consider the expression $x / (1 \shl y)$, where $x$ and
-$y$ are unconstrained 32-bit integers.  \sys will be able to detect
-the oversized shift, but not the division by zero, since
-with \sys's default semantics $1 \shl y$ cannot be zero.
+Division by zero remains undefined.  \sys does not consider the case
+in further expressions.
+
+\sys may miss integer errors that are not modeled by the semantics.
+Consider the expression $x / (1 \shl 32)$, which will trigger a
+division by zero on PowerPC.  \sys will be able to detect the
+oversized shift, but not the division by zero, since \sys evaluates
+the divisor to 1.
 
 \subsection{White Listing Idioms}
 \label{s:sema:whitelist}
@@ -184,7 +218,7 @@ given $x = \cc{0x1fffffff}$ and $y = 16$, their product evaluates
 to a larger value $\cc{0xfffffff0}$, which both overflows and
 bypasses the check.  A correct check is $(x \times_u y) /_u y \neq
 x$, or an non-overflow form, $\uintmax(n) /_u x > y$.
-
+\if 0
 In addition, \sys accepts user-provided idioms tailored for the
 code being analyzed.  For example, in the Linux kernel to set a
 timer that expires after \cc{delay} ticks one often invokes
@@ -196,6 +230,7 @@ theoretically overflow.
 ASCII string ``jiffies + delay'', or do you allow a more general
 pattern?  How general?  ``jiffies + *''?  Or ``jiffies + *'' in
 the last argument of {\tt mod\_timer}?}
+\fi
 
 \begin{figure}
 \centering

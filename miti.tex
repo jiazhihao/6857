@@ -1,18 +1,17 @@
 \section{Mitigation Strategies}
 \label{s:miti}
 
-This section discusses mitigating integer errors
-in C code.
+Writing integer error checks is tedious and error-prone.
+Even for a simple multiplication \cc{n * size} that is often used
+as the allocation size for an array, programmers would
+have to write a non-trivial overflow check like \cc{(size \&\& n >
+SIZE_MAX / size)}.  We contributed \cc{kmalloc_array(n, size)}
+to help perform the check, which landed in the Linux kernel v3.4-rc1.
 
-\subsection{NaN Integer Semantics}
-
-Writing integer error checks is tedious and error-prone.  Programmers
+\xw{to be revised.}
 may forget to perform a check, or use wrong bounds that some inputs
 can bypass. \xw{reference results from eval.}
-
-Even for a simple multiplication \cc{n * size} that is often used
-as a \cc{malloc} size, programmers need a non-trivial check \cc{(size
-\&\& n > SIZE_MAX / size)}.  When the expression gets more complex,
+When the expression gets more complex,
 programmers would have to write checks for every arithmetic operation.
 
 To automate integer error checking, we propose a new
@@ -67,7 +66,7 @@ when calculating the allocation size.
 
 We modified the e1000 driver in the Linux kernel to use NaN integers
 for all allocation sizes.
-\xw{changed XXX lines of code. the slowdown is negligible.
+\xw{changed less than 20 lines of code. the slowdown is negligible.
 still want to talk about infiniband?}
 
 We use \cc{x * y} as a microbenchmark to measure the runtime
@@ -78,12 +77,14 @@ inserted by the compiler, respectively.
 The baselines are a simple multiplication and that followed by a
 \cc{malloc} call, noted as w/o and w/ \cc{malloc}, respectively.
 
-\autoref{f:data:nan-micro} shows the results:
+\autoref{f:data:nan-micro} shows the results. Each test is repeated 1000 times,
+and in a single test, we repeat the operation $10^6$ times and log arithmetic mean
+as the result.
 %
-w/o \cc{malloc}, the manual check incurs $7\times$ slowdown, while
-the slowdown using NaN integers is only $44.5\%$;
+In w/o \cc{malloc} cases, the manual check incurs $7\times$ slowdown, while
+the slowdown using NaN integers is only $34.5\%$;
 %
-w/ \cc{malloc}, the slowdown numbers are $31\%$ and $3.8\%$,
+In w/ \cc{malloc} cases, the slowdown numbers are $31.6\%$ and $3.8\%$,
 respectively.
 %
 We can see that the NaN integer checks are more efficient than
@@ -91,7 +92,6 @@ manual checks.
 
 \begin{figure}
 \centering
-\small
 \input{data/nan-micro}
 \caption{Performance overhead of an multiplication \cc{n * size}, using
 manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and automated
@@ -114,27 +114,6 @@ With NaN integers, one needs to change the type of
 and wrap the original check with $\cc{nan}(\dots, \cc{true})$.
 \input{code/ib-nan}
 \fi
-
-
-\subsection{Safe Array Allocator}
-
-\xw{could move this part to an earlier point}
-
-Multiplication for calculating allocation size seems particularly
-prone to integer errors, particularly in the forms of \cc{kmalloc}\cc{(n
-* size, ...)} if the code does not correctly bound \cc{n}.
-
-\cc{kmalloc_array}.
-
-\subsection{TBD}
-
-Windows seems to enforce unsigned integers in kernel.
-
-overflow builtins?
-
-integer libraries?
-
-buggy allocator?
 
 \if 0
 
