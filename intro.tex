@@ -68,8 +68,9 @@ possibly negative value as an error~\cite{brumley:rich, moy:z3prefix,
 seacord:secure-c}; such sign conversions are so widely used in C
 code that doing so would cause a flood of noisy false
 errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
-Developers even intentionally count on integer overflows
-such as $x + y < x$ for the correctness of their programs~\cite{ioc},
+In C, developers can test for integer overflow only by using overflow; 
+for example, to test if \textit{base} plus \textit{len} overflows,
+kernel developers write expressions such as $x + y < x$~\cite{ioc},
 which \sys should not consider as errors.
 \sys needs integer semantics that recognize commonly used code
 patterns while still effectively catch integer errors.
@@ -105,14 +106,21 @@ To further reduce false errors, \sys asks users to provide a white
 list of overflow checking idioms, as well as additional range
 constraint annotations to filter out infeasible cases.
 
-\sys identified \nrbugs integer errors in the Linux kernel,
-the lighttpd web server, and OpenSSH, which were confirmed and fixed
-by the developers.  It also reveals that even two previously known
-CVE cases were fixed incorrectly.
-%
-We evaluate \sys's completeness by running it against 36 known
-integer errors in the Linux kernel from the past three years; \sys
-is able to detect 34 of them.
+The primary contributions of this paper are:
+\begin{CompactItemize}
+\item A design and implementation of integer error checker that has a pragmatic
+  definition of integer errors and can scale to programs of the size of the
+  Linux kernel;
+\item An experimental evaluation in which identified \nrbugs integer errors in
+  the Linux kernel, the lighttpd web server, and OpenSSH, which were confirmed
+  and fixed by the developers.  It also reveals that even two previously known
+  CVE cases were fixed incorrectly.  The evaluation also shows that \sys is
+  complete: \sys is able to detect 34 of the 36 known integer errors in the
+  Linux kernel from the past three years.
+\item A few mitigation strategies, which include a new integer type that enters
+  an error state once it overflows and \texttt{kmalloc\_array} that checks for
+  integer overflow, and which has been adopted in the Linux kernel v3.4-rc1.
+\end{CompactItemize}
 
 The rest of this paper is organized as follows. \autoref{s:sema}
 defines the integer semantics that \sys uses.  \autoref{s:gen}
