@@ -167,12 +167,11 @@ these optimizations disabled.
 \subsection{Overflow Semantics}
 \label{s:sema:def}
 
-\fk{Isn't it better to have two separate statements: i = x + y, and a[i]? to
-  make the point more clear}
-Consider the C expression $a[x +_s y]$, where $a$ is an array and
-$x +_s y$ is an index.  \sys would catch $x +_s y$ if it overflows.
-On many architectures the overflowed index becomes a negative value
-(e.g., on x86).  To further catch the negative array index, \sys
+Consider the following code snippet.
+\input{code/array-neg-index}
+\sys would catch $x +_s y$ if it overflows.  On many architectures
+the overflowed index becomes a negative value~(e.g., on x86).  To
+further catch the negative array index, \sys
 needs to continue evaluating $x +_s y$, even if it overflows.
 Signed overflow, however, is undefined behavior in C.  To catch
 more integer errors, \sys thus defines the semantics for integer
