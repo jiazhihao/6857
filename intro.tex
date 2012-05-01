@@ -68,7 +68,8 @@ code that doing so would cause a flood of noisy false
 errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.  In C, a common way to
 test if an integer operation overflows is using overflow; for example, to test
 if \textit{base} plus \textit{len} overflows, kernel developers write
-expressions such as $x + y < x$~\cite{ioc}, which \sys should not consider as
+expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
+which \sys should not consider as
 errors.  \sys needs integer semantics that recognize commonly used code patterns
 while still effectively catch integer errors.
 %Conceptually, any integer operation that may produce a
