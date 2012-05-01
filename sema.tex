@@ -206,13 +206,14 @@ checking idiom is as follows:
 \begin{equation*}
 x +_u y <_u x.
 \end{equation*}
-This idiom is useful when the sum is needed later in the code.\fk{but this check
-  is dangerous so kint replaces it with an equivalent but safe check?}
-Let $\uintmax(n)$ denote the largest $n$-bit unsigned integer (i.e.,
-$2^n - 1$).  Below is an equivalent non-overflow form.
+This idiom is useful when the sum is needed later in the code.
+To avoid reporting the benign overflow,
+\sys rewrites it to the following equivalent non-overflow form:
 \begin{equation*}
 \uintmax(n) -_u x >_u y.
 \end{equation*}
+Here $\uintmax(n)$ denotes the largest $n$-bit unsigned integer~(i.e.,
+$2^n - 1$).
 
 Note that \sys does not recognize the overflowed comparison $x
 \times_u y <_u x$ as a valid integer error check.  For example,
