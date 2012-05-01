@@ -78,12 +78,14 @@ inserted by the compiler, respectively.
 The baselines are a simple multiplication and that followed by a
 \cc{malloc} call, noted as w/o and w/ \cc{malloc}, respectively.
 
-\autoref{f:data:nan-micro} shows the results:
+\autoref{f:data:nan-micro} shows the results. Each test is repeated 1000 times,
+and in a single test, we repeat the operation $10^6$ times and log arithmetic mean
+as the result.
 %
-w/o \cc{malloc}, the manual check incurs $7\times$ slowdown, while
-the slowdown using NaN integers is only $44.5\%$;
+In w/o \cc{malloc} cases, the manual check incurs $7\times$ slowdown, while
+the slowdown using NaN integers is only $34.5\%$;
 %
-w/ \cc{malloc}, the slowdown numbers are $31\%$ and $3.8\%$,
+In w/ \cc{malloc} cases, the slowdown numbers are $31.6\%$ and $3.8\%$,
 respectively.
 %
 We can see that the NaN integer checks are more efficient than
