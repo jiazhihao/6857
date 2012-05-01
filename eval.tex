@@ -110,7 +110,7 @@ ranking heuristics.
 There is also an interesting vulnerability in the sound subsystem;
 an adversary can exploit it by plugging in a malicious USB audio
 device that responds with bogus sampling rates, leading to kernel
-hang, DoS, and overflow a buffer.
+hang, DoS, or buffer overflow.
 
 Integer errors cause timing bugs in several network protocol
 implementations.  For example, a user-space application can try to
@@ -212,17 +212,17 @@ $\cc{sbi->s_log_groups_per_flex} > 31$ before the shift.
 \subsection{Completeness Validation}
 \label{s:eval:complete}
 
-We collected 36 known integer errors in the Linux kernel from the
-CVE list~\cite{cve} over the last three years (excluding those found
-by \sys for fairness) as a benchmark to evaluate
-\sys's completeness, as shown in \autoref{f:data:cve}.  They provide
-a comprehensive coverage of the whole source tree.
+To evaluate \sys's completeness, We collected 36 known integer errors in the
+Linux kernel from the CVE list~\cite{cve} over the last three years (excluding
+those found by \sys).  They provide a comprehensive coverage of the whole source
+tree. 
 %For each
 %case, we run \sys against both the original and the patched code
 %snippets.
 %Ideally \sys should catch the bugs in the original code,
 %and declare that the bug is fixed in the patched code.
 %
+As shown in \autoref{f:data:cve}, 
 \sys is able to find 34 out of the 36 integer errors (94\%).
 This shows that \sys's report is fairly complete.
 
@@ -260,8 +260,8 @@ To evaluate how many false errors are in \sys's reports,
 we first tested \sys on the patched code of these CVE cases
 in \autoref{s:eval:complete},
 and expected that ideally \sys would not report any errors.
-The result is also shown in \autoref{f:data:cve}.
-\sys declares no bug in 29 of the 36 cases, times out in 1 case, and
+The results are also shown in \autoref{f:data:cve}.
+\sys reports no bugs in 29 of the 36 cases, times out in 1 case, and
 reports errors in 6 cases.
 %
 In these 6 cases,
@@ -285,22 +285,22 @@ to free more memory.
 The patch changes the type of \cc{points} from \cc{int} to \cc{long} because
 \cc{points} could be large on 64-bit systems; multiplying it by
 1000 could overflow and produce an incorrect score,
-causing an innocent process being killed.
+causing an innocent process to be killed.
 
 There is an implicit rule that the sum of these numbers of pages
 (e.g., from \cc{get_mm_rss}) is at most \cc{totalpages}, so the
 additions never overflow.  \sys does not understand the rule and
-reports false errors on these additions.
+reports false errors for these additions.
 
-When applying \sys to the whole Linux kernel, it warned 134,051 possible
-integer errors in total. Filtered with senstive sinks, only 1,024 of them are
+When applying \sys to the whole Linux kernel, it reported 134,051 possible
+integer errors in total. After filtering for senstive sinks, 1,024 of them are
 related to memory allocation sizes, and 2,255 are related to memory moving
-sizes.  Out of the 1,024 reported allocation size errors, only 646 are derived
-from untrusted inputs.  We scaned through them and inspected 97 reports in
-detail.  It took us roughly 12 hours to discover the first batch of 6
-exploitable bugs.  The other 91 warnings are either harmless overflows or false
-warnings.  Most of the false warnings are due to either imprecise range
-analysis or lack of domain-specific knowledge.
+sizes.  Out of the 1,024 reported allocation size errors, 646 are derived from
+untrusted inputs.  We scanned through them and inspected 97 reports in detail.
+It took us roughly 12 hours to discover 6 exploitable errors.
+The other 91 warnings are either harmless overflows or false warnings.  Most of
+the false warnings are due to imprecise range analysis or lack of
+domain-specific knowledge.
 
 % first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
 
@@ -308,19 +308,19 @@ analysis or lack of domain-specific knowledge.
 \label{s:eval:perf}
 
 To measure the running time of \sys, we ran \sys against the source
-code for Linux kernel 3.4-rc1.  We set the timeout
+code of Linux kernel 3.4-rc1.  We set the timeout
 to 5 seconds for each constraint solving query.   \sys analyzed
-8896 files and made 420,743 solving queries, 992 of which timeouts.
+8,896 files and made 420,743 solving queries, 992 of which timeouts.
 The predicate generation and constraint solving (excluding compilation)
-cost 40 minutes.  This shows that \sys can finish analyzing a large
-system within a reasonable amount of time.
+took 40 minutes.  This shows that \sys can analyze a large
+system in a reasonable amount of time.
 
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
 idioms for better performance.  We measured the solving time of three
 equivalent forms: division, multiplication, and overflow detection
-circuit, for both 32- and 64-integers, respectively.  The result
-is shown in \autoref{f:udiv}.  Each test is repeated 1000 times.
-For a single unsigned division operation this optimization can
+circuit, for both 32- and 64-integers, respectively.  The results
+are shown in \autoref{f:udiv}.  Each test is repeated a 1,000 times.
+For a single unsigned division operation the best form can
 achieve up to 2.5$\times$ speedup.
 
 \begin{figure}
