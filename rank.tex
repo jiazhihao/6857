@@ -1,8 +1,8 @@
 \section{Ranking}
 \label{s:rank}
 
-\sys may report a long list of potential errors.  We are only interested
-in serious ones.  We consider an integer error as serious if the
+\sys may report many potential errors.  We are only interested
+in high-risk ones.  We consider an integer error as high risk if the
 result is either computed based on untrusted inputs, or is used in
 sensitive sinks.  Such inputs and sinks are generally specific to
 the system being analyzed.  This section discuss them in the context
@@ -16,7 +16,9 @@ systems like \cc{sysfs}, or kernel functions like \cc{copy_from_user()}),
 received from the network, and read from disks. The kernel usually needs to
 perform sanity checks before using them. 
 
-In general, hardware devices are considered trusted. Device drivers often do
+\fk{The following sentences are confusing; are they trusted even though they
+  don't check I/O responses?}
+In general, \sys trusts hardware devices. Device drivers often do
 not validate the I/O response from the hardware. Thus, \sys excludes them from
 untrusted inputs, with the exception of USB devices.  Recent research has
 demonstrated how to develop a malicious USB device to plug in a Linux box and
@@ -48,6 +50,7 @@ is more likely to damage the system, yielding memory corruption or information
 leak. Currently we have 41 annotations for these sensitive sinks in the Linux
 kernel.
 
+\fk{Isn't this a third high-risk category?}
 In addition, control flow decisions based on the outcome of a buggy integer
 operation are prone to cause logical errors. \sys highlights these errors
 in its report as well.
