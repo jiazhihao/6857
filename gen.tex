@@ -182,34 +182,48 @@ exit value $n$ in the predicate $i <_s 0$.
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
 
-Error and path predicates are generated based on one function at a time,
-and do not capture constraints on arguments, return values, or memory
-locations that span multiple functions, which can lead to false error
-reports.  To mitigate this problem, \sys generates range predicates to
-propagate global constraints across functions.
+Error and path predicates are generated on a per-function basis, and do not
+capture constraints on external values, such as function parameters and memory
+loads. To mitigate false positives, \sys generates range predicates that impose
+global constraints on these external value sources.
 
-Tracking arbitrary predicates across functions can lead to complex
-predicates, which would not scale to a large system such as the Linux
-kernel.  Instead, \sys tracks range predicates across functions using
-two constant integers as the minimum and maximum values, respectively.
-If the range of a parameter $x$ is from 1 to 10, \sys generates the
-range predicates $x \geq 1 \land x \leq 10$.
+Tracking symbolic predicates across functions can lead to solving complex
+constraint expressions, which would not scale to a large system such as the
+Linux kernel. Instead, \sys bounds each external value using two constant
+integers as the minimum and maximum values, respectively. For example, if the
+range of a parameter $x$ is from 1 to 10, \sys generates the range predicates
+$x \geq 1 \land x < 11$.
 
-\sys implements the value range propagation algorithm for inferring
-ranges of function parameters, return values, structure fields, and
-global variables~\cite{patterson:vrp}.  The detail of the algorithm is
-omitted here.  We manually reviewed and refined the output ranges.
+\sys implements a interprocedural value range propagation algorithm to infer
+the ranges of all integer-typed function parameters, return values, structure
+members and global variables. The algorithm maintains a global range table that
+maps each of the aforementioned external values to their ranges. Initially, all
+ranges are set to an empty set, except for values that originate from untrusted
+external sources, such as system call arguments, which are initialized to a
+full set.
 
-Some domain-specific range knowledge is required from users to
-reduce false errors.  For example, the C standard does not impose
-any limit on the \cc{argc} parameter of the \cc{main} function, nor
-could the value range propagation algorithm infer that range.
-Currently we annotate its range as $[0, 1024]$; otherwise \sys would
-report an addition overflow for on expressions like $\cc{argc} + 1$.
-\nz{why does \cc{argc} show up in the kernel?  use sysctl example
-instead?}
+The range table is consulted each time when a function accesses its arguments,
+uses values returned by a function call, loads from a structure member or
+global variables.  Within the function, value ranges are propagated using range
+arithmetics as described in ~\cite{range-analysis}.  When a value reaches an
+external sink through argument passing, function returns, stores to structure
+members or global variables, the corresponding range table entry is updated by
+merging its previous range with the range of the incoming value. The algorithm
+iteratively scans through every function of the entire system, update the
+range table accordingly until it converges. If some table entries do not
+converge within a limited number of rounds, they are assumed to be full sets.
 
-%handle sysctl interface.
+The above algorithm requires a system-wide call graph that associates each call
+site with a set of possible callee functions. \sys builds the graph beforehand
+using a similar iterative algorithm. For each indirect call site, \sys collects
+possible assignments to the function pointer by looking at all initializers and
+stores to the corresponding structure member, variable or parameter. 
+
+To further reduce false errors, we also refine the output ranges using
+domain-specific knowledge. For example, many \cc{sysctl} parameters in the
+Linux kernel have lower and upper bounds encoded in their \cc{sysctl} table
+entries, which are hard to infer using the above algorithm. \sys extracts the
+bounds from the code and patches them to the global range table.
 
 
 \subsection{Code Rewriting}
