@@ -312,14 +312,12 @@ or lack of domain-specific knowledge.
 \label{s:eval:perf}
 
 To measure the running time of \sys, we ran \sys against the source
-code for Linux kernel 3.2.  We set the timeout
+code for Linux kernel 3.4-rc1.  We set the timeout
 to 5 seconds for each constraint solving query.   \sys analyzed
-8637 files, 10 of which timed out, and made 411,851 solving queries.
+8896 files and made 420,743 solving queries, 992 of which timeouts.
 The predicate generation and constraint solving (excluding compilation)
-cost 22 minutes.  This shows that \sys can finish analyzing a large
+cost 40 minutes.  This shows that \sys can finish analyzing a large
 system within a reasonable amount of time.
-\nz{report number of individual query timeouts, in addition to the
-  number of files that had 1 or more timeouts.}
 
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
 idioms for better performance.  We measured the solving time of three
