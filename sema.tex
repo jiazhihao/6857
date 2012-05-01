@@ -29,7 +29,7 @@ it operates on signed or unsigned integers, respectively.
 \small
 \centering
 \begin{tabular}{l@{ }l@{ }lll}\toprule
-\multicolumn{3}{l}{Operation} & In-range requirement \\
+\multicolumn{3}{l}{Integer operation} & In-range requirement \\
 \midrule
 $x +_s y$, & $x -_s y$, & $x \times_s y$
 & $x_{\infty}\ \textrm{op}\ y_{\infty} \in [-2^{n-1}, 2^{n-1}-1]$
@@ -73,6 +73,11 @@ which is at most $2^{n-1}-1$.
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
 and at most $n-1$, as per the C standard~\cite[6.5.7]{c11}.
+%
+Unlike multiplication, \sys assumes that programmers are aware of
+the fact that a shift operation is lossy since it shifts some bits
+out.  Therefore, \sys considers $x \shl 1$ always in range, while
+$x \times_u 2$ is not.
 
 \paragraph{Conversion.}
 Lossy truncations and sign conversions are common practice in
