@@ -14,10 +14,9 @@ can bypass. \xw{reference results from eval.}
 When the expression gets more complex,
 programmers would have to write checks for every arithmetic operation.
 
-To automate integer error checking, we propose a new
-integer family that provides NaN semantics: an integer value goes
-into error state (i.e., NaN) once it overflows, and remains NaN in
-future computation.
+To automate integer error checking, we propose a new integer type that provides
+not-a-number (NaN) semantics once it overflows, and remains NaN in future
+computations.
 
 The basic usage of NaN integers is to add a type qualifier \cc{nan}
 to an actual integer type, such as \cc{nan size_t}.
