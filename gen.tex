@@ -196,7 +196,7 @@ integers as the minimum and maximum values, respectively. For example, if the
 range of a parameter $x$ is from 1 to 10, \sys generates the range predicates
 $x \geq 1 \land x < 11$.
 
-\sys implements a interprocedural value range propagation algorithm to infer
+\sys implements an interprocedural value range propagation algorithm to infer
 the ranges of all integer-typed function parameters, return values, structure
 members and global variables. The algorithm maintains a global range table that
 maps each of the aforementioned external values to their ranges. Initially, all
@@ -363,7 +363,7 @@ This rewriting speeds up constraint solving, as demonstrated in
 
 \sys will miss the following integer errors.
 %
-\sys only understands C-language code; it will cannot detect integer
+\sys only understands C-language code; it cannot detect integer
 errors written in assembly language.
 %
 \sys cannot scan code that is not enabled for compilation in the
