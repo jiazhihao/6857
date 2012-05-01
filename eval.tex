@@ -294,13 +294,13 @@ reports false errors on these additions.
 
 When applying \sys to the whole Linux kernel, it warned 134,051 possible
 integer errors in total. Filtered with senstive sinks, only 1,024 of them are
-related to memory allocation size, and 2,255 are related to memory moving size.
-Out of the 1,024 reported allocation size errors, only 646 are derived from
-untrusted inputs.  We scaned through them and inspected 97 reports in detail.
-It took us roughly 12 hours to discover the first batch of 6 exploitable bugs.
-The other 91 warnings are either harmless overflows or false warnings.  Most of
-the false warnings are due to either imprecise range analysis or lack of
-domain-specific knowledge.
+related to memory allocation sizes, and 2,255 are related to memory moving
+sizes.  Out of the 1,024 reported allocation size errors, only 646 are derived
+from untrusted inputs.  We scaned through them and inspected 97 reports in
+detail.  It took us roughly 12 hours to discover the first batch of 6
+exploitable bugs.  The other 91 warnings are either harmless overflows or false
+warnings.  Most of the false warnings are due to either imprecise range
+analysis or lack of domain-specific knowledge.
 
 % first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
 
