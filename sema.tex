@@ -167,12 +167,14 @@ these optimizations disabled.
 \subsection{Overflow Semantics}
 \label{s:sema:def}
 
+\fk{Isn't it better to have two separate statements: i = x + y, and a[i]? to
+  make the point more clear}
 Consider the C expression $a[x +_s y]$, where $a$ is an array and
 $x +_s y$ is an index.  \sys would catch $x +_s y$ if it overflows.
 On many architectures the overflowed index becomes a negative value
 (e.g., on x86).  To further catch the negative array index, \sys
-needs to continue evaluating $x +_s y$ even if it may overflow.
-However, signed overflow is undefined behavior in C.  To catch
+needs to continue evaluating $x +_s y$, even if it overflows.
+Signed overflow, however, is undefined behavior in C.  To catch
 more integer errors, \sys thus defines the semantics for integer
 operations that the C standard specifies as undefined behavior, as
 follows:
@@ -205,7 +207,8 @@ checking idiom is as follows:
 \begin{equation*}
 x +_u y <_u x.
 \end{equation*}
-This idiom is useful when the sum is needed later in the code.
+This idiom is useful when the sum is needed later in the code.\fk{but this check
+  is dangerous so kint replaces it with an equivalent but safe check?}
 Let $\uintmax(n)$ denote the largest $n$-bit unsigned integer (i.e.,
 $2^n - 1$).  Below is an equivalent non-overflow form.
 \begin{equation*}
