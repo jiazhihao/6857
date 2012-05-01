@@ -283,9 +283,9 @@ function.
 
 \sys also adopts an aliasing assumption: a pointer passed as a
 function parameter or a global variable points to a memory location
-is distinct from any other memory location.  This assumption, though
-unsound, has been proven to be practical for detecting bugs in C
-programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
+that is distinct from any other memory location.  This assumption,
+though unsound, has been proven to be practical for detecting bugs
+in C programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
 to aggressively push load instructions ahead for more elimination
 opportunity.
 
