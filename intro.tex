@@ -13,9 +13,9 @@ that integer errors account for more than one third of the
 vulnerabilities that can be misused to corrupt the kernel and gain
 root privilege.
 
-\autoref{f:bridge} shows an integer error in the Linux
-kernel (CVE-2006-5751).  The size for allocating \cc{buf} is computed
-from the multiplication of \cc{maxnum}, a value controlled by user
+\autoref{f:bridge} shows an example of an integer error in the Linux
+kernel~(CVE-2006-5751).  The size for allocating \cc{buf} is calculated
+from the multiplication of \cc{maxnum}, an integer read from user
 space, and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
 a 32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
 integers, ranging from 0 to $2^{32} - 1$.  The developer's intention
@@ -43,7 +43,7 @@ leakage, for example, if it is used to determine the number of data
 items to be copied from kernel to user space, raising privacy
 concerns.  It may cause more subtle logic bugs if the value is used
 in decision making, such as misleading the kernel to kill an innocent
-process (CVE-2011-4097).
+process~(CVE-2011-4097).
 
 \begin{figure}[t]
 \centering
@@ -56,12 +56,6 @@ arbitrary code via a large \cc{maxnum} from user space.
 }
 \label{f:bridge}
 \end{figure}
-
-\xw{first part is static analysis / a study of the linux kernel
-(i.e., how bad the situation is).
-then we discuss about mitigation strategies.
-could move design challenges to section 2.
-}
 
 This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
