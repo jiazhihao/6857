@@ -8,7 +8,7 @@ an $n$-bit signed integer is in the range $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign.
 
 \sys assumes that programmers expect the result of an $n$-bit
-arithemtic operation to equal to that of the corresponding mathematical
+arithmetic operation to equal to that of the corresponding mathematical
 ($\infty$-bit) operation.
 In other words, the result should fall in the $n$-bit integer range.
 %
@@ -151,54 +151,48 @@ kernel oops, to a stack overflow.
 \subsection{Equivalence}
 \label{s:sema:eqv}
 
-It is worth noting that two functionally equivalent operations at
-the machine instruction level may have different integer semantics
-in \sys.
-For example, $\cc{maxnum}\times_u 16$ and $\cc{maxnum} \shl 4$ are
-identical instructions, but the former expression causes an integer
-error if \cc{maxnum} is large, while the latter one is considered
-always secure.  \sys assumes that the developer uses the
-arithmetically intended integer operation. \nz{``intended'' is vague.}
-
-Any compiler optimization that rewrites
-$\cc{maxnum}\times_u 16$ to $\cc{maxnum} \shl 4$ will destroy the
-integer semantics.  Even worse, C compilers like GCC may completely
+As explained in \autoref{s:sema:sec}, \sys imposes different in-range
+requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
+that they are functionally equivalent.
+Any compiler optimization that rewrites $x \times_u 2$ to $x \shl
+1$ will destroy the integer semantics,
+%
+Even worse, C compilers like GCC may completely
 optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
-given.  To avoid the interference, \sys is designed to run before
-these optimizations.
+given.  To avoid the interference, \sys is designed to run with
+these optimizations disabled.
 
-\subsection{Default Semantics}
+\subsection{Overflow Semantics}
 \label{s:sema:def}
 
-Signed integer overflows and oversized shifts are undefined according
-to the C language standard.  In order to continue evaluating
-expressions like $x \times_s y + z$ after $x \times_s y$ overflows,
-\sys defines the default semantics for these integer operations, as
+Consider the C expression $a[x +_s y]$, where $a$ is an array and
+$x +_s y$ is an index.  \sys would catch $x +_s y$ if it overflows.
+On many architectures the overflowed index becomes a negative value
+(e.g., on x86).  To further catch the negative array index, \sys
+needs to continue evaluating $x +_s y$ even if it may overflow.
+However, signed overflow is undefined behavior in C.  To catch
+more integer errors, \sys thus defines the semantics for integer
+operations that the C standard specifies as undefined behavior, as
 follows:
 \begin{itemize}
 \item
-For $n$-bit signed arithmetic operations, \sys assumes the wrapping
-semantics as if they were unsigned (i.e., $\mod{2^n}$), which is
-the same as invoking GCC with the \cc{-fwrapv} option.
+The signed overflow wraps around using the two's complement.
 \item
-Division by zero is undefined.  \sys does not consider the result
-in further expressions.
-\item
-For shifts, \sys assumes x86's semantics, using $\log_2 n$ bits for
-shifting an $n$-bit integer.  That is, it uses 5~bits of the shift
-amount for 32-bit shifts, e.g., $1 \shl 32 = 1 \shl 0 = 1$.  This semantics
-is also the behavior of ARM and MIPS processors.
-\nz{Why does this matter?  KINT semantics already flag an oversized
-shift as an error, so why do we need to continue reasoning about the
-precise value that an oversized shift expression will have?}
+\sys truncates the shifting amount of an $n$-bit integer to $\log_2
+n$ bits, just like as x86 shift instructions.  For example, shifting
+a 32-bit integer by 32 bits is the same as by $\log_2 32 = 0$ bit,
+so we have $1 \shl 32 = 1 \shl 0 = 1$.
 \end{itemize}
-\sys may miss integer errors that are not modeled by the above
-semantics.  Consider the expression $x / (1 \shl y)$, where $x$ and
-$y$ are unconstrained 32-bit integers.  \sys will be able to detect
-the oversized shift, but not the division by zero, since
-with \sys's default semantics $1 \shl y$ cannot be zero.
+Division by zero remains undefined.  \sys does not consider the case
+in further expressions.
+
+\sys may miss integer errors that are not modeled by the semantics.
+Consider the expression $x / (1 \shl 32)$, which will trigger a
+division by zero on PowerPC.  \sys will be able to detect the
+oversized shift, but not the division by zero, since \sys evaluates
+the divisor to 1.
 
 \subsection{White Listing Idioms}
 \label{s:sema:whitelist}
@@ -224,7 +218,7 @@ given $x = \cc{0x1fffffff}$ and $y = 16$, their product evaluates
 to a larger value $\cc{0xfffffff0}$, which both overflows and
 bypasses the check.  A correct check is $(x \times_u y) /_u y \neq
 x$, or an non-overflow form, $\uintmax(n) /_u x > y$.
-
+\if 0
 In addition, \sys accepts user-provided idioms tailored for the
 code being analyzed.  For example, in the Linux kernel to set a
 timer that expires after \cc{delay} ticks one often invokes
@@ -236,6 +230,7 @@ theoretically overflow.
 ASCII string ``jiffies + delay'', or do you allow a more general
 pattern?  How general?  ``jiffies + *''?  Or ``jiffies + *'' in
 the last argument of {\tt mod\_timer}?}
+\fi
 
 \begin{figure}
 \centering
