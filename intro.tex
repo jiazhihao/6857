@@ -61,7 +61,7 @@ arbitrary code via a large \cc{maxnum} from user space.
 This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
 %
-The key challenge facing \sys is knowing what are actual integer errors.  For
+A key challenge facing \sys is knowing what are actual integer errors.  For
 example, some previous tools rigidly classify any signed-to-unsigned integer
 conversion from a possibly negative value as an error~\cite{brumley:rich,
   moy:z3prefix, seacord:secure-c}; such sign conversions are so widely used in C
@@ -80,30 +80,32 @@ while still effectively catch integer errors.
 A second challenge is to precisely reason about integer operations
 on every code path.  Given the semantics of an integer operation,
 \sys needs to determine whether the control flow can reach that
-operation while simultaneously violating the semantics.  For
+operation while simultaneously producing an out-of-bounds value.  For
 example, in \autoref{f:bridge}, \sys should conclude that an overflowed
 product \cc{size} will bypass the sanity check and reach the
 \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
-Linux kernel.  \sys needs to finish scanning the source code in a
+Linux kernel.  \sys needs to finish analyzing the source code in a
 reasonable amount of time.  \sys also should rank reported integer
-errors for human inspection, and remove unlikely ones if the bug
-list is long.
+errors to ease human inspection.  For example, an integer error
+that could only be triggered by misbehaved hardware is
+less likely to receive interest than by network input.
 
 \sys addresses these challenges with three ideas: practical integer
 semantics that define integer errors, a precise analysis algorithm
 that performs bit-level reasoning per function, and a set of ranking
 criteria that estimate the security impacts of possible integer
-errors.  \sys accept C source code as input, and inspects each
-integer operation for possible integer errors.
+errors.  \sys
+%accept C source code as input, and inspects each
+%integer operation for possible integer errors.
 %
-It is implemented using the LLVM compiler framework~\cite{lattner:llvm}
+is implemented using the LLVM compiler framework~\cite{lattner:llvm}
 and the Boolector constraint solver~\cite{boolector}.
 %
-To further reduce false errors, \sys asks users to provide a white
-list of overflow checking idioms, as well as additional range
-constraint annotations to filter out infeasible cases.
+%To further reduce false errors, \sys asks users to provide a white
+%list of overflow checking idioms, as well as additional range
+%constraint annotations to filter out infeasible cases.
 
 The primary contributions of this paper are:
 \begin{CompactItemize}
