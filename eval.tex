@@ -39,9 +39,10 @@ Each line represents a patch that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
 organize the patches based on the source directories.  Most
 columns are self-explanatory.  ``Description'' shows the attack
-vector and what values are infected.  ``\# of prev. fixes'' shows
-the number of previous commits that tried to fix the same error but
-did it incorrectly. 
+vector and what values are infected.  ``\# of prev. checks'' shows
+the number of previous validations in the code that tried to address the 
+same problem but did it incorrectly or insufficiently. 
+
 %``Patch accepted?'' shows how the kernel
 %developers respond to our patches:
 %\begin{itemize}
