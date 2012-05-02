@@ -1,8 +1,9 @@
-\begin{tabular}{lllll} \toprule
-Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
+\begin{tabular}{lll@{ }llll} \toprule
+Subsystem & Error & Arch & & Impact & Description & \# of prev. checks \\ \midrule
 \cc{drivers:drm} \\
 \hspace{1em} crtc
 	& $\times_u$
+	& 32 & 64
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
@@ -10,42 +11,63 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} nouveau
 	& cmp
+	& 32 & 64
 	& logic error
 	& spec misread
-	& --
+	& 1
 %	& \ok
 \\
 \hspace{1em} vmwgfx
 	& $\times_u$
+	& 32 &
 	& OOB read
 	& ioctl: \cc{kmalloc} size
 	& --
 %	& \ok
 \\
-%\hspace{1em} vmwgfx
 	& $\times_u$
+	& 32 & 64
 	& OOB write
 	& ioctl: VRAM size requested
 	& 2
 %	& \ok
 \\
+\hspace{1em} i915
+	& $\times_u$ (2)
+	& 32 &
+	& OOB write
+	& ioctl: \cc{kmalloc} size
+	& 2
+%	& \ok
+\\
+\hspace{1em} savage
+	& $\times_u$ (2)
+	& 32 &
+	& OOB read
+	& ioctl: \cc{kmalloc} size
+	& --
+%	& \ok
+\\
 \cc{drivers:input} \\
 \hspace{1em} cma3000_d0x
 	& cmp
+	& 32 & 64
 	& logic error
 	& $<_u 0$: error handling
-	& --
+	& 1
 %	& \ok
 \\
 \cc{drivers:media} \\
 \hspace{1em} lgdt330x
 	& cmp
+	& 32 & 64
 	& logic error
 	& $<_u 0$: error handling
-	& --
+	& 1
 \\
 \hspace{1em} uvc
 	& $\times_u$
+	& 32 &
 	& OOB read
 	& ioctl: \cc{kmalloc} size
 	& --
@@ -53,30 +75,76 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} wl128x
 	& cmp (36)
+	& 32 & 64
 	& logic error
 	& $<_u 0$: error handling
-	& --
+	& 36
+%	& \ok
+\\
+\hspace{1em} v4l2-ctrls
+	& $\times_u$ (2)
+	& 32 &
+	& OOB write
+	& ioctl: \cc{kmalloc} size
+	& 2
+%	& \ok
+\\
+\hspace{1em} zoran
+	& $\times_u$ $+_s$
+	& 32 & 64
+	& OOB write
+	& ioctl: \cc{vmalloc} size
+	& 1
 %	& \ok
 \\
 \cc{drivers:mtd} \\
 \hspace{1em} pmc551
 	& cmp
+	& 32 & 64
 	& logic error
 	& $\leq_u 0$: error handling
-	& --
+	& 1
 %	& \ok
 \\
 \cc{drivers:scsi} \\
 \hspace{1em} iscsi_tcp
 	& $\times_u$
+	& 32 & 64
 	& OOB write
 	& network: \cc{kmalloc} size
+	& --
+%	& \ok modified
+\\
+\cc{drivers:usb} \\
+\hspace{1em} usbtest
+	& $\times_u$
+	& 32 & 64
+	& OOB write
+	& ioctl: \cc{kmalloc} size
+	& --
+%	& \ok modified
+\\
+\hspace{1em} 
+	& $\times_u$
+	& 32 &
+	& logic error
+	& ioctl: \cc{context.count} 
+	& 1
+%	& \ok modified
+\\
+\cc{drivers:platform} \\
+\hspace{1em} panasonic-laptop
+	& $\times_u$
+	& 32 & 64
+	& OOB write
+	& ioctl: \cc{kzalloc} size
 	& --
 %	& \ok modified
 \\
 \cc{drivers:staging} \\
 \hspace{1em} comedi
 	& $\times_u$
+	& 32 &
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& 1
@@ -84,20 +152,23 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} olpc_dcon
 	& cmp
+	& 32 & 64
 	& logic error
 	& $\cc{(int)u8} = -1$: error handling
-	& --
+	& 1
 %	& \ok
 \\
 \hspace{1em} vt6655
-	& $\times_u$ (2)
+	& $\times_u$ $+_u$ (2)
+	& 32 &
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
 %	& \ok
 \\
 \hspace{1em} vt6656
-	& $\times_u$ (2)
+	& $\times_u$ $+_u$ (2)
+	& 32 &
 	& OOB write
 	& ioctl: \cc{kmalloc} size
 	& --
@@ -112,10 +183,20 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 %	& fixed \\
 \hspace{1em} xenbus
 	& $+_u$
+	& & 64
 	& N/A
 	& not exploitable
 	& --
 %	& \ok modified
+\\
+\cc{block} \\
+\hspace{1em} rbd
+	& $\times_u$ $+_u$
+	& 32 &
+	& OOB write
+	& disk: \cc{snap_count}
+	& --
+%	& \ok
 \\
 \cc{fs} \\
 \hspace{1em} ext4
@@ -125,6 +206,7 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 %	& --
 %	& fixed \\
 	& \shl
+	& 32 & 64
 	& DoS
 	& disk: \cc{groups_per_flex}
 	& 1 (CVE-2009-4307)
@@ -132,26 +214,64 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} nilfs2
 	& $\times_u$
+	& 32 &
 	& OOB read
 	& ioctl: \cc{kmalloc} size
-	& --
+	& 1
 %	& \ok
 \\
 	& $\times_u$
+	& 32 &
 	& OOB read
 	& ioctl: \cc{vmalloc} size
+	& 1
+\\
+	& $\times_u$
+	& 32 & 64
+	& logic error
+	& disk: \cc{ns_r_segments_percentage} range
 	& --
 \\
 \hspace{1em} xfs
 	& $\times_u$
+	& 32 & 64
 	& OOB write
 	& disk: \cc{kmalloc} size
 	& 1
 %	& \ok
 \\
+\hspace{1em} ceph
+	& index (2)
+	& 32 & 64
+	& OOB read
+	& network: \cc{len} when parsing reply info
+	& 2
+\\
+\hspace{1em}
+	& $\times_u$
+	& 32 &
+	& OOB write
+	& network: \cc{kzalloc} size
+	& 1
+\\
+\hspace{1em}
+	& $+_u$
+	& 32 & 64
+	& DoS
+	& network: \cc{kmalloc} size
+	& 1
+\\
+\hspace{1em} jffs2
+	& $+_u$
+	& 32 & 64
+	& OOB write
+	& disk: \cc{kmalloc} size
+	& --
+\\
 \cc{kernel} \\
 \hspace{1em} auditsc
 	& cmp
+	& 32 & 64
 	& logic error
 	& $\leq_u 0$: error handling
 	& --
@@ -173,6 +293,7 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \cc{net} \\
 \hspace{1em} ax25
 	& $\times_u$ (8)
+	& 32 & 64
 	& timer
 	& {ioctl}/{setsockopt}: T1/T2/T3/idle timers
 	& --
@@ -180,13 +301,15 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 %\hspace{1em} ax25
 	& $\times_u$ (4)
+	& & 64
 	& timer
 	& {setsockopt}: T1/T2/T3/idle timers
-	& 1
+	& 4
 %	& \ok
 \\
 \hspace{1em} can
 	& cmp
+	& 32 & 64
 	& logic error
 	& spec misread %error counter state
 	& --
@@ -194,6 +317,7 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} irda
 	& $\times_s$
+	& 32 & 64
 	& timer
 	& {getsockopt}: watchdog timer
 	& --
@@ -201,27 +325,31 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em} netfilter
 	& $-_u$ (2)
+	& 32 & 64
 	& output
 	& wrong timeout value sent out
-	& --
+	& 2
 %	& \ok
 \\
 \hspace{1em} netrom
 	& $\times_u$ (4)
+	& 32 & 64
 	& timer
 	& {setsockopt}: T1/T2/T4/idle timers
 	& --
 %	& \ok
 \\
 \hspace{1em} rps
-	& $\times_u$
+	& $\times_u$ $+_u$
+	& 32 &
 	& OOB write
 	& sysfs: \cc{vmalloc} size
-	& --
+	& 1
 %	& \ok
 \\
 \hspace{1em} sctp
 	& $\times_u$
+	& 32 &
 	& timer
 	& {setsockopt}: autoclose timer
 	& 3
@@ -229,14 +357,24 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 %\hspace{1em} sctp
 	& $+_u$
+	& 32 & 64
 	& N/A
 	& not exploitable
 	& 1 (CVE-2008-3526)
 %	& \ok
 \\
+\hspace{1em} ceph
+	& $\times_u$ $+_u$
+	& 32 &
+	& OOB write
+	& network: \cc{kmalloc} size
+	& 1
+%	& \ok
+\\
 \cc{sound} \\
 \hspace{1em} usb
 	& $\times_u$
+	& 32 &
 	& OOB write
 	& usb: \cc{kmalloc} size
 	& --
@@ -244,6 +382,7 @@ Subsystem & Error & Impact & Description & \# of prev. fixes \\ \midrule
 \\
 \hspace{1em}
 	& $\times_u$
+	& 32 &
 	& OOB read
 	& usb: \cc{kmalloc} size
 	& --
