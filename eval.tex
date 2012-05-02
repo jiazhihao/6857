@@ -74,9 +74,11 @@ in \autoref{f:data:linux}.
 kernel source trees.  Each line is a patch that tries to fix one
 or more bugs (the number is in the ``Error'' column if more than
 one).  For each patch, we list the corresponding subsystem, the
-error operation with the number of bugs, the security impact, a
+error operation with the number of bugs, the affected architectures
+(32-bit and/or 64-bit), the security impact, a
 description of the attack vector and affected values, and the number
-of previous commits that fixed the same problem incorrectly.}
+of incorrect or insufficient checks that kernel developers wrote
+previousely in an attempt to address the same problem.}
 \label{f:data:linux}
 \end{figure*}
 
