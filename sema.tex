@@ -154,14 +154,23 @@ kernel crash, to a stack overflow.
 \subsection{Equivalence}
 \label{s:sema:eqv}
 
+\if 0
+Let $\uintmax(n)$ denote the largest $n$-bit unsigned integer ~(i.e.,
+$2^n-1$).  Consider two functionally equivalent expresssions $x -_u
+1$ and $x +_u \uintmax(n)$, where $x$ is an $n$-bit unsigned integer.
+According to \autoref{f:in-bounds}, the in-bounds requirement of
+$x -_u 1$ is $x \geq_u 1$, while that of $x +_u \uintmax(n)$ is $x
+= 0$.
+\fi
 As explained in \autoref{s:sema:sec}, \sys imposes different in-bounds
 requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
 that they are functionally equivalent.
 Any compiler optimization that rewrites $x \times_u 2$ to $x \shl
 1$ will destroy the integer semantics.
 %
+%
 Even worse, C compilers like GCC may completely
-optimize away checks like $x + 1 < x$ if $x$ is a signed integer
+optimize away checks like $a + 1 < a$ if $a$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
 given.  To avoid the interference, \sys is designed to run with
