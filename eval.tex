@@ -78,7 +78,7 @@ error operation with the number of bugs, the affected architectures
 (32-bit and/or 64-bit), the security impact, a
 description of the attack vector and affected values, and the number
 of incorrect or insufficient checks that kernel developers wrote
-previousely in an attempt to address the same problem.}
+previously in an attempt to address the same problem.}
 \label{f:data:linux}
 \end{figure*}
 
@@ -292,7 +292,7 @@ additions never overflow.  \sys does not understand the rule and
 reports false errors for these additions.
 
 When applying \sys to the whole Linux kernel, it reported 134,051 possible
-integer errors in total. After filtering for senstive sinks, 1,024 of them are
+integer errors in total. After filtering for sensitive sinks, 1,024 of them are
 related to memory allocation sizes, and 2,255 are related to memory moving
 sizes.  Out of the 1,024 reported allocation size errors, 646 are derived from
 untrusted inputs.  We scanned through them and inspected 97 reports in detail.
