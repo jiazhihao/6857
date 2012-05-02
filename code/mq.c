@@ -1,9 +1,6 @@
 static int mq_attr_ok(struct ipc_namespace *ipc_ns, struct mq_attr *attr)
 {
-    if (attr->mq_maxmsg <= 0 || attr->mq_msgsize <= 0)
-        return 0;
-    ...../*not change attr->mq_maxmsg and attr->mq_msgsize*/
-    /* check for overflow */
+    .../* guarantee attr->mq_msgsize > 0 and attr->mq_maxmsg > 0*/
     if (attr->mq_msgsize > ULONG_MAX/attr->mq_maxmsg)
         return 0;
     if ((unsigned long)(attr->mq_maxmsg * (attr->mq_msgsize
@@ -12,4 +9,3 @@ static int mq_attr_ok(struct ipc_namespace *ipc_ns, struct mq_attr *attr)
         return 0;
     return 1;
 }
-
