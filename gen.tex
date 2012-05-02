@@ -206,9 +206,9 @@ Tracking predicates across functions can lead to solving complex
 constraint expressions, which would not scale to a large system such as the
 Linux kernel.
 
-To address the scalability issue,
-when generating predicates across functions (i.e., for function parameters,
-return values, global variables, and structure fields),
+To address the scalability issue, when generating predicates across
+functions (i.e., for entities like function parameters, return
+values, global variables, and structure fields),
 \sys bounds each external value using two constant
 integers as the minimum and maximum values, respectively. For example, if the
 value of a parameter $x$ ranges from 1 to 10, \sys generates the range predicates
@@ -218,11 +218,13 @@ $x \geq 1 \land x < 11$.
 %the ranges of all integral function parameters, return values, structure
 %fields, and global variables.
 \sys maintains a global range table that
-maps each of the aforementioned cross-function values to its range. Initially, all
+maps each cross-function entity to its range. Initially, all
 ranges are set to empty, except for values that originate from untrusted
 external sources, such as system call parameters, which are initialized to 
 full sets.
 
+\xw{i don't understand what `consults' means. I guess you
+mean \sys updates the table when...}
 \sys consults the range table each time when it sees a function reading its arguments,
 using values returned by a function call, loading from a structure field or
 global variables.  Within the function, \sys propagates value using range
