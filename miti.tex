@@ -85,9 +85,8 @@ The baselines are a simple multiplication and that followed by a
 and in a single test, we repeat the operation $10^6$ times and log arithmetic mean
 as the result.
 %
-In w/o \cc{malloc} cases, the manual check incurs $7\times$ slowdown, while
+In w/o \cc{malloc} cases, the manual check incurs $700\%$ slowdown, while
 the slowdown using NaN integers is only $34.5\%$;
-\fk{don't switch between $\times$ and \%}
 %
 In w/ \cc{malloc} cases, the slowdown numbers are $31.6\%$ and $3.8\%$,
 respectively.
@@ -102,7 +101,7 @@ manual checks.
 \input{data/nan-micro}
 \caption{Performance overhead of an multiplication \cc{n * size}, using
 manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and automated
-check via NaN integers, measured in cycles.}
+check via NaN integers, measured in cycles, for both w/o and w/ \cc{malloc} cases}
 \label{f:data:nan-micro}
 \end{figure}
 
