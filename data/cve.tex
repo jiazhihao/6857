@@ -1,89 +1,23 @@
 \begin{tabular}{lllcc} \toprule
- & Subsystem & Error & Caught in original? & Cleared in patch? \\ \midrule
-\cc{arch:x86} \\
-\hspace{1em} CVE-2009-3638 & kvm
- & $\times_u$, size & \ok & \ok \\
-\cc{drivers:block} \\
-\hspace{1em} CVE-2010-3437 & pktcdvd
- & index & \ok & \ok \\
-\cc{drivers:char} \\
-\hspace{1em} CVE-2011-2022 & agp
- & $+_u$ & \ok & \ok \\
-\hspace{1em} CVE-2011-1746 & agp
- & $+_u$, $\times_u$ & \ok & \ok \\
-\hspace{1em} CVE-2011-1745 & agp
- & $+_u$ & \ok & \ok \\
-\cc{drivers:drm} \\
-\hspace{1em} CVE-2011-1013 & irq
- & index & \ok & \ok \\
-\cc{drivers:infiniband} \\
-\hspace{1em} CVE-2010-4649 & uverbs
- & $\times_u$, size & \ok & \ok \\
-\cc{drivers:media} \\
-\hspace{1em} CVE-2011-0521 & av7110
- & index & \ok & \ok \\
-\cc{drivers:net} \\
-\hspace{1em} CVE-2009-1385 & e1000
- & $-_u$ & \ok & \ok \\
-\cc{drivers:scsi} \\
-\hspace{1em} CVE-2011-1494 & mpt2sas
- & $\times_u$, size & \ok & \ok \\
-\hspace{1em} CVE-2010-4157 & gdth
- & $+_u$, size & \ok & \ok \\
-\cc{fs} \\
-\hspace{1em} CVE-2011-4077 & xfs
- & index, size & \ok & \ok \\
-\hspace{1em} CVE-2011-3191 & cifs
- & $+_u$, index, size & \ok & \ok \\
-\hspace{1em} CVE-2010-4162 & bio
- & $+_u$, $-_u$ & \ok & \ok \\
-\hspace{1em} CVE-2010-3067 & aio
- & $\times_u$ & \ok & \ok \\
-\hspace{1em} CVE-2010-2538 & btrfs
- & $+_u$, $-_u$ & \ok & solver timeout \\
-\hspace{1em} CVE-2009-4307 & ext4
- & $\shl$, $/_u$ (ppc) & \shl semantics & bad fix \\
-\cc{kernel} \\
-\hspace{1em} CVE-2011-1593 & pid
- & $+_s$, index & \ok & \ok \\
-\cc{mm} \\
-\hspace{1em} CVE-2011-4097 & oom
- & $+_s$, $-_s$, $\times_s$ & \ok & page semantics \\
-\cc{net} \\
-\hspace{1em} CVE-2011-2497 & l2cap
- & $-_u$, size & \ok & \ok \\
-\hspace{1em} CVE-2011-1770 & dccp
- & $-_u$ & \ok & \ok \\
-\hspace{1em} CVE-2010-4529 & irda
- & $+_u$, $\times_s$, size & \ok & new errors \\
-\hspace{1em} CVE-2010-4175 & rds
- & size & \ok & \ok \\
-\hspace{1em} CVE-2010-4165 & tcp
- & $/_u$, $\times_u$ & \ok & \ok \\
-\hspace{1em} CVE-2010-4164 & x25
- & $-_u$ & \ok & \ok \\
-\hspace{1em} CVE-2010-3873 & x25
- & $-_u$, size & \ok & CVE-2010-4164 \\
-\hspace{1em} CVE-2010-3865 & rds
- & $+_u$ & accumulation & \ok \\
-\hspace{1em} CVE-2010-3310 & rose
- & index & \ok & \ok \\
-\hspace{1em} CVE-2010-2959 & can
- & $+_u$, $\times_u$, size & \ok & \ok \\
-\hspace{1em} CVE-2010-2478 & ethtool
- & $\times_u$, size & \ok & \ok \\
-\hspace{1em} CVE-2009-3280 & cfg80211
- & $-_u$   & \ok & \ok \\
-\hspace{1em} CVE-2009-2909 & ax25
- & $\times_s$, size & \ok & new errors \\
-\hspace{1em} CVE-2009-1265 & rose (netrom, x25)
- & $+_u$, size & \ok & \ok \\
-\hspace{1em} CVE-2008-3526 & sctp
- & $+_u$ & \ok & bad fix \\
-\cc{sound} \\
-\hspace{1em} CVE-2011-1477 & opl3
- & index & \ok & \ok \\
-\hspace{1em} CVE-2010-3442 & alsa
- & $+_u$, $\times_u$ & \ok & \ok \\
+ & Caught in original? & Cleared in patch? \\ \midrule
+CVE-2011-4097 & \ok & page semantics \\
+CVE-2010-4529 & \ok & new errors \\
+CVE-2010-3873 & \ok & CVE-2010-4164 \\
+CVE-2010-3865 & accumulation & \ok \\
+CVE-2010-2538 & \ok & solver timeout \\
+CVE-2009-4307 & \shl semantics & bad fix \\
+CVE-2009-2909 & \ok & new errors \\
+CVE-2008-3526 & \ok & bad fix \\
+For the rest: & \ok & \ok \\
+\multicolumn{3}{l}{CVE-2011-4077, CVE-2011-3191, CVE-2011-2497} \\
+\multicolumn{3}{l}{CVE-2011-2022, CVE-2011-1770, CVE-2011-1746} \\
+\multicolumn{3}{l}{CVE-2011-1745, CVE-2011-1593, CVE-2011-1494} \\
+\multicolumn{3}{l}{CVE-2011-1477, CVE-2011-1013, CVE-2011-0521} \\
+\multicolumn{3}{l}{CVE-2010-4649, CVE-2010-4175, CVE-2010-4165} \\
+\multicolumn{3}{l}{CVE-2010-4164, CVE-2010-4162, CVE-2010-4157} \\
+\multicolumn{3}{l}{CVE-2010-3442, CVE-2010-3437, CVE-2010-3310} \\
+\multicolumn{3}{l}{CVE-2010-3067, CVE-2010-2959, CVE-2010-2478} \\
+\multicolumn{3}{l}{CVE-2009-3638, CVE-2009-3280, CVE-2009-1385} \\
+\multicolumn{3}{l}{CVE-2009-1265} \\
 \bottomrule
 \end{tabular}

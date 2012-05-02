@@ -226,17 +226,16 @@ As shown in \autoref{f:data:cve},
 \sys is able to find 34 out of the 36 integer errors (94\%).
 This shows that \sys's report is fairly complete.
 
-\begin{figure*}
+\begin{figure}
 \centering
 \footnotesize
 \input{data/cve}
 \caption{The result of applying \sys to integer errors in Linux
-kernel from the CVE list.  We list the corresponding
-subsystem, the error operations, whether \sys catches the expected
-bugs in the original code, and whether \sys determines that the bug
-is fixed in the patched code.}
+kernel from the CVE list.  For each case, we show whether \sys
+catches the expected bugs in the original code, and whether \sys
+determines that the bug is fixed in the patched code.}
 \label{f:data:cve}
-\end{figure*}
+\end{figure}
 
 \sys misses the following two cases.
 
