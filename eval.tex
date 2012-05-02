@@ -107,17 +107,16 @@ Integer errors that allow out-of-bounds writes (i.e., buffer
 overflow) would break the integrity of the kernel and potentially
 allow privilege escalation.  They can be exploited via local access,
 disk (malformed filesystem), and network.  We see a large number of
-errors in \cc{ioctl}, since it is error-prone and biased by \sys's
-ranking heuristics.
+errors in \cc{ioctl}, an infamous error-prone interface.
 %
-There is also an interesting vulnerability in the sound subsystem;
-an adversary can exploit it by plugging in a malicious USB audio
+There are also two interesting vulnerabilities in the sound subsystem;
+an adversary can exploit them by plugging in a malicious USB audio
 device that responds with bogus sampling rates, leading to kernel
 hang, DoS, or buffer overflow.
 
 Integer errors cause timing bugs in several network protocol
-implementations.  For example, a user-space application can try to
-set a large timeout value, but the value could overflow and end up
+implementations.  For example, when a user-space application sets
+a large timeout value, the value could wrap around to
 with a small timeout.
 
 Error-handling related integer errors would make the kernel behave in
@@ -144,13 +143,16 @@ patches for clarification and reliability improvement.
 \subsubsection{Bad Fixes}
 \label{s:eval:bad}
 
-\sys discovered 7 integer errors that were previously known but
-fixed incorrectly.
-The ``\# of prev. fixes'' column in \autoref{f:data:linux} counts
-the incorrect patches that were committed into the mainline repository.
+\sys discovered 7 integer errors, where kernel developers had written checks,
+but the checks were incorrect or insufficient.
+The ``\# of prev. checks'' column in \autoref{f:data:linux} counts
+the those checks that were committed into the mainline repository.
 %those only proposed on the mailing list are not included.
 Some integer errors were fixed incorrectly more than once before
 we submitted a correct patch.
+\xw{this doesn't match the data.
+we wanted to show the number of generations
+of bad checks.  36 is not really what we wanted.}
 
 %
 It is interesting that two bad patches were committed to fix
