@@ -24,7 +24,7 @@ respectively.
 
 If an adversary supplies a large \cc{maxnum}, say $2^{31}$,
 however, the multiplication $\cc{maxnum} \times 16$ would
-overflow the 32-bit unsigned integer range and result in \cc{size}
+overflow the 32-bit unsigned integer bounds and result in \cc{size}
 being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
 are incorrectly limited.  In this case \cc{buf} is allocated as
