@@ -223,18 +223,16 @@ ranges are set to empty, except for values that originate from untrusted
 external sources, such as system call parameters, which are initialized to 
 full sets.
 
-\xw{i don't understand what `consults' means. I guess you
-mean \sys updates the table when...}
-\sys consults the range table each time when it sees a function reading its arguments,
-using values returned by a function call, loading from a structure field or
-global variables.  Within the function, \sys propagates value using range
-arithmetic~\cite{range-analysis}.  When a value reaches an
-external sink through argument passing, function returns, stores to structure
-fields or global variables, the corresponding range table entry is updated by
-merging its previous range with the range of the incoming value.  \sys
-iteratively scans through every function of the entire code base, update the
-range table accordingly until it converges.  If some table entries do not
-converge within a limited number of rounds, \sys sets them to be full sets.
+\sys queries the range table each time when it sees a function reading its
+arguments, using values returned by a function call, loading from a structure
+field or global variables.  Within the function, \sys propagates value using
+range arithmetic~\cite{range-analysis}.  When a value reaches an external sink
+through argument passing, function returns, stores to structure fields or
+global variables, the corresponding range table entry is updated by merging its
+previous range with the range of the incoming value.  \sys iteratively scans
+through every function of the entire code base, update the range table
+accordingly until it converges.  If some table entries do not converge within a
+limited number of rounds, \sys sets them to be full sets.
 
 \sys requires a system-wide call graph that associates each call
 site with a set of possible callee functions.  To do so, \sys builds
