@@ -353,22 +353,21 @@ In the above example, \sys will move the integer operation $x
 
 \paragraph{Error checking idiom.}
 
-When generating path predicates, some integer
-operations, such as division, can significantly slow down the constraint
-solver~\cite{brummayer:perf}.  Many such cases occur in integer
-error checks like $\cc{if}\ (N /_u x > y)$, where $N$ is a constant
-and $x$ and $y$ are $n$-bit integers.  \sys recognizes such idioms and
-rewrites them to avoid the slow operations, as follows.
+Some integer operations such as division in path predicates can
+significantly slow down the constraint solver~\cite{brummayer:perf}.
+Many such cases occur in integer error checks like $\cc{if}\ (N /_u
+x > y)$, where $N$ is a constant and $x$ and $y$ are $n$-bit integers.
+\sys recognizes such idioms and rewrites them to avoid the slow
+operations, as follows.
 
-\sys first zero-extends $x$ and $y$ from $n$ to $2n$ bits, as
-$x_{2n}$ and $y_{2n}$, respectively, and rewrites the check as
-multiplication $x_{2n} \times_u y_{2n} >_u N$.  If $N$ is a special
-constant, such as $\uintmax(n)$ or $2^n-1$, \sys rewrites the check
-with the multiplication overflow detection predicate, as described
-in \autoref{s:gen:oob}.
+To avoid division in $N /_u x > y$, \sys rewrites the check using
+Boolector's multiplication overflow detection predicate if $N$ is
+a special constant $\uintmax(n)$ (see \autoref{s:gen:oob}).
+Otherwise, \sys rewrites the check using multiplication as $x_{2n}
+\times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
+of $x$ and $y$ from $n$ to $2n$ bits, respectively.
 %
-This rewriting speeds up constraint solving, as demonstrated in
-\autoref{s:eval:perf}.
+See \autoref{s:eval:perf} for an evulation of the speed-up.
 
 \subsection{Limitations}
 \label{s:gen:limit}
