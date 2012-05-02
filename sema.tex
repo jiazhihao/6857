@@ -158,10 +158,10 @@ As explained in \autoref{s:sema:sec}, \sys imposes different in-bounds
 requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
 that they are functionally equivalent.
 Any compiler optimization that rewrites $x \times_u 2$ to $x \shl
-1$ will destroy the integer semantics,
+1$ will destroy the integer semantics.
 %
 Even worse, C compilers like GCC may completely
-optimize away checks like $(x + 1) < x$ if $x$ is a signed integer
+optimize away checks like $x + 1 < x$ if $x$ is a signed integer
 or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
 given.  To avoid the interference, \sys is designed to run with
