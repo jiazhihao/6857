@@ -184,10 +184,10 @@ follows:
 \item
 The signed overflow wraps around using the two's complement.
 \item
-\sys truncates the shifting amount of an $n$-bit integer to $\log_2
-n$ bits, just like as x86 shift instructions.  For example, shifting
-a 32-bit integer by 32 bits is the same as by $\log_2 32 = 0$ bit,
-so we have $1 \shl 32 = 1 \shl 0 = 1$.
+The shifting amount for an $n$-bit integer wraps around at $n$,
+similarly to x86's shift instructions.  For example, shifting
+a 32-bit integer by 32 bits is the same as by $0$ bit,
+so we have $1 \shl 32 = 1$.
 \end{itemize}
 Division by zero remains undefined.  \sys does not consider the case
 in further expressions.
