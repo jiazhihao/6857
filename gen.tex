@@ -358,16 +358,16 @@ significantly slow down the constraint solver~\cite{brummayer:perf}.
 Many such cases occur in integer error checks like $\cc{if}\ (N /_u
 x > y)$, where $N$ is a constant and $x$ and $y$ are $n$-bit integers.
 \sys recognizes such idioms and rewrites them to avoid the slow
-operations, as follows.
+operations.
 
-To avoid division in $N /_u x > y$, \sys rewrites the check using
-Boolector's multiplication overflow detection predicate if $N$ is
-a special constant $\uintmax(n)$ (see \autoref{s:gen:oob}).
-Otherwise, \sys rewrites the check using multiplication as $x_{2n}
+For example, to avoid division in $N /_u x > y$, \sys rewrites the check using
+Boolector's multiplication overflow detection predicate described
+in \autoref{s:gen:oob}, if $N$ is a special constant $\uintmax(n)$.
+Otherwise \sys rewrites the check using multiplication as $x_{2n}
 \times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
 of $x$ and $y$ from $n$ to $2n$ bits, respectively.
 %
-See \autoref{s:eval:perf} for an evulation of the speed-up.
+See \autoref{s:eval:perf} for an evaluation of the speed-up.
 
 \subsection{Limitations}
 \label{s:gen:limit}
@@ -382,11 +382,12 @@ testing configuration or architecture.  For better code coverage
 one should enable as many modules as possible, or try cross compilation
 for different architectures.
 
-As discussed in \autoref{s:sema}, \sys will miss integer errors
+\sys will miss integer errors
 that are not modeled by its semantics.  Particularly, it cannot catch
-overflows if the developer uses left shift instead of multiplication;
+overflows if the developer uses left shift instead of multiplication
+(see \autoref{s:sema:eqv});
 it will also miss errors specific to architectures like PowerPC,
-whose semantics it does not model.
+whose semantics it does not model~(see \autoref{s:sema:def})
 
 If the annotations for ``size'' parameters are incomplete, \sys will
 miss the corresponding integer errors.
