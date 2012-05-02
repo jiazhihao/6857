@@ -14,7 +14,7 @@ is silently converted to the signed \cc{status} of the same size.
 The Microsoft tool will issue a warning for the sign conversion if
 the value returned from \cc{le32_to_cpu} can be as large as $2^{32}
 - 1$, because $2^{32} - 1$ is out of the bounds of 32-bit signed
-integers~(at most $2^{31} - 1$) and makes \cc{status} negative.
+integers~(at most $2^{31} - 1$) and turns \cc{status} negative.
 %
 \sys does not flag every such conversion as an error.  \sys considers
 the conversion as an error only if \cc{status} causes a comparison
