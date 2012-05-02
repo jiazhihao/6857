@@ -30,14 +30,26 @@ the predicates to a solver for satisfiability testing.}
 \subsection{Out-of-Bounds Predicate Generation}
 \label{s:gen:oob}
 
-%From the definition in \autoref{s:sema:sec},
 To find integer errors, \sys needs to detect integer operations
-that violate the corresponding in-bounds requirements.
-To do so, for each integer operation \sys derives
-the negation of its in-bounds requirement, namely out-of-bounds~(OOB) predicate,
-satisfying which implies an error.
+that violate the corresponding in-bounds requirements, as listed
+in \autoref{f:in-bounds}.  To do so, for each integer operation
+\sys derives the negation of its in-bounds requirement, namely
+out-of-bounds~(OOB) predicate, satisfying which implies an error.
 
-\paragraph{Arithmetic operations.}
+\paragraph{Addition, subtraction, and multiplication.}
+The Boolector constraint solver provides an API for constructing
+efficient overflow detection
+predicates~\cite[\chapterautorefname~3.5]{brummayer:phd}.
+\sys invokes the API to generate OOB predicates for additive and
+multiplicative operations.
+
+\paragraph{Division.}
+For signed division $x /_s y$, \sys generates the OOB predicate
+$y = 0 \lor (x = -2^{n-1} \land y = -1)$.
+For unsigned division $x /_u y$, the OOB predicate is simply
+$y \neq 0$.
+
+\if 0
 Take multiplication for an example.  Given two $n$-bit unsigned
 integers $x$ and $y$, the in-bounds requirement is that their product
 cannot overflow $\uintmax(n)$.  There are several possible OOB
@@ -61,12 +73,12 @@ from the Boolector constraint
 solver~\cite[\chapterautorefname~3.5]{brummayer:phd}, which can be
 solved far more efficiently without computing the product.  The
 detailed implementation of the predicate is beyond the scope of
-this paper.\fk{Can we delete the last sentence?  it doesn't see to be our
-  contribution; we seem to be exploiting features that Boolean has for this case.}
+this paper.
+\fi
 
 \paragraph{Shift.}
 The OOB predicate \sys generates for a $n$-bit shift operation
-$x \shl y$ or $x \shr y$ is a simple comparison $y \geq n$, where
+$x \shl y$ or $x \shr y$ is a simple comparison $y \geq_u n$, where
 $y$ is the number of bits to shift.
 
 \paragraph{Conversion.}
