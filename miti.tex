@@ -59,6 +59,11 @@ returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 
 \zj{Should we change \cc{unnan} API to R\ \cc{unnan}(\cc{nan}\ T\; x,\; R\; v), 
 therefore programmers can write codes like \cc{if (unnan(x < y, true))}, where \cc{x}, \cc{y} are NaN Type}
+
+\if 0
+\zj{above doesn't explain the return value of comparison with NaN Type, necessary to say?} 
+\fi
+
 Comparison with $\cc{nan}\ T$ is interesting: when either operand is 
 in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
 the semantic of this comparison. Therefore programmers are expected to 
