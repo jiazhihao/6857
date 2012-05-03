@@ -6,7 +6,7 @@ LLVM intermediate representation~(IR).  \sys then examines the IR to
 find integer operations, and for each operation, \sys generates a
 set of predicates on the program's variables that would have to be
 true in order for that integer operation to have an error.  Finally,
-\sys feeds the constraints for each integer operation into the
+\sys feeds the predicates for each integer operation into the
 Boolector constraint solver for deciding satisfiability.  If the
 solver answers ``satisfiable'' with an assignment of variables,
 there is a potential integer error that could be triggered with

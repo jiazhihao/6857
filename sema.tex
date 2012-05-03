@@ -70,8 +70,8 @@ of $32$-bit unsigned integers.
 \paragraph{Division.}
 The divisor should be non-zero.  Particularly, the signed division
 $-2^{n-1} /_s {-1}$ is not in bounds, because the expected mathematical
-quotient $2^{n-1}$ is out of the bounds of an $n$-bit signed integer,
-which is at most $2^{n-1}-1$.
+quotient $2^{n-1}$ is out of the bounds of $n$-bit signed integers~(at
+most $2^{n-1}-1$).
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
@@ -240,7 +240,6 @@ Here $\uintmax(n)$ denotes the largest $n$-bit unsigned integer.}
 
 Consider the following code snippet.
 \input{code/array-neg-index}
-
 \sys would catch $x +_s y$ if it overflows. The result of signed overflow,
 however, is undefined in C\@. On many architectures~(e.g., x86) the overflowed
 result becomes a negative value. In practice, to further catch more errors,
