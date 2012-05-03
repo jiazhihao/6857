@@ -288,26 +288,36 @@ instruction is unconstrained~(unless the value has a range predicate).
 %
 In other words, \sys regards values returned by different load
 instructions as unrelated.
-Consider the code snippet below.
+Consider the example below.
 \input{code/alias}
 There are four occurrences of \cc{arg->count}, each meaning a load
-from memory.  \sys must merge these load instructions. Otherwise,
-for example, \sys would consider the \cc{arg->count} in \cc{copy_from_user}
+from memory.  \sys must merge these load instructions, otherwise
+\sys would consider the \cc{arg->count} in \cc{copy_from_user}
 as a fresh load and the value is unconstrained, despite the fact
 that earlier code limits \cc{arg->count} to 128; this would cause
 \sys to report a false multiplication overflow.
 
-LLVM's load elimination algorithm does not work well for our goal,
-because it optimizes for performance and tends to delay loads.
-This would result in multiple load instructions, 
-often scattered in several branches, that are in fact identical.
+LLVM's load elimination algorithm is too conservative and does not
+fit our goal.  For the above example, it would conservatively
+assume that the call to \cc{kmalloc} \emph{may} modify \cc{arg->count}
+(e.g., via some global variable that points to \cc{arg}).
+
+\sys merges load instructions as follows.
+It first adopts an aliasing assumption: a pointer passed to a
+function argument or a global variable points to a memory location
+that is distinct from any other pointers.  This assumption,
+though unsound, has been proven to be practical for detecting bugs
+in C programs~\cite{livshits:ipssa}.
 %
-\sys addresses the problem by hoisting every load instruction to
+In the example, \sys assumes that \cc{kmalloc} cannot hold a pointer
+to \cc{arg}, and concludes that the call to \cc{kmalloc} does
+not modify \cc{arg->count}.
+
+\sys then hoists every load instruction to
 the earliest possible point within the function.  The hope is that
 those load instructions will be moved up and put close to each
-other, so that the load elimination algorithm can easily merge
-identical ones.
-
+other, so as to easily merge identical ones.
+%
 Consider a load instruction $L$ that loads from pointer $p$.  $L$ is
 safe to move across its previous instruction $I$ if:
 \begin{CompactItemize}
@@ -321,14 +331,6 @@ there are multiple predecessors that jump to $I$, \sys tries to
 move $L$ up to their common ancestor block.  \sys repeatedly hoists $L$
 until it is either unsafe to do so or $L$ reaches the entry block of the
 function.
-
-\sys also adopts an aliasing assumption: a pointer passed to a
-function argument or a global variable points to a memory location
-that is distinct from any other pointers.  This assumption,
-though unsound, has been proven to be practical for detecting bugs
-in C programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
-to aggressively push load instructions ahead for more elimination
-opportunity.  
 
 In practice, \sys's memory model avoids sophisticated global
 analysis and achieves good performance (see \autoref{s:eval:perf}).
