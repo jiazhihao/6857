@@ -47,7 +47,7 @@ To demonstrate the use of the API, we modified libc's \cc{malloc}
 to take an \cc{nan size_t} as the allocation size.
 \input{code/malloc-nan}
 The modified \cc{malloc} returns \cc{NULL} if the allocation size
-overflowed.  To do so, it sets the allcation size to a large value
+overflowed.  To do so, it sets the allocation size to a large value
 \cc{SIZE_MAX} if \cc{size} overflowed, which will cause
 \cc{libc_malloc(SIZE_MAX)} to return \cc{NULL}.
 
