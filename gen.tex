@@ -34,7 +34,7 @@ To find integer errors, \sys needs to detect integer operations
 that violate the corresponding in-bounds requirements, as listed
 in \autoref{f:in-bounds}.  To do so, for each integer operation
 \sys derives the negation of its in-bounds requirement, namely
-out-of-bounds~(OOB) predicate, satisfying which implies an error.
+the out-of-bounds~(OOB) predicate, satisfying which implies an error.
 
 \paragraph{Addition, subtraction, and multiplication.}
 The Boolector constraint solver provides an API for constructing
@@ -94,9 +94,9 @@ For an array index $x$, \sys generates an OOB predicate $x <_s 0$.
 \sys implements a front-end plugin to recognize array indices.
 
 Similarly, for a data size $x$, \sys generates an OOB predicate $x <_s 0$.
-\sys requires user-provided annotations on ``size'' function parameters.  
-As for the Linux kernel, we annotate the ``size'' parameters in functions 
-like \cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
+For the Linux kernel, we annotate the ``size'' parameters in functions 
+like \cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb} as
+data sizes.
 
 \subsection{Path Predicate Generation}
 \label{s:gen:path}

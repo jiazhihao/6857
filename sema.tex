@@ -123,7 +123,7 @@ otherwise it may lead to an out-of-bounds access.
 A variable that represents a data size should be non-negative, 
 otherwise it would be misinterpreted
 as a large positive value and lead to an out-of-bounds access.
-\sys uses annotations to specify data size parameters.
+\sys requires annotations to specify data size parameters.
 
 \autoref{f:ax25-sign} shows an example of a negative size in the
 Linux kernel.  The third parameter of $\cc{copy_from_user}$ should
