@@ -3,7 +3,7 @@
 
 \sys may report many potential errors.  We are only interested
 in high-risk ones.  We consider an integer error as high risk if the
-result is either computed based on untrusted inputs, or is used in
+result is either computed based on untrusted inputs, or used in
 sensitive sinks.  Such inputs and sinks are generally specific to
 the system being analyzed.  This section discuss them in the context
 of the Linux kernel.
@@ -12,7 +12,7 @@ of the Linux kernel.
 \label{s:rank:input}
 
 Untrusted inputs are all channels into the kernel from the outside world,
-including data copied from the user space (via system calls, virtual file
+including data copied from user space (via system calls, virtual file
 systems like \cc{sysfs}, or kernel functions like \cc{copy_from_user}),
 received from the network, and read from disks. The kernel usually needs to
 perform sanity checks before using them. 
@@ -45,9 +45,9 @@ converting values are likely to originate from network or disk.
 Sensitive sinks include sizes for memory allocation, data moving and I/O
 communication. For example, an erroneous integer value used in the size
 argument of \cc{kmalloc}, \cc{copy_to_user} or \cc{sock_alloc_send_skb}
-is more likely to damage the system, yielding memory corruption or information
-leak. Currently we have 41 annotations for these sensitive sinks in the Linux
-kernel.
+is more likely to damage the system, yielding memory corruption or 
+information leakage.  Currently we have 41 annotations for these sensitive
+sinks for the Linux kernel.
 
 Another category of sensitive sinks are branch conditions. Control flow
 decisions based on the outcome of buggy integer operations are prone to cause
