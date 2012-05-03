@@ -4,7 +4,7 @@
 \autoref{s:eval} shows that a major source of integer errors is due
 to unanticipated integer wraparound.  To mitigate the issue, we
 propose a new integer family with NaN semantics: the value enters
-and stays in an error state once an integer error occurs.
+and stays in NaN state once an integer error occurs.
 %
 This section will illustrate how NaN integers help automate integer
 error checking.
@@ -24,9 +24,10 @@ operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 We implement NaN integers by modifying the Clang compiler.
 The compiler inserts overflow checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
-NaN if any source operand is NaN, or an integer error occurred
+NaN state if any source operand is NaN state, or an integer error occurred
 during the operation; otherwise the operation follows standard C rules.
-\nz{The NaN state is represented by all ones?}
+We choose the maximum value as NaN state for unsigned integers,
+and the minimum for signed integers.
 
 The compiler generates efficient overflow detection instructions
 for these checks. On x86, for example,
@@ -38,10 +39,10 @@ The NaN integer API consists of two functions:
 \begin{CompactItemize}
 \item
 $\cc{bool}\ \cc{isnan}(\cc{nan}\ T\; x)$ \hfill (NaN testing) \\
-returns true if $x$ is NaN, or false otherwise.
+returns true if $x$ is NaN state, or false otherwise.
 \item
 $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
-returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
+returns $v$ if $x$ is NaN state, or $(T)x$ otherwise.
 \end{CompactItemize}
 
 To demonstrate the use of the API, we modified libc's \cc{malloc}
@@ -70,7 +71,7 @@ operations, averaged over 1,000 runs.}
 
 To show how NaN integers help simplify overflow checks,
 consider the following (simplified) code snippet from the
-\cc{mq_attr_ok} function in Linux kernel 3.3:
+\cc{mq_attr_ok} function in Linux kernel:
 %
 \input{code/mq}
 %
