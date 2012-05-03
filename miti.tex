@@ -1,6 +1,17 @@
 \section{NaN Integer Semantics}
 \label{s:miti}
 
+\begin{figure}
+\centering
+\input{data/nan-micro}
+\caption{Performance overhead of \cc{n * size},
+using manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and
+automated check via NaN integers, for both w/o and w/ \cc{malloc}
+cases, measured in cycles per operation over $10^6$ back-to-back
+operations, averaged over 1,000 runs.}
+\label{f:data:nan-micro}
+\end{figure}
+
 \autoref{s:eval} shows that a major source of integer errors is unanticipated
 integer wraparound.  To mitigate these errors, we propose a new integer family
 with NaN semantics: once an integer has an overflow error, its value enters and
@@ -55,17 +66,6 @@ checks when calculating the allocation size, as illustrated by the following
 example.
 \input{code/use-nan}
 %
-\begin{figure}
-\centering
-\input{data/nan-micro}
-\caption{Performance overhead of \cc{n * size},
-using manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and
-automated check via NaN integers, for both w/o and w/ \cc{malloc}
-cases, measured in cycles per operation over $10^6$ back-to-back
-operations, averaged over 1,000 runs.}
-\label{f:data:nan-micro}
-\end{figure}
-
 To show how NaN integers help simplify overflow checks,
 consider the following (simplified) code snippet from the
 \cc{mq_attr_ok} function in the Linux kernel:
