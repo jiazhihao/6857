@@ -107,9 +107,9 @@ disabling most of its error handling paths.
 
 Integer errors that allow out-of-bounds writes (i.e., buffer
 overflow) would break the integrity of the kernel and potentially
-allow privilege escalation.  They can be exploited via local access,
-disk (malformed filesystem), and network.  We see a large number of
-errors in \cc{ioctl}, an infamous error-prone interface.
+enable privilege escalation attacks.  They can be exploited via network,
+local access, or malformed filesystem on disk.  We see a large number of
+such errors in \cc{ioctl}, an infamous error-prone interface.
 %
 There are also two interesting vulnerabilities in the sound subsystem;
 an adversary can exploit them by plugging in a malicious USB audio
@@ -117,26 +117,23 @@ device that responds with bogus sampling rates, leading to kernel
 hang, DoS, or buffer overflow.
 
 Integer errors cause timing bugs in several network protocol
-implementations.  For example, when a user-space application sets
-a large timeout value, the value could wrap around to
-with a small timeout.
+implementations.  For example, when a user space application sets
+a large timeout argument, the internal timer could wrap around
+to a smaller timeout value.
 
-Error-handling related integer errors would make the kernel behave in
-unanticipated ways, though they are hard to exploit by an adversary.
-Most of these bugs are simple tautological comparisons.
+Most logic related integer errors are due to tautological comparisons.
+These bugs would effectively disable error handling, or make the kernel
+behave in unanticipated ways. 
 
-\sys also found two logic bugs that were caused by programmer
-confusion rather than integer conversions.
-Below is one example in CAN\@.
-\begin{align*}
-((\cc{errc}\ \&\ \cc{0x7f}) \shr 8) > 127.
-\end{align*}
+\sys also found two logic bugs that were caused by programmer's
+confusion. One example from \cc{net/can} is shown below.
+\input{code/can}
 The intent of the code is to test whether the error counter \cc{errc}
 has reached certain level.  However, this
 comparison will never be true because the left-hand side of the test,
-which extracts 7 bits, is at most
-$2^7 - 1 = 127$.  The fix is to read the right bit according to the specification,
-via $\cc{errc}\ \&\ \cc{0x80}$.
+which extracts 7 bits from \cc{errc}, is at most
+$2^7 - 1 = 127$.  The fix is to check the right bit according to the
+specification, using $\cc{errc}\ \&\ \cc{0x80}$.
 
 Two integer errors (in xenbus and sctp) turned out
 to be non-exploitable.  The kernel developers still applied our
