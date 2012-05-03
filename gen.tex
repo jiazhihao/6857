@@ -93,10 +93,10 @@ reports the conversion as an integer error.
 For an array index $x$, \sys generates an OOB predicate $x <_s 0$.
 \sys implements a front-end plugin to recognize array indices.
 
-Similarly, for a data size $x$, \sys generates an OOB predicate $x <_s 0$.
-For the Linux kernel, we annotate the ``size'' parameters in functions 
-like \cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb} as
-data sizes.
+For a data size $x$, \sys generates an OOB predicate $x <_s 0$.
+We annotate the ``size'' parameters in functions 
+like \cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb} in
+the Linux kernel as data sizes for \sys.
 
 \subsection{Path Predicate Generation}
 \label{s:gen:path}
