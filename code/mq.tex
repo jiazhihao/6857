@@ -2,8 +2,8 @@
 \PY{c+cm}{/* overflow checks for}
 \PY{c+cm}{ *   maxmsg * msgsize + maxmsg * sizeof(void *)}
 \PY{c+cm}{ * assume}
-\PY{c+cm}{ *   $\cc{maxmsg} > 0 \land \cc{maxmsg} \leq 2^{15}$}
-\PY{c+cm}{ *   $\cc{msgsize} > 0 \land \cc{msgsize} \leq 2^{20}$}
+\PY{c+cm}{ *   0 \PYZlt{} maxmsg $\leq$ $2^{15}$}
+\PY{c+cm}{ *   0 \PYZlt{} msgsize $\leq$ $2^{31}$}
 \PY{c+cm}{ */}
 \PY{k}{if} \PY{p}{(}\PY{n}{msgsize} \PY{o}{\PYZgt{}} \PY{n}{ULONG\PYZus{}MAX} \PY{o}{/} \PY{n}{maxmsg}\PY{p}{)}
     \PY{k}{return} \PY{l+m+mi}{0}\PY{p}{;}
