@@ -1,4 +1,4 @@
-\section{Programming with NaN Integers}
+\section{NaN Integers}
 \label{s:miti}
 
 \fk{make clear that there are two new mitigation proposals.  i would lead with
@@ -110,7 +110,7 @@ slight modification to make it clear.
 \input{code/mq}
 The above checks intend to return 0 if the result of \cc{lhs} 
 overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
-$\cc{ULONG_MAX}$, otherwise it will return 1.   
+$\cc{ULONG_MAX}$, otherwise it will return 1m.   
 
 With NaN integers, one can wrap the original tricky checks with $\cc{isnan}(nan T)$
 \input{code/mq-nan}
