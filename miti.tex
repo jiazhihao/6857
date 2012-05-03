@@ -54,7 +54,7 @@ With the NaN-ized \cc{malloc}, developers do not have to write any overflow
 checks when calculating the allocation size, as illustrated by the following
 example.
 \input{code/use-nan}
-
+%
 \begin{figure}
 \centering
 \input{data/nan-micro}
@@ -81,8 +81,9 @@ never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
 With NaN integers, a developer can directly use \cc{isnan}
 without worrying about intermediate overflows:
+%
 \input{code/mq-nan}
-
+%
 To show that the runtime overhead of NaN integers is low, we compare
 the cost of a single multiplication (\cc{x * y}), as well as a multiplication
 followed by a \cc{malloc} call, in three scenarios: with no overflow

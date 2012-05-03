@@ -269,16 +269,14 @@ contains additional integer errors that are covered by CVE-2010-4164,
 which \sys correctly identified;
 Two cases contain fixes as we have shown in \autoref{s:eval:linux}.
 One case is a false error in CVE-2011-4097 (oom), as detailed below.
-
 \input{code/oom}
 The code
 computes a score proportional to process $p$'s memory consumption.
-It sums up different numbers of
-memory pages $p$ takes, divide the result by the total number
-of pages to get a ratio, and scale it by 1000.
+It sums up the numbers of different 
+memory pages that $p$ takes, divides the result by the total number
+of pages to get a ratio, and scales it by 1000.
 When the whole system is running out of memory,
-the kernel kills the process with the highest score
-to free more memory.
+the kernel kills the process with the highest score.
 
 The patch changes the type of \cc{points} from \cc{int} to \cc{long} because
 \cc{points} could be large on 64-bit systems; multiplying it by
@@ -287,20 +285,26 @@ causing an innocent process to be killed.
 
 There is an implicit rule that the sum of these numbers of pages
 (e.g., from \cc{get_mm_rss}) is at most \cc{totalpages}, so the
-additions never overflow.  \sys does not understand the rule and
+additions never overflow.  \sys is unaware of the rule and
 reports false errors for these additions.
 
-\fk{separate in two paragraph? one about the 12 hours and one about
-the effectiveness of range analysis etc. to reduce false errors}
+%\fk{separate in two paragraph? one about the 12 hours and one about the
+%effectiveness of range analysis etc. to reduce false errors} 
+
 When applying \sys to the whole Linux kernel, it reported 134,051 possible
-integer errors in total. After filtering for sensitive sinks, 1,024 of them are
+integer errors in total. We scanned through them and inspected 97 reports in
+detail.  It took us roughly 12 hours to discover the first batch of 6
+exploitable errors, all of them are related to erroneous allocation size.
+The other 91 warnings are either harmless overflows or
+false warnings.  Most of the false warnings are due to imprecise range analysis
+or lack of domain-specific knowledge.
+
+After filtering for sensitive sinks, only 1,024 of the 134,051 reports are
 related to memory allocation sizes, and 2,255 are related to memory moving
-sizes.  Out of the 1,024 reported allocation size errors, 646 are derived from
-untrusted inputs.  We scanned through them and inspected 97 reports in detail.
-It took us roughly 12 hours to discover 6 exploitable errors.
-The other 91 warnings are either harmless overflows or false warnings.  Most of
-the false warnings are due to imprecise range analysis or lack of
-domain-specific knowledge.
+sizes. Out of the 1,024 reported allocation size errors, 646 are derived from
+untrusted inputs, which include all the 6 bugs we found before.
+This shows that \sys's ranking strategy is useful in helping
+users focus on high risk errors.
 
 % first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
 
