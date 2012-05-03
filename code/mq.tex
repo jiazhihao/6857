@@ -1,6 +1,7 @@
 \begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
 \PY{c+cm}{/* overflow checks for}
 \PY{c+cm}{ *   maxmsg * msgsize + maxmsg * sizeof(void *)}
+\PY{c+cm}{ * maxmsg and msgsize are defined as signed long}
 \PY{c+cm}{ * assume}
 \PY{c+cm}{ *   0 \PYZlt{} maxmsg $\leq$ $2^{15}$}
 \PY{c+cm}{ *   0 \PYZlt{} msgsize $<$ $2^{31}$}

@@ -1,5 +1,6 @@
 /* overflow checks for
  *   maxmsg * msgsize + maxmsg * sizeof(void *)
+ * maxmsg and msgsize are defined as signed long
  * assume
  *   0 < maxmsg $\leq$ $2^{15}$
  *   0 < msgsize $<$ $2^{31}$
