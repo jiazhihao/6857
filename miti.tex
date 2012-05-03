@@ -1,28 +1,24 @@
 \section{NaN Integer Semantics}
 \label{s:miti}
 
-\fk{make clear that there are two new mitigation proposals.  i would lead with
-  the type.  this section needs a careful writing pass.  happy to do so one it
-  has been flushed out.}
-
+\if 0
 Writing integer error checks is tedious and error-prone.
 Even for a simple multiplication \cc{n * size} that is often used
 as the allocation size for an array, programmers would
 have to write a non-trivial overflow check like \cc{(size \&\& n >
 SIZE_MAX / size)}.  We contributed \cc{kmalloc_array(n, size)}
 to help perform the check, which landed in the Linux kernel v3.4-rc1.
+\fi
 
-\xw{to be revised.}
-may forget to perform a check, or use wrong bounds that some inputs
-can bypass. \xw{reference results from eval.}
-When the expression gets more complex,
-programmers would have to write checks for every arithmetic operation.
+\autoref{s:eval} shows that a major source of integer errors is due
+to unanticipated integer wraparound.  To mitigate the issue, we
+propose a new integer family with NaN semantics: the value enters
+and stays in an error state once an integer error occurs.
+%
+This section will illustrate how NaN integers help automate integer
+error checking.
 
-To automate integer error checking, we propose a new integer type that provides
-not-a-number (NaN) semantics once it overflows, and remains NaN in future
-computations.
-
-The basic usage of NaN integers is to add a type qualifier \cc{nan}
+The basic usage is to add a type qualifier \cc{nan}
 to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
@@ -37,15 +33,13 @@ The compiler inserts error checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
 during the operation.
-
+%
 The compiler generates efficient overflow detection instructions
 for these checks, depending on the target architecture.  For example,
-to detect a multiplication overflow on x86, the compiler may only
-\fk{may? it inserts nor no inserts.}
-need to insert one \cc{jno} instruction after the multiplication,
+the compiler inserts one \cc{jno} instruction after the multiplication,
 which jumps if no overflow happened.
 
-\noindent
+%\noindent
 The NaN integer API consists of two functions:
 \begin{itemize}
 \item
@@ -68,52 +62,49 @@ Below is an example use case.
 In this way, programmers do not have to write any overflow checks
 when calculating the allocation size.
 
-We modified the e1000 driver in the Linux kernel to use NaN integers
-for all allocation sizes.
-\xw{changed less than 20 lines of code. the slowdown is negligible.
-still want to talk about infiniband?}
-
-We use \cc{x * y} as a microbenchmark to measure the runtime
-overhead introduced by the manual overflow check \cc{x != 0 \&\& y
-> UINT_MAX / x}, and that by the NaN integer's automated check
-inserted by the compiler, respectively.
-%
-The baselines are a simple multiplication and that followed by a
-\cc{malloc} call, noted as w/o and w/ \cc{malloc}, respectively.
-
-\autoref{f:data:nan-micro} shows the results. Each test is repeated 1,000 times,
-and in a single test, we repeat the operation $10^6$ times and log arithmetic mean
-as the result.
-%
-In w/o \cc{malloc} cases, the manual check incurs $700\%$ slowdown, while
-the slowdown using NaN integers is only $34.5\%$;
-%
-In w/ \cc{malloc} cases, the slowdown numbers are $31.6\%$ and $3.8\%$,
-respectively.
-%
-We can see that the NaN integer checks are more efficient than
-manual checks.
-\fk{Is the problem that programmers don't write checks because they are worried
-  about the performance impact?}
-
 \begin{figure}
 \centering
 \input{data/nan-micro}
-\caption{Performance overhead of an multiplication \cc{n * size}, using
-manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and automated
-check via NaN integers, measured in cycles, for both w/o and w/ \cc{malloc} cases.}
+\caption{Performance overhead of \cc{n * size},
+using manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x} and
+automated check via NaN integers, for both w/o and w/ \cc{malloc}
+cases, measured in cycles.}
 \label{f:data:nan-micro}
 \end{figure}
 
-Below is the code of function \cc{mq_attr_ok} in linux kernel IPC, with 
+Below is the code of function \cc{mq_attr_ok} in Linux kernel IPC, with 
 slight modification to make it clear.
 \input{code/mq}
 The above checks intend to return 0 if the result of \cc{lhs} 
 overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
 $\cc{ULONG_MAX}$, otherwise it will return 1.   
 
-With NaN integers, one can wrap the original tricky checks with $\cc{isnan}(nan T)$
+With NaN integers, one can wrap the original tricky checks with
+$\cc{isnan}$.
 \input{code/mq-nan}
+
+We further show that using NaN integers incurs little runtime
+overhead.  The baselines are a simple multiplication \cc{x * y} and
+that followed by a \cc{malloc} call (referred as w/o and w/
+\cc{malloc}, respectively).  We measure the overhead introduced by
+the manual overflow check \cc{x != 0 \&\& y > UINT_MAX / x}, and
+that by the NaN integer's automated check inserted by the compiler,
+respectively,
+%
+Each test is repeated 1,000~times, and in a single test, we repeat
+the operation $10^6$ times and log arithmetic mean as the result.
+
+\autoref{f:data:nan-micro} shows the results.
+%
+With a simple multiplication, the slowdown using NaN integers is
+$34.5\%$.  If an additional \cc{malloc} call is present, the slowdown
+drops to $3.8\%$.
+%
+The corresponding slowdown numbers for manual checking
+are $700\%$ and $31.6\%$, respectively.
+%
+We believe that it is practical to adopt NaN integers for
+replacing manual overflow checking with a low overhead.
 
 \if 0
 Below is an example check in the infiniband driver.
