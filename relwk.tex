@@ -1,12 +1,17 @@
 \section{Related Work}
 \label{s:relwk}
 
-The closest work to \sys is a static integer overflow detection
-tool inside Microsoft~\cite{moy:z3prefix}, which also uses
-constraint solving techniques.
-Compared to \sys, its integer semantics impose more restrictions.
+In the context of integer error analysis, \sys has a combination of 5 novel
+properties: static analysis with pragmatic integer semantics, ability to scale
+to large software, high precision, high coverage, and a new NaN integer family.
+We relate \sys to previous work along these 5 properties.
 
-Consider the sign conversion below, a widely seen code pattern in
+\paragraph{Pragmatic integer semantics.} The closest work to \sys is a static integer overflow detection
+tool inside Microsoft~\cite{moy:z3prefix}, which also uses constraint solving
+techniques.  Compared to \sys, Microsoft's tool imposes too strict integer
+semantics.
+
+Consider the sign conversion below, a widely-seen code pattern in
 the Linux kernel.
 \input{code/endian}
 Note that \cc{le32_to_cpu} returns an unsigned 32-bit integer, which
@@ -78,7 +83,10 @@ constraints are so complex that one may also have to split
 individual modules for model checking~\cite{engler:vs}.  These
 changes require too much manual effort, especially given the
 large number of drivers and the rapid code changes in the Linux
-kernel.
+kernel.  To avoid these complications \sys is a static analysis tool that
+generates predicates carefully to allow it to scale to the Linux kernel, without
+making any modifications to the Linux source code. \sys can be inserted into the
+Linux compilation workflow transparently.
 
 \paragraph{Precision.}
 It is difficult for tools that do not track path conditions (e.g.,
@@ -92,7 +100,8 @@ eliminates cases where a user-controlled value is checked against
 \emph{some} bounds and reports unbounded integer usages.  A similar heuristic
 is used in a PREfast-based tool from Microsoft~\cite{prefast}.  This
 approach will miss integer errors due to incorrect bounds checking since
-it does not perform reasoning on the actual values of the bounds.
+it does not perform reasoning on the actual values of the bounds. \sys avoids
+these issues by generating carefully predicates that includes path conditions.
 
 \paragraph{Coverage.}
 Dynamic integer error detection tools,
@@ -116,7 +125,8 @@ such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
 The advantage of these tools is that they have a lower false error rate.
 Using them to find integer errors requires input that can trigger
 those bugs, and thus it is in general difficult to achieve high
-coverage.
+coverage.  In particular, because triggering integer errors often requires
+carefully-chosen input values.
 
 \if 0
 \paragraph{OS testing tools.}
@@ -148,7 +158,7 @@ will suffer from this problem and will be unable to extract
 precise integer security requirements.
 \fi
 
-\paragraph{Current practice.}
+\paragraph{Library and language support.}
 To avoid integer errors, developers can adopt
 an integer library with error checks, such as CERT's
 IntegerLib~\cite[INT03-C]{seacord:secure-c}
@@ -213,7 +223,8 @@ to define a ranged subtype (e.g., integers from 0 to 9).  The runtime
 will raise an exception on any attempt to store an out-of-bounds
 value to variables of that subtype, and developers are responsible
 for handling the exception.  There is a similar proposal that adds
-ranged integers to the C language~\cite{ranged-c}.
+ranged integers to the C language~\cite{ranged-c}.  Our NaN integer family is
+inspired by these designs.
 
 \if 0
 Another option is to use infinitely ranged integers (i.e., bignum),
