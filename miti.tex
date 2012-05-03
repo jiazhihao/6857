@@ -105,6 +105,13 @@ check via NaN integers, measured in cycles, for both w/o and w/ \cc{malloc} case
 \label{f:data:nan-micro}
 \end{figure}
 
+Below is the code of function \cc{mq_attr_ok} in linux kernel IPC, with 
+equivalent modification to make it clear.
+\input{code/mq}
+
+With NaN integers, one can wrap the original tricky checks with $\cc{isnan}(...)$
+\input{code/mq-nan}
+
 \if 0
 Below is an example check in the infiniband driver.
 \input{code/ib-check}
