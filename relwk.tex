@@ -11,7 +11,7 @@ tool inside Microsoft~\cite{moy:z3prefix}, which also uses constraint solving
 techniques.  Compared to \sys, Microsoft's tool imposes too strict integer
 semantics.
 
-Consider the sign conversion below, a widely-seen code pattern in
+Consider the sign conversion below, a widely seen code pattern in
 the Linux kernel.
 \input{code/endian}
 Note that \cc{le32_to_cpu} returns an unsigned 32-bit integer, which
@@ -126,7 +126,7 @@ The advantage of these tools is that they have a lower false error rate.
 Using them to find integer errors requires input that can trigger
 those bugs, and thus it is in general difficult to achieve high
 coverage.  In particular, because triggering integer errors often requires
-carefully-chosen input values.
+carefully chosen input values.
 
 \if 0
 \paragraph{OS testing tools.}
