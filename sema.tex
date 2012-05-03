@@ -247,7 +247,7 @@ such as the potentially negative array index, \sys needs to continue evaluating
 $x +_s y$, even if it overflows.  \sys models the semantics for some integer
 operations that the C standard specifies as undefined behavior, as follows:
 
-\begin{itemize}
+\begin{CompactItemize}
 \item
 The result of signed overflow wraps around using two's complement.
 \item
@@ -255,7 +255,7 @@ The shifting amount for an $n$-bit integer wraps around at $n$,
 similarly to x86's shift instructions.  For example, shifting
 a 32-bit integer by 32 bits is the same as by $0$ bit,
 so we have $1 \shl 32 = 1$.
-\end{itemize}
+\end{CompactItemize}
 Division by zero remains undefined.  \sys does not consider the case
 in further expressions.
 
