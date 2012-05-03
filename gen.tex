@@ -66,7 +66,6 @@ product is 1.  This is conceptually equivalent to:
 x_{2n} \times y_{2n} > \uintmax(n).
 \end{equation*}
 Both forms would hurt the solver's performance noticeably
-(see \autoref{s:eval:perf} for a performance comparison).
 %
 \sys reuses a specialized multiplication overflow detection predicate
 from the Boolector constraint
@@ -378,8 +377,6 @@ Otherwise \sys rewrites the check using multiplication as $x_{2n}
 \times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
 of $x$ and $y$ from $n$ to $2n$ bits, respectively.
 %
-See \autoref{s:eval:perf} for an evaluation of the speed-up.\fk{shouldn't this
-  senetence be deleted?}
 
 \subsection{Limitations}
 \label{s:gen:limit}
