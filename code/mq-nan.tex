@@ -1,4 +1,6 @@
 \begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
-\PY{c+c1}{// change maxmsg and msgsize to type `nan long'}
-\PY{k}{return} \PY{n+nf}{isnan}\PY{p}{(}\PY{n}{maxmsg} \PY{o}{*} \PY{p}{(}\PY{n}{msgsize} \PY{o}{+} \PY{k}{sizeof}\PY{p}{(}\PY{k+kt}{void} \PY{o}{*}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+\PY{c+c1}{// change the type of maxmsg and msgsize to `nan long'}
+\PY{k}{if} \PY{p}{(}\PY{n+nf}{isnan}\PY{p}{(}\PY{n}{maxmsg} \PY{o}{*} \PY{p}{(}\PY{n}{msgsize} \PY{o}{+} \PY{k}{sizeof}\PY{p}{(}\PY{k+kt}{void} \PY{o}{*}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+    \PY{k}{return} \PY{l+m+mi}{0}\PY{p}{;}
+\PY{k}{return} \PY{l+m+mi}{1}\PY{p}{;}
 \end{Verbatim}
