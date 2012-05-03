@@ -20,14 +20,14 @@ error checking.
 
 The basic usage is to add a type qualifier \cc{nan}
 to an actual integer type, such as \cc{nan size_t}.
-\begin{itemize}
+\begin{CompactItemize}
 \item
 An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
 when used with an integer of type $\cc{nan}\ T$.
 \item
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
-\end{itemize}
+\end{CompactItemize}
 
 We implement NaN integers by modifying the Clang compiler.
 The compiler inserts overflow checks for every arithmetic or
@@ -42,14 +42,14 @@ which jumps if no overflow happened.
 
 %\noindent
 The NaN integer API consists of two functions:
-\begin{itemize}
+\begin{CompactItemize}
 \item
 $\cc{bool}\ \cc{isnan}(\cc{nan}\ T\; x)$ \hfill (NaN testing) \\
 returns true if $x$ is NaN, or false otherwise.
 \item
 $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
-\end{itemize}
+\end{CompactItemize}
 
 We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
