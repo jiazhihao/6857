@@ -69,7 +69,7 @@ such signedness conversions are so widely used in C
 code that doing so would cause a flood of false
 errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
 Similarly, a common way to detect overflow in C is to 
-check the overflowed the result after the fact. For example, to test
+check the overflowed result after the fact. For example, to test
 if \textit{base} plus \textit{len} overflows, kernel developers write
 expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
 which \sys should not consider as an error.
