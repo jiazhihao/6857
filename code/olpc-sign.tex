@@ -3,8 +3,19 @@
     \PY{p}{.}\PY{p}{.}\PY{p}{.}
     \PY{n}{u8} \PY{p}{(}\PY{o}{*}\PY{n}{read\PYZus{}status}\PY{p}{)}\PY{p}{(}\PY{k+kt}{void}\PY{p}{)}\PY{p}{;}
 \PY{p}{\PYZcb{}}\PY{p}{;}
-\PY{k}{struct} \PY{n}{dcon\PYZus{}platform\PYZus{}data} \PY{o}{*}\PY{n}{pdata} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
-\PY{k+kt}{int} \PY{n}{status} \PY{o}{=} \PY{n}{pdata}\PY{o}{-}\PY{o}{\PYZgt{}}\PY{n}{read\PYZus{}status}\PY{p}{(}\PY{p}{)}\PY{p}{;}
-\PY{k}{if} \PY{p}{(}\PY{n}{status} \PY{o}{=}\PY{o}{=} \PY{o}{-}\PY{l+m+mi}{1}\PY{p}{)}
-    \PY{k}{return} \PY{n}{IRQ\PYZus{}NONE}\PY{p}{;}
+\PY{c+cm}{/* -\PYZgt{}read\PYZus{}status() implementation */}
+\PY{k}{static} \PY{n}{u8} \PY{n+nf}{dcon\PYZus{}read\PYZus{}status\PYZus{}xo\PYZus{}1\PYZus{}5}\PY{p}{(}\PY{n}{u8} \PY{o}{*}\PY{n}{status}\PY{p}{)}
+\PY{p}{\PYZob{}}
+    \PY{k}{if} \PY{p}{(}\PY{o}{!}\PY{n}{dcon\PYZus{}was\PYZus{}irq}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+        \PY{k}{return} \PY{o}{-}\PY{l+m+mi}{1}\PY{p}{;}
+    \PY{p}{.}\PY{p}{.}\PY{p}{.}
+\PY{p}{\PYZcb{}}
+\PY{n}{irqreturn\PYZus{}t} \PY{n+nf}{dcon\PYZus{}interrupt}\PY{p}{(}\PY{k+kt}{int} \PY{n}{irq}\PY{p}{,} \PY{k+kt}{void} \PY{o}{*}\PY{n}{id}\PY{p}{)}
+\PY{p}{\PYZob{}}
+    \PY{k}{struct} \PY{n}{dcon\PYZus{}platform\PYZus{}data} \PY{o}{*}\PY{n}{pdata} \PY{o}{=} \PY{p}{.}\PY{p}{.}\PY{p}{.}\PY{p}{;}
+    \PY{k+kt}{int} \PY{n}{status} \PY{o}{=} \PY{n}{pdata}\PY{o}{-}\PY{o}{\PYZgt{}}\PY{n}{read\PYZus{}status}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+    \PY{k}{if} \PY{p}{(}\PY{n}{status} \PY{o}{=}\PY{o}{=} \PY{o}{-}\PY{l+m+mi}{1}\PY{p}{)}
+        \PY{k}{return} \PY{n}{IRQ\PYZus{}NONE}\PY{p}{;}
+    \PY{p}{.}\PY{p}{.}\PY{p}{.}
+\PY{p}{\PYZcb{}}
 \end{Verbatim}
