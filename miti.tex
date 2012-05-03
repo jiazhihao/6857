@@ -81,8 +81,7 @@ the other for the addition;
 note that the second multiplication \cc{maxmsg * sizeof(void *)}
 never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, one rewrite the code as follows.
-\hc{change to `nan long' or `nan unsigned long'?}
+With NaN integers, one rewrites the code as follows.
 \input{code/mq-nan}
 
 We further show that using NaN integers incurs little runtime
