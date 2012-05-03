@@ -4,7 +4,11 @@
     \PY{c+cm}{/*attr-\PYZgt{}mq\PYZus{}msgsize \PYZgt{} 0 and attr-\PYZgt{}mq\PYZus{}maxmsg \PYZgt{} 0*/}
     \PY{k+kt}{nan} \PY{k+kt}{unsigned} \PY{k+kt}{long} \PY{n}{msg} \PY{o}{=} \PY{n}{attr}\PY{o}{-}\PY{o}{\PYZgt{}}\PY{n}{mq\PYZus{}maxmsg}\PY{p}{;}
     \PY{k+kt}{nan} \PY{k+kt}{unsigned} \PY{k+kt}{long} \PY{n}{size} \PY{o}{=} \PY{n}{attr}\PY{o}{-}\PY{o}{\PYZgt{}}\PY{n}{mq\PYZus{}msgsize}\PY{p}{;}
+<<<<<<< HEAD
     \PY{k}{if} \PY{p}{(}\PY{n}{isnan}\PY{p}{(}\PY{n}{msg} \PY{o}{*} \PY{p}{(}\PY{n}{size} \PY{o}{+} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{msg\PYZus{}msg}\PY{o}{*}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+=======
+    \PY{k}{if} \PY{p}{(}\PY{n+nf}{isnan}\PY{p}{(}\PY{n}{msg} \PY{o}{*} \PY{p}{(}\PY{n}{size} \PY{o}{+} \PY{k}{sizeof}\PY{p}{(}\PY{k}{struct} \PY{n}{msg\PYZus{}msg}\PY{o}{*}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+>>>>>>> 321e15d725701d4df417ab907bde1bc6ea905b67
         \PY{k}{return} \PY{l+m+mi}{0}\PY{p}{;}
     \PY{k}{return} \PY{l+m+mi}{1}\PY{p}{;}
 \PY{p}{\PYZcb{}}
