@@ -1,7 +1,7 @@
 \section{Evaluation}
 \label{s:eval}
 
-The evaluation tries to answer the following questions.
+The evaluation answers the following questions:
 \begin{CompactItemize}
 \item
 Is \sys effective in discovering new integer errors?
@@ -27,14 +27,15 @@ and submitted patches according to \sys's reports.
 The kernel developers confirmed and fixed \nrbugslinux integer errors.
 %
 We also applied \sys to two popular user-space applications, lighttpd
-and OpenSSH; the developers fixed \nrbugslighttpd and \nrbugsopenssh
-integer errors reported by \sys, respectively.
+and OpenSSH; the developers fixed respectively \nrbugslighttpd and \nrbugsopenssh
+integer errors reported by \sys.
 %
 The results show that \sys is effective in finding new integer
-errors, and the developers are willing to fix them.
+errors, and the developers are willing to fix them.  The rest
+of this subsection explores the bugs found in Linux in more detail.
 
-We use the Linux kernel for a case study.  \autoref{f:data:linux}
-summarizes integer errors \sys discovered in its source code.
+\autoref{f:data:linux}
+summarizes the integer errors \sys discovered in Linux.
 Each line represents a patch that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
 organize the patches based on the source directories.  Most
@@ -93,7 +94,7 @@ protocols.
 
 Multiplication appears to be the most error-prone operation; it is
 often used for calculating allocation size, such as $n \times
-\cc{sizeof}(...)$.  This is vulnerable if $n$ can be controlled
+\cc{sizeof}(...)$.  This use is vulnerable if $n$ can be controlled
 by an adversary, causing the allocation size to wrap around to an
 unanticipated smaller value.
 
@@ -117,8 +118,8 @@ device that responds with bogus sampling rates, leading to kernel
 hang, DoS, or buffer overflow.
 
 Integer errors cause timing bugs in several network protocol
-implementations.  For example, when a user space application sets
-a large timeout argument, the internal timer could wrap around
+implementations.  For example, when a user space application provides
+a large timeout argument, the internal timer can wrap around
 to a smaller timeout value.
 
 Most logic related integer errors are due to tautological comparisons.
@@ -142,9 +143,9 @@ patches for clarification and reliability improvement.
 \subsubsection{Bad Fixes}
 \label{s:eval:bad}
 
-The ``\# of prev. checks'' column in \autoref{f:data:linux} counts
-the number of sanity checks that were incorrect or insufficient
-from the history of the Linux kernel repository.
+Using log of changes in the kernel repository,
+the ``\# of prev. checks'' column in \autoref{f:data:linux} counts
+the number of sanity checks that were incorrect or insufficient.
 It shows that even though developers were aware of the fact that
 those values needed sanity checking, it is still non-trivial
 to write correct checks.
@@ -153,7 +154,7 @@ three times before we submitted a patch.
 
 %
 It is interesting that two bad patches were committed to fix
-vulnerabilities reported on the CVE list, which received extensive
+vulnerabilities reported on the CVE list. These patches received extensive
 review.  We describe them below.
 
 \paragraph{CVE-2008-3526 (sctp).}
@@ -161,7 +162,7 @@ Below is the fix that performs a sanity check on \cc{key_len} to
 avoid an integer overflow and possible heap overflow if
 \cc{key_len} is large.
 \input{code/sctp-bad}
-This sanity check in fact does not work.  Consider $\cc{key_len} =
+This fix does not work.  Consider $\cc{key_len} =
 \cc{0xffffffff}$ (i.e., \cc{UINT_MAX}).
 The result of the left-hand side of the check is then \cc{0x80000000}.
 Since \cc{key_len} is unsigned,  the left-hand side result
@@ -170,7 +171,7 @@ is also treated as unsigned, $2^{31}$, which bypasses the check.
 After discussion with the kernel developers, we came to the conclusion
 that \cc{key_len} could not become that large with input from either
 user space or network by an adversary.  CVE-2008-3526 is not
-exploitable, and the previous commit is unnecessary.  Our patch was
+exploitable, and the fix is unnecessary.  Our patch was
 applied to clarify the case.
 
 \paragraph{CVE-2009-4307 (ext4).}
@@ -179,7 +180,7 @@ on the \cc{s_log_groups_per_flex} value, which is read from disk,
 to prevent a division-by-zero DoS attack when the value is large
 and the result of the shift becomes zero.
 \input{code/ext4-bad}
-In the sanity check, the value of \cc{groups_per_flex} comes from
+The fix is incorrect. In the sanity check, the value of \cc{groups_per_flex} comes from
 a shift with a possible oversized amount.
 %This would lead to two potential
 %issues.
@@ -214,7 +215,7 @@ $\cc{sbi->s_log_groups_per_flex} > 31$ before the shift.
 \subsection{Completeness Validation}
 \label{s:eval:complete}
 
-To evaluate \sys's completeness, We collected 36 known integer errors in the
+To evaluate \sys's completeness, we collected 36 known integer errors in the
 Linux kernel from the CVE list~\cite{cve} over the last three years (excluding
 those found by \sys).  They provide a comprehensive coverage of the whole source
 tree. 
