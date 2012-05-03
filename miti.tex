@@ -37,7 +37,7 @@ NaN if any source operand is NaN, or an integer error occurred
 during the operation; otherwise the operation follows standard C rules.
 
 The compiler generates efficient overflow detection instructions
-for these checks, depending on the target architecture. On x86, for example,
+for these checks. On x86, for example,
 the compiler inserts one \cc{jno} instruction after the 
 multiplication, which jumps in case of no overflow.
 
@@ -52,13 +52,15 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{CompactItemize}
 
-We modify \cc{malloc} to take an \cc{nan size_t} as
+\fk{which malloc?}
+We modified \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
 \input{code/malloc-nan}
 The modified \cc{malloc} would change the allocation size to a large
 value \cc{SIZE_MAX} if \cc{size} is NaN (i.e., the calculation
 overflows).  We assume that \cc{libc_malloc(SIZE_MAX)} would return
-\cc{NULL} given a too large allocation size.
+\cc{NULL} given a too large allocation size.  \fk{i don't change ``would''; does
+  it do it or not?}
 
 An example usage is as follows.
 \input{code/use-nan}
@@ -90,8 +92,8 @@ the other for the addition;
 note that the second multiplication \cc{maxmsg * sizeof(void *)}
 never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, one can simplify the above tricky checks as
-follows. \hc{change to `nan long' or `nan unsigned long'?}
+With NaN integers, one rewrite the code as follows.
+\hc{change to `nan long' or `nan unsigned long'?}
 \input{code/mq-nan}
 
 We further show that using NaN integers incurs little runtime
@@ -121,7 +123,7 @@ For legacy C code that is unlikely to adopt NaN integers, we encourage
 developers to use safe allocators that perform overflow checking
 internally.  Particularly, we contributed \cc{kmalloc_array(n,
 size)} for array allocation, which checks overflow for $\cc{n}
-\times_u \cc{size}$. This API is available in the Linux kernel
+\times_u \cc{size}$. This function has been incorporated in the Linux kernel
 since v3.4-rc1.
 
 \if 0
