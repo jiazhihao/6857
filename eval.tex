@@ -309,13 +309,14 @@ domain-specific knowledge.
 \label{s:eval:perf}
 
 To measure the running time of \sys, we ran \sys against the source
-code of Linux kernel 3.4-rc1.  We set the timeout
-to 5 seconds for each query to the constraint solver.   \sys analyzed
-8,896 files and made 420,743 queries, 992 of which timeout.
+code of Linux kernel 3.4-rc1, with all kernel modules enabled. 
+We set the timeout to 5 seconds for each query to the constraint solver.
+\sys analyzed 8,896 files and made 420,743 queries, 992 of which timeout.
 The predicate generation and constraint solving (excluding compilation)
-took 40 minutes.  This shows that \sys can analyze a large
+took 62 minutes.  This shows that \sys can analyze a large
 system in a reasonable amount of time.
 
+\if 0
 \fk{weren't we going to delete this?}
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
 idioms for better performance.  We measured the solving time of three
@@ -334,3 +335,5 @@ overflow detection predicate, measured in milliseconds, for both
 32- and 64-bit integers.}
 \label{f:udiv}
 \end{figure}
+
+\fi
