@@ -196,43 +196,34 @@ exit value $n$ in the predicate $i <_s 0$.
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
 
-%OOB and path predicates are generated on a per-function basis, and do not
-%capture constraints on external values, such as function parameters and memory
-%loads. To mitigate false errors, \sys generates range predicates that impose
-%global constraints on these external value sources.
-
 OOB and path predicates are generated on a per-function basis.
-Tracking predicates across functions can lead to solving complex
+Tracking symbolic predicates across functions can lead to solving complex
 constraint expressions, which would not scale to a large system such as the
 Linux kernel.
 
-To address the scalability issue, when generating predicates across
-functions (i.e., for entities like function parameters, return
-values, global variables, and structure fields),
-\sys bounds each external value using two constant
+To address the scalability issue, when generating predicates across functions
+(i.e., for entities like function parameters, return values, global variables,
+and structure fields), \sys bounds each integral entity using two constant
 integers as the minimum and maximum values, respectively. For example, if the
-value of a parameter $x$ ranges from 1 to 10, \sys generates the range predicates
-$x \geq 1 \land x < 11$.
+value of a parameter $x$ ranges from 1 to 10, \sys generates the range
+predicates $x \geq 1 \land x < 11$.
 
-%\sys implements an interprocedural value range propagation algorithm to infer
-%the ranges of all integral function parameters, return values, structure
-%fields, and global variables.
-\sys maintains a global range table that
-maps each cross-function entity to its range. Initially, all
-ranges are set to empty, except for values that originate from untrusted
-external sources, such as system call parameters, which are initialized to 
+\sys maintains a global range table that maps each aforementioned
+cross-function entity to its range. Initially, all ranges are set to empty,
+except for entities that originate from untrusted external sources, such as
+system call parameters (see \autoref{s:rank:input}), which are initialized to
 full sets.
 
-\sys queries the range table each time when it sees a function reading its
-arguments, using values returned by a function call, loading from a structure
-field or global variables.  Within the function, \sys propagates value using
-range arithmetic~\cite{range-analysis}.  When a value reaches an external sink
+\sys scans through every function of the entire code base. When encountering
+accesses to a cross-function entity, such as loads from a structure field or a
+global variable, \sys retrieves the entity's value range from the global range
+table.  Within a function, \sys propagates value ranges using range
+arithmetic~\cite{range-analysis}.  When a value reaches an external sink
 through argument passing, function returns, stores to structure fields or
 global variables, the corresponding range table entry is updated by merging its
-previous range with the range of the incoming value.  \sys iteratively scans
-through every function of the entire code base, update the range table
-accordingly until it converges.  If some table entries do not converge within a
-limited number of rounds, \sys sets them to be full sets.
+previous range with the range of the incoming value. The algorithm runs
+iteratively until the range table converges.  If some table entries do not
+converge within a limited number of rounds, \sys sets them to be full sets.
 
 \sys requires a system-wide call graph that associates each call
 site with a set of possible callee functions.  To do so, \sys builds
@@ -243,11 +234,9 @@ to the corresponding structure field, variable, or parameter.
 
 To further reduce false errors, \sys refines the output ranges using
 domain-specific knowledge. For example, many \cc{sysctl} parameters in the
-Linux kernel have lower and upper bounds encoded in the initialization code
-of their \cc{sysctl} table entries.
-%, which are hard to infer using the above algorithm.
-\sys understands the \cc{sysctl} structures and extracts the
-bounds from these entries.% and patches them to the global range table.
+Linux kernel have lower and upper bounds encoded in the initialization code of
+their \cc{sysctl} table entries.  \sys understands the \cc{sysctl} structures
+and extracts the bounds from these entries.
 
 
 \subsection{Code Rewriting}
