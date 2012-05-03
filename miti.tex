@@ -33,9 +33,8 @@ We implement NaN integers by modifying the Clang compiler.
 The compiler inserts overflow checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
-during the operation. Otherwise, the result will be a normal value, 
-based on the semantic of this operation.
-%
+during the operation; otherwise the operation follows standard C rules.
+
 The compiler generates efficient overflow detection instructions
 for these checks, depending on the target architecture.  For example,
 the compiler inserts one \cc{jno} instruction after the multiplication,
@@ -58,7 +57,7 @@ the allocation size, as follows.
 The modified \cc{malloc} would change the allocation size to a large
 value \cc{SIZE_MAX} if \cc{size} is NaN (i.e., the calculation
 overflowed).  We assume that \cc{libc_malloc(SIZE_MAX)} returns
-NULL due to a too large allocation size.
+\cc{NULL} due to a too large allocation size.
 
 Below is an example use case.
 \input{code/use-nan}
@@ -75,15 +74,23 @@ cases, measured in cycles.}
 \label{f:data:nan-micro}
 \end{figure}
 
-Below is the code of function \cc{mq_attr_ok} in Linux kernel IPC, with 
-slight modification to make it clear.
+We will use a more complex example to show how NaN integers
+help reduce manual overflow checks.
+%
+Below is a code snippet (simplified for clarification) from the
+\cc{mq_attr_ok} function in the Linux kernel.
+%
 \input{code/mq}
-The above checks intend to return 0 if the result of \cc{lhs} 
-overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
-$\cc{ULONG_MAX}$, otherwise it will return 1.
+%
+The developer wrote two separate overflow checks for
+\cc{maxmsg * msgsize + maxmsg * sizeof(void *)}:
+one check for the first multiplication \cc{maxmsg * msgsize}, and
+the other for the addition;
+note that the second multiplication \cc{maxmsg * sizeof(void *)}
+never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, one can wrap the original tricky checks with
-$\cc{isnan}$.
+With NaN integers, one can simplify the above tricky checks as
+follows.
 \input{code/mq-nan}
 
 We further show that using NaN integers incurs little runtime
