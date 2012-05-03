@@ -1,14 +1,14 @@
 \section{Integer Semantics}
 \label{s:sema}
 
-\sys assumes two's complement~\cite[4.2.1]{intel:vol1},
+\sys assumes two's complement~\cite[\subsectionautorefname~4.2.1]{intel:vol1},
 a de facto standard integer representation on modern architectures.
 An $n$-bit signed integer is in the bounds $-2^{n-1}$ to $2^{n-1}-1$,
 with the most significant bit indicating the sign,
 while an $n$-bit unsigned integer is in the bounds $0$ to $2^n-1$.
 
 \sys assumes that programmers expect the result of an $n$-bit
-arithmetic operation to equal to that of the corresponding mathematical
+arithmetic operation to be equal to that of the corresponding mathematical
 ($\infty$-bit) operation.
 In other words, the result should fall in the $n$-bit integer bounds.
 %
@@ -19,8 +19,8 @@ that \sys explicitly allows (see \autoref{s:sema:whitelist}).
 \subsection{In-Bounds Integer Operations}
 \label{s:sema:sec}
 
-We describe the requirement of producing an in-bounds result for each
-integer operation, as listed in \autoref{f:in-bounds}.
+\autoref{f:in-bounds} lists the requirements of producing an in-bounds result
+for each integer operation.
 %
 An operation may have a subscript $s$ or $u$ to indicate whether
 it operates on signed or unsigned integers, respectively.
@@ -70,12 +70,12 @@ of $32$-bit unsigned integers.
 \paragraph{Division.}
 The divisor should be non-zero.  Particularly, the signed division
 $-2^{n-1} /_s {-1}$ is not in bounds, because the expected arithmetic
-quotient $2^{n-1}$ is out of the $n$-bit signed integer bounds,
+quotient $2^{n-1}$ is out of the bounds of an $n$-bit signed integer,
 which is at most $2^{n-1}-1$.
 
 \paragraph{Shift.}
 For $n$-bit integers, the shifting amount should be non-negative
-and at most $n-1$, as per the C standard~\cite[6.5.7]{c11}.
+and at most $n-1$, as per C standard~\cite[\subsectionautorefname~6.5.7]{c11}.
 %
 Unlike multiplication, \sys assumes that programmers are aware of
 the fact that a shift operation is lossy since it shifts some bits
@@ -83,7 +83,7 @@ out.  Therefore, \sys considers $x \shl 1$ always in bounds, while
 $x \times_u 2$ is not.
 
 \paragraph{Conversion.}
-Lossy truncations and sign conversions are common practice in
+Lossy truncations and signedness conversions are common practice in
 C code.  Therefore,
 %, and they can be found by invoking GCC with \cc{-Wconversion}.
 \sys does not impose any restrictions on a conversion,
@@ -119,7 +119,8 @@ An array index should be non-negative,
 otherwise it would lead to out-of-bounds access.
 
 \paragraph{$(3)$ Data size.}
-A data size should be non-negative, otherwise it would be misinterpreted
+A variable that represents data size should be non-negative, 
+otherwise it would be misinterpreted
 as a large positive value and lead to out-of-bounds access.
 
 \autoref{f:ax25-sign} shows an example of a negative size in the
@@ -181,17 +182,17 @@ these optimizations disabled.
 
 Consider the following code snippet.
 \input{code/array-neg-index}
-\sys would catch $x +_s y$ if it overflows.  On many architectures
-the overflowed index becomes a negative value~(e.g., on x86).  To
-further catch the negative array index, \sys
-needs to continue evaluating $x +_s y$, even if it overflows.
-Signed overflow, however, is undefined behavior in C.  To catch
-more integer errors, \sys thus defines the semantics for integer
-operations that the C standard specifies as undefined behavior, as
-follows:
+
+\sys would catch $x +_s y$ if it overflows. The result of signed overflow,
+however, is undefined in C. On many architectures~(e.g., x86) the overflowed
+result becomes a negative value. In practice, to further catch more errors,
+such as the potentially negative array index, \sys needs to continue evaluating
+$x +_s y$, even if it overflows.  \sys models the semantics for some integer
+operations that the C standard specifies as undefined behavior, as follows:
+
 \begin{itemize}
 \item
-The signed overflow wraps around using the two's complement.
+The result of signed overflow wraps around using two's complement.
 \item
 The shifting amount for an $n$-bit integer wraps around at $n$,
 similarly to x86's shift instructions.  For example, shifting
@@ -233,6 +234,7 @@ given $x = \cc{0x1fffffff}$ and $y = 16$, their product evaluates
 to a larger value $\cc{0xfffffff0}$, which both overflows and
 bypasses the check.  A correct check is $(x \times_u y) /_u y \neq
 x$, or an non-overflow form, $\uintmax(n) /_u x > y$.
+
 \if 0
 In addition, \sys accepts user-provided idioms tailored for the
 code being analyzed.  For example, in the Linux kernel to set a
