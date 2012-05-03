@@ -88,19 +88,18 @@ producing an out-of-bounds value.  For example, in \autoref{f:bridge},
 bypass the sanity check and reach the \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
-Linux kernel.  \sys needs to finish analyzing the source code in a
+Linux kernel.  \sys needs to finish in a
 reasonable amount of time.  \sys should also rank reported integer
 errors so as to ease human inspection.  For example, an integer error
 that could only be triggered by misbehaved hardware is
 less likely to receive interest than those triggered by network input.
 
-\sys addresses these challenges with three ideas: practical integer
-semantics that define integer errors, a precise analysis algorithm
-that performs bit-level reasoning per function, and a set of ranking
-criteria that estimate the security impacts of possible integer
-errors.
-%accept C source code as input, and inspects each
-%integer operation for possible integer errors.
+\sys addresses these challenges with three ideas:
+practical integer semantics that define integer errors,
+a precise analysis that performs bit-level reasoning per function
+combined with a coarse-grained range analysis across functions,
+and a set of ranking criteria that estimate the security impacts
+of possible integer errors.
 
 We implemented \sys using the LLVM compiler framework~\cite{lattner:llvm}
 and the Boolector constraint solver~\cite{boolector}, and applied it
@@ -125,9 +124,8 @@ The primary contributions of this paper are:
   size of the Linux kernel;
 \item \nrbugs confirmed and fixed integer errors in
   the Linux kernel, the lighttpd web server, and OpenSSH;
-\item a proposal of a new integer family with NaN semantics, which
+\item a proposal of a new integer type with NaN semantics, which
   enters an error state once its value overflows. 
-  \hc{`family' sounds weired, why not just say `type'?}
 \end{CompactItemize}
 
 The rest of this paper is organized as follows.
