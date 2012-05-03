@@ -283,17 +283,20 @@ Without this rewriting, \sys would have considered \cc{off} to be
 the result of a subtraction between two unconstrained integers, and
 would have flagged an error.
 
-
-
-
 \paragraph{Memory model.}
 \sys employs a simple memory model: a value returned from a load
 instruction is unconstrained~(unless the value has a range predicate).
 %
 In other words, \sys regards values returned by different load
 instructions as unrelated.
-To improve precision, \sys must merge load instructions that
-loads from the same pointer.\fk{can you give an example?}
+Consider the code snippet below.
+\input{code/alias}
+There are four occurrences of \cc{arg->count}, each meaning a load
+from memory.  \sys must merge these load instructions. Otherwise,
+for example, \sys would consider the \cc{arg->count} in \cc{copy_from_user}
+as a fresh load and the value is unconstrained, despite the fact
+that earlier code limits \cc{arg->count} to 128; this would cause
+\sys to report a false multiplication overflow.
 
 LLVM's load elimination algorithm does not work well for our goal,
 because it optimizes for performance and tends to delay loads.
@@ -377,9 +380,6 @@ in \autoref{s:gen:oob}, provided that $N$ equals $\uintmax(n)$.
 Otherwise \sys rewrites the check using multiplication as $x_{2n}
 \times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
 of $x$ and $y$ from $n$ to $2n$ bits, respectively.
-%
-See \autoref{s:eval:perf} for an evaluation of the speed-up.\fk{shouldn't this
-  senetence be deleted?}
 
 \subsection{Limitations}
 \label{s:gen:limit}
