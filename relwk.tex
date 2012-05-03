@@ -1,15 +1,15 @@
 \section{Related Work}
 \label{s:relwk}
 
-In the context of integer error analysis, \sys has a combination of 5 novel
+In the context of integer error analysis, \sys has a combination of five novel
 properties: static analysis with pragmatic integer semantics, ability to scale
 to large software, high precision, high coverage, and a new NaN integer family.
-We relate \sys to previous work along these 5 properties.
+We relate \sys to previous work along these five properties.
 
 \paragraph{Pragmatic integer semantics.} The closest work to \sys is a static integer overflow detection
 tool inside Microsoft~\cite{moy:z3prefix}, which also uses constraint solving
-techniques.  Compared to \sys, Microsoft's tool imposes too strict integer
-semantics.
+techniques.  Compared to \sys, Microsoft's tool imposes integer
+semantics that are too strict.
 
 Consider the signedness conversion below, a widely seen code pattern in
 the Linux kernel.
@@ -93,13 +93,13 @@ integrated into the Linux compilation workflow transparently.
 \paragraph{Precision.}
 It is difficult for tools that do not track path conditions (e.g.,
 sanity checks) to pinpoint integer errors.  For example, a simple
-taint analysis that warns untrusted integers used in sensitive
+taint analysis that warns about untrusted integers used in sensitive
 sinks~(e.g., allocation)~\cite{cqual, lclint} would report false
 errors on all correctly fixed code.
 
 The range checker from Stanford's metacompiler~\cite{range-checker}
 eliminates cases where a user-controlled value is checked against
-\emph{some} bounds and reports unbounded integer usages.  A similar heuristic
+\emph{some} bounds, and reports unchecked integer uses.  A similar heuristic
 is used in a PREfast-based tool from Microsoft~\cite{prefast}.  This
 approach will miss integer errors due to incorrect bounds checking since
 it does not perform reasoning on the actual values of the bounds. \sys avoids

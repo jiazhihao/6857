@@ -58,18 +58,18 @@ denote their $\infty$-bit mathematical integers.}
 \end{figure}
 
 \paragraph{Addition, subtraction, and multiplication.}
-The arithmetic result of an $n$-bit signed additive or multiplicative
+The mathematical result of an $n$-bit signed additive or multiplicative
 operation should fall in $[-2^{n-1}, 2^{n-1}-1]$,
 and that of an unsigned operation should fall in
 $[0, 2^{n}-1]$.
 For example,
 $2^{31}\times_u 16$ is not in bounds,
-because the expected arithmetic product $2^{35}$ is out of the bounds
+because the expected mathematical product $2^{35}$ is out of the bounds
 of $32$-bit unsigned integers.
 
 \paragraph{Division.}
 The divisor should be non-zero.  Particularly, the signed division
-$-2^{n-1} /_s {-1}$ is not in bounds, because the expected arithmetic
+$-2^{n-1} /_s {-1}$ is not in bounds, because the expected mathematical
 quotient $2^{n-1}$ is out of the bounds of an $n$-bit signed integer,
 which is at most $2^{n-1}-1$.
 
@@ -79,7 +79,7 @@ and at most $n-1$, as per C standard~\cite[\subsectionautorefname~6.5.7]{c11}.
 %
 Unlike multiplication, \sys assumes that programmers are aware of
 the fact that a shift operation is lossy since it shifts some bits
-out.  Therefore, \sys considers $x \shl 1$ always in bounds, while
+out.  Therefore, \sys considers that $x \shl 1$ is always in bounds, but
 $x \times_u 2$ is not.
 
 \paragraph{Conversion.}
@@ -104,6 +104,7 @@ handling.
 
 \begin{figure}
 \centering
+\nz{It would be good to show ->read\_status() returning -1.}
 \input{code/olpc-sign}
 \vspace{-1em}
 \caption{An integer error in the OLPC secondary display controller
@@ -116,12 +117,13 @@ which breaks the error handling.}
 
 \paragraph{$(2)$ Array index.}
 An array index should be non-negative,
-otherwise it would lead to out-of-bounds access.
+otherwise it may lead to an out-of-bounds access.
 
 \paragraph{$(3)$ Data size.}
-A variable that represents data size should be non-negative, 
+A variable that represents a data size should be non-negative, 
 otherwise it would be misinterpreted
-as a large positive value and lead to out-of-bounds access.
+as a large positive value and lead to an out-of-bounds access.
+\sys uses annotations to specify data size parameters.
 
 \autoref{f:ax25-sign} shows an example of a negative size in the
 Linux kernel.  The third parameter of $\cc{copy_from_user}$ should
@@ -131,11 +133,11 @@ ${-1}$ for \cc{optlen} from user space, which will bypass both
 sanity checks:
 according C's conversion rules, \cc{optlen} is interpreted as positive
 in the first comparison because the type of the right-hand side
-\cc{sizeof(int)} is unsigned, while it is still considered as
+\cc{sizeof(int)} is unsigned, and \cc{optlen} is considered as
 negative in the second comparison because the type of the right-hand
 side \cc{IFRAMESIZ} is signed.
 The negative \cc{optlen} is later used in the call to \cc{copy_from_user}
-as the size parameter, which flags an integer error.
+as a data size parameter, which flags an integer error.
 
 \begin{figure}
 \centering
@@ -146,7 +148,7 @@ of the Linux kernel (CVE-2009-2909).  A negative \cc{optlen} will
 bypass both sanity checks due to sign misinterpretation and reach
 the \cc{copy_from_user} call, which interprets \cc{optlen}
 as a large positive integer.  Depending on the architecture-specific
-implementation, the consequences range from a silent failure, a
+implementation, the consequences range from a silent failure, to a
 kernel crash, to a stack overflow.
 }
 \label{f:ax25-sign}
@@ -182,7 +184,7 @@ these optimizations disabled.
 \label{s:sema:whitelist}
 
 Developers often use overflowed results to defend against integer
-overflows.  \sys recognizes such idioms and avoid reporting them
+overflows.  \sys recognizes such idioms and avoids reporting them
 as integer errors, as listed in \autoref{f:whitelist}.  For example,
 given two $n$-bit unsigned integers $x$ and $y$, a popular overflow
 checking idiom is as follows:
