@@ -27,13 +27,14 @@ to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
 An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
-when used with an integer of type $\cc{nan}\ T$.
+when computed with an integer of type $\cc{nan}\ T$.
 \item
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 \end{itemize}
+
 We implement NaN integers by modifying the Clang compiler.
-The compiler inserts error checks for every arithmetic or
+The compiler inserts overflow checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
 during the operation.
@@ -55,7 +56,14 @@ returns true if $x$ is NaN, or false otherwise.
 $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (integer casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
-With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
+
+Comparison with $\cc{nan}\ T$ is interesting: when either operand is 
+in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
+the semantic of this comparison. Therefore programmers are expected to 
+use \cc{unnan} with \cc{if} statements, and tells the compilers what to do
+when the result is NaN.
+
+We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
 \input{code/malloc-nan}
 The modified \cc{malloc} would change the allocation size to a large
