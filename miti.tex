@@ -33,9 +33,8 @@ We implement NaN integers by modifying the Clang compiler.
 The compiler inserts overflow checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
-during the operation. Otherwise, the result will be a normal value, 
-based on the semantic of this operation.
-%
+during the operation; otherwise the operation follows standard C rules.
+
 The compiler generates efficient overflow detection instructions
 for these checks, depending on the target architecture.  For example,
 the compiler inserts one \cc{jno} instruction after the multiplication,
