@@ -178,7 +178,8 @@ The complete algorithm is shown in \autoref{f:path-cstr}.
 \end{figure}
 
 To partially alleviate missing predicates due to loop unrolling,
-\sys tries to move predicates inside a loop to the outer scope.
+\sys tries to move predicates inside a loop to the outer scope,
+and substitutes the loop variable in the predicate with its exit value.
 Consider the following loop.
 \input{code/loop}
 \sys generates an OOB predicate $i <_s 0$ since $i$ is used
@@ -188,7 +189,6 @@ integer error (e.g., if the code does not correctly restrict $n$).
 To address the problem, \sys generates a new predicate $n <_s 0$
 outside the loop, by substituting the loop variable $i$ with its
 exit value $n$ in the predicate $i <_s 0$.
-\hc{a bit hard to follow, should we say loop invariants?}
 
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
@@ -252,6 +252,7 @@ Consider the following code snippet:
 %
 \input{code/pid-ptrsub}
 %
+\if 0
 The offset of \cc{pidmap} in the structure \cc{pid_namespace} is 4
 bytes (i.e., the size of \cc{kref}), thus \sys represents the address
 \cc{pid_ns->pidmap} as $\cc{pid_ns} + 4$.  Here \sys considers \cc{pid_ns}
@@ -267,36 +268,52 @@ the subtraction of the two pointers, is reduced to $(\cc{pid_ns} +
 Without this rewriting, \sys would have considered \cc{off} to be
 the result of a subtraction between two unconstrained integers, and
 would have reported an error.
+\fi
+
+Assume that the offset into the structure member \cc{pidmap[]} is 4 bytes, 
+and the size of its element is 8 bytes.
+%
+The symbolic expression for \cc{map} and \cc{pid_ns->pidmap} would
+be $\cc{pid_ns} + 4 + i \times 8$ and $\cc{pid_ns} + 4$ respectively,
+where the array index $i = (\cc{last} + 1) /_u \cc{BITS_PER_PAGE}$.
+
+Thus, the value of \cc{off}, the subtraction of the two pointers, 
+can be reduced to $(\cc{pid_ns} + 4 + i \times 8) - (\cc{pid_ns} + 4) 
+= i \times 8$, which is irrelevant to the value of pointer \cc{pid_ns}.
+Without this rewriting, \sys would have considered \cc{off} to be
+the result of a subtraction between two unconstrained integers, and
+would have flagged an error.
+
+
+
 
 \paragraph{Memory model.}
 \sys employs a simple memory model: a value returned from a load
 instruction is unconstrained~(unless the value has a range predicate).
 %
-In other words, \sys considers two values from different load
-instructions to be unrelated.
-%
+In other words, \sys regards values returned by different load
+instructions as unrelated.
 To improve precision, \sys needs to merge load instructions that
-will return the same value.
+loads from the same pointer.
 
-Directly applying LLVM's load elimination algorithm does not work
-well, because the algorithm optimizes for performance and tends to
-delay load instructions.  This would result in multiple load
-instructions, often spanned in several branches, that are in fact
-identical.
+LLVM's load elimination algorithm does not work well for our goal,
+because it optimizes for performance and tends to delay loads.
+This would result in multiple load instructions, 
+often scattered in several branches, that are in fact identical.
 %
 \sys addresses the problem by hoisting every load instruction to
 the earliest possible point within the function.  The hope is that
-those load instructions will be moved up and put closed to each
-other, so that the load elimination algorithm can easily merge them
-if they are identical.
+those load instructions will be moved up and put close to each
+other, so that the load elimination algorithm can easily merge
+identical ones.
 
 Consider a load instruction $L$ that loads from pointer $p$.  $L$ is
 safe to move across its previous instruction $I$ if:
-\begin{itemize}
+\begin{CompactItemize}
 \item $I$ does not write to any memory location, or
 \item $I$ writes to pointer $q$, and $p$ and $q$ never point to the
 same memory location (i.e., they do not alias).
-\end{itemize}
+\end{CompactItemize}
 
 If $L$ is already the first instruction in a non-entry block and
 there are multiple predecessors that jump to $I$, \sys tries to
@@ -304,17 +321,16 @@ move $L$ up to their common ancestor block.  \sys repeatedly hoists $L$
 until it is either unsafe to do so or $L$ reaches the entry block of the
 function.
 
-\sys also adopts an aliasing assumption: a pointer passed as a
-function parameter or a global variable points to a memory location
-that is distinct from any other memory location.  This assumption,
+\sys also adopts an aliasing assumption: a pointer passed to a
+function argument or a global variable points to a memory location
+that is distinct from any other pointers.  This assumption,
 though unsound, has been proven to be practical for detecting bugs
 in C programs~\cite{livshits:ipssa}.  It allows the hoisting algorithm
 to aggressively push load instructions ahead for more elimination
-opportunity.
+opportunity.  
 
-In practice this memory model works well for \sys.
-It does not require sophisticated analysis across the whole kernel
-and achieves good performance (see \autoref{s:eval:perf}).
+In practice, \sys's memory model avoids sophisticated global
+analysis and achieves good performance (see \autoref{s:eval:perf}).
 
 \if 0
 \begin{figure}
@@ -331,7 +347,7 @@ of the block's predecessors.}
 \paragraph{Error-before-check.}
 An integer error check may occur after the overflowed computation,
 but before any use of the result.  In that case, the overflowed
-computation is benign.  Below is such an example.  Even if the
+computation is benign.  In the following example, even if the
 multiplication $x \times_u y$ overflows, the product \cc{size} is
 not used before the check.
 \input{code/error-before-use}
@@ -358,7 +374,7 @@ operations.
 
 For example, to avoid division in $N /_u x > y$, \sys rewrites the check using
 Boolector's multiplication overflow detection predicate described
-in \autoref{s:gen:oob}, if $N$ is a special constant $\uintmax(n)$.
+in \autoref{s:gen:oob}, provided that $N$ equals $\uintmax(n)$.
 Otherwise \sys rewrites the check using multiplication as $x_{2n}
 \times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
 of $x$ and $y$ from $n$ to $2n$ bits, respectively.
@@ -374,7 +390,7 @@ See \autoref{s:eval:perf} for an evaluation of the speed-up.
 errors written in assembly language.
 %
 \sys cannot scan code that is not enabled for compilation in the
-testing configuration or architecture.  For better code coverage
+testing configuration or architecture.  For better code coverage,
 one should enable as many modules as possible, or try cross compilation
 for different architectures.
 
