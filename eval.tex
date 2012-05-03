@@ -118,8 +118,8 @@ device that responds with bogus sampling rates, leading to kernel
 hang, DoS, or buffer overflow.
 
 Integer errors cause timing bugs in several network protocol
-implementations.  For example, when a user space application sets
-a large timeout argument, the internal timer could wrap around
+implementations.  For example, when a user space application provides
+a large timeout argument, the internal timer can wrap around
 to a smaller timeout value.
 
 Most logic related integer errors are due to tautological comparisons.
