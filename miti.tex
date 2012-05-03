@@ -51,22 +51,13 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
 
-\zj{Should we change \cc{unnan} API to R\ \cc{unnan}(\cc{nan}\ T\; x,\; R\; v), 
-therefore programmers can write codes like \cc{if (unnan(x < y, true))}, where \cc{x}, \cc{y} are NaN Type}
-
-Comparison with $\cc{nan}\ T$ is interesting: when either operand is 
-in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
-the semantic of this comparison. Therefore programmers are expected to 
-use \cc{unnan} with \cc{if} statements, and tells the compilers what to do
-when the result is NaN.
-
 We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
 \input{code/malloc-nan}
 The modified \cc{malloc} would change the allocation size to a large
 value \cc{SIZE_MAX} if \cc{size} is NaN (i.e., the calculation
 overflowed).  We assume that \cc{libc_malloc(SIZE_MAX)} returns
-NULL due to a too large allocation size.
+\cc{NULL} due to a too large allocation size.
 
 Below is an example use case.
 \input{code/use-nan}
@@ -83,15 +74,23 @@ cases, measured in cycles.}
 \label{f:data:nan-micro}
 \end{figure}
 
-Below is the code of function \cc{mq_attr_ok} in Linux kernel IPC, with 
-slight modification to make it clear.
+We will use a more complex example to show how NaN integers
+help reduce manual overflow checks.
+%
+Below is a code snippet (simplified for clarification) from the
+\cc{mq_attr_ok} function in the Linux kernel.
+%
 \input{code/mq}
-The above checks intend to return 0 if the result of \cc{lhs} 
-overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
-$\cc{ULONG_MAX}$, otherwise it will return 1.
+%
+The developer wrote two separate overflow checks for
+\cc{maxmsg * msgsize + maxmsg * sizeof(void *)}:
+one check for the first multiplication \cc{maxmsg * msgsize}, and
+the other for the addition;
+note that the second multiplication \cc{maxmsg * sizeof(void *)}
+never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, one can wrap the original tricky checks with
-$\cc{isnan}$.
+With NaN integers, one can simplify the above tricky checks as
+follows.
 \input{code/mq-nan}
 
 We further show that using NaN integers incurs little runtime

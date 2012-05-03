@@ -1,13 +1,12 @@
-static int mq_attr_ok(..., struct mq_attr *attr)
-{
-    /* attr->mq_msgsize > 0 and attr->mq_maxmsg > 0 */
-    if (attr->mq_msgsize > ULONG_MAX/attr->mq_maxmsg)
-        return 0;
-    unsigned long size, lhs, rhs;
-    size = attr->mq_msgsize + sizeof(struct msg_msg*);
-    lhs = attr->mq_maxmsg * size;
-    rhs = attr->mq_maxmsg * attr->mq_msgsize;
-    if (lhs < rhs)
-        return 0;
-    return 1;
-}
+/* overflow checks for
+ *   maxmsg * msgsize + maxmsg * sizeof(void *)
+ * assume
+ *   $\cc{maxmsg} > 0 \land \cc{maxmsg} \leq 2^{15}$
+ *   $\cc{msgsize} > 0 \land \cc{msgsize} \leq 2^{20}$
+ */
+if (msgsize > ULONG_MAX / maxmsg)
+	return 0;
+if (maxmsg * (msgsize + sizeof(void *))
+    < maxmsg * msgsize)
+	return 0;
+return 1;
