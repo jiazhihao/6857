@@ -1,8 +1,10 @@
 \section{Conclusion}
 \label{s:concl}
 
-This paper describes \sys, a static analysis tool that detects
-integer errors in C code.  It proposes pragmatic integer
-semantics and effective predicate generation algorithms.
-We applied \sys to the Linux kernel, the lighttpd web server, and
-OpenSSH, and fixed \nrbugs integer errors in them.
+This paper describes the design and implementation of \sys, a static
+analysis tool that identified and aided to fix \nrbugs integer
+errors in the Linux kernel, the lighttpd web server, and OpenSSH\@.
+Our experience shows that integer errors are prevalent in systems,
+often due to unanticipated integer wraparound caused by values from
+untrusted inputs.  We hope that NaN integers can help mitigate the
+issue in practice.
