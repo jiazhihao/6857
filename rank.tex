@@ -28,7 +28,7 @@ similar to what we discussed in Section \ref{s:gen:range}. We manually annotate
 taint sources for the Linux kernel, which include system call arguments, the
 destination argument of \cc{copy_from_user} and \cc{get_user}. For network,
 file systems and USB drivers, the return values of endian conversion functions
-(e.g. \cc{be32_to_cpu}) are also marked as taint sources because the
+(e.g., \cc{be32_to_cpu}) are also marked as taint sources because the
 converting values are likely to originate from network or disk.
 
 
