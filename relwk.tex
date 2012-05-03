@@ -124,10 +124,11 @@ these checks will cause a trap at run time.
 An alternative approach is to instrument binary executable files,
 such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
 %
-The advantage of these tools is that they have a lower false error rate.
-Using them to find integer errors, however, requires carefully chosen
-input that can trigger those bugs.
-Therefore they are in general difficult to achieve high coverage.
+The advantage of these tools is that they have a lower false error rate.  Using
+them to find integer errors, however, requires carefully chosen inputs to
+trigger them.  Because integer errors typically involve corner cases, the
+dynamic approaches tend to have low coverage.  Because \sys is a static checker,
+it doesn't have't this limitation.
 %In particular, because triggering integer errors often requires
 %carefully chosen input values.
 
