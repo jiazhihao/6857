@@ -30,7 +30,7 @@ the predicates to a solver for satisfiability testing.}
 \subsection{Out-of-Bounds Predicate Generation}
 \label{s:gen:oob}
 
-To find integer errors, \sys needs to detect integer operations
+To find integer errors, \sys must detect integer operations
 that violate the corresponding in-bounds requirements, as listed
 in \autoref{f:in-bounds}.  To do so, for each integer operation
 \sys derives the negation of its in-bounds requirement, namely
@@ -292,8 +292,8 @@ instruction is unconstrained~(unless the value has a range predicate).
 %
 In other words, \sys regards values returned by different load
 instructions as unrelated.
-To improve precision, \sys needs to merge load instructions that
-loads from the same pointer.
+To improve precision, \sys must merge load instructions that
+loads from the same pointer.\fk{can you give an example?}
 
 LLVM's load elimination algorithm does not work well for our goal,
 because it optimizes for performance and tends to delay loads.
@@ -378,7 +378,8 @@ Otherwise \sys rewrites the check using multiplication as $x_{2n}
 \times_u y_{2n} >_u N$, where $x_{2n}$ and $y_{2n}$ are zero-extension
 of $x$ and $y$ from $n$ to $2n$ bits, respectively.
 %
-See \autoref{s:eval:perf} for an evaluation of the speed-up.
+See \autoref{s:eval:perf} for an evaluation of the speed-up.\fk{shouldn't this
+  senetence be deleted?}
 
 \subsection{Limitations}
 \label{s:gen:limit}
