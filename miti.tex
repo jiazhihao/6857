@@ -105,6 +105,16 @@ check via NaN integers, measured in cycles, for both w/o and w/ \cc{malloc} case
 \label{f:data:nan-micro}
 \end{figure}
 
+Below is the code of function \cc{mq_attr_ok} in linux kernel IPC, with 
+slight modification to make it clear.
+\input{code/mq}
+The above checks intend to return 0 if the result of \cc{lhs} 
+overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
+$\cc{ULONG_MAX}$, otherwise it will return 1.   
+
+With NaN integers, one can wrap the original tricky checks with $\cc{isnan}(nan T)$
+\input{code/mq-nan}
+
 \if 0
 Below is an example check in the infiniband driver.
 \input{code/ib-check}
