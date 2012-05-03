@@ -1,16 +1,13 @@
 \section{NaN Integer Semantics}
 \label{s:miti}
 
-\autoref{s:eval} shows that a major source of integer errors is due
-to unanticipated integer wraparound.  To mitigate the issue, we
-propose a new integer family with NaN semantics: the value enters
-and stays in NaN state once an integer error occurs.
-%
-This section will illustrate how NaN integers help automate integer
-error checking.
+\autoref{s:eval} shows that a major source of integer errors is unanticipated
+integer wraparound.  To mitigate these errors, we propose a new integer family
+with NaN semantics: once an integer has an overflow error, its value enters and
+stays in the NaN state. This section details the NaN integer type.
 
-The basic usage is to add a type qualifier \cc{nan}
-to an actual integer type, such as \cc{nan int}. The type conversion
+Programmers can declar an integer to be an NaN integer by adding a type
+qualifier \cc{nan} to an integer declaration: \cc{nan int}. The type conversion
 rules for NaN integers are as follows.
 \begin{CompactItemize}
 \item
@@ -21,12 +18,12 @@ The resulting type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 \end{CompactItemize}
 
-We implement NaN integers by modifying the Clang compiler.
+We implemented NaN integers by modifying the Clang compiler.
 The compiler inserts overflow checks for every arithmetic or
-comparison operation of type $\cc{nan}\ T$, and sets the result to
-NaN state if any source operand is NaN state, or an integer error occurred
+comparison operation of type $\cc{nan}\ T$, and sets the result to the
+NaN state if any source operand is the NaN state, or an integer error occurred
 during the operation; otherwise the operation follows standard C rules.
-We choose the maximum value as NaN state for unsigned integers,
+We choose the maximum value as the NaN state for unsigned integers,
 and the minimum for signed integers.
 
 The compiler generates efficient overflow detection instructions
@@ -45,7 +42,7 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN state, or $(T)x$ otherwise.
 \end{CompactItemize}
 
-To demonstrate the use of the API, we modified libc's \cc{malloc}
+To demonstrate the benefit of the API, we modified libc's \cc{malloc}
 to take an \cc{nan size_t} as the allocation size.
 \input{code/malloc-nan}
 The modified \cc{malloc} returns \cc{NULL} if the allocation size
@@ -53,9 +50,9 @@ overflowed.  To do so, it sets the allocation size to a large value
 \cc{SIZE_MAX} if \cc{size} overflowed, which will cause
 \cc{libc_malloc(SIZE_MAX)} to return \cc{NULL}.
 
-With the NaN-ized \cc{malloc}, developers do not have to write any overflow checks
-when calculating the allocation size.
-An example usage is as follows.
+With the NaN-ized \cc{malloc}, developers do not have to write any overflow
+checks when calculating the allocation size, as illustrated by the following
+example.
 \input{code/use-nan}
 
 \begin{figure}
@@ -78,8 +75,8 @@ consider the following (simplified) code snippet from the
 The developer wrote two separate overflow checks for
 \cc{maxmsg * msgsize + maxmsg * sizeof(void *)}:
 one check for the first multiplication \cc{maxmsg * msgsize}, and
-the other for the addition;
-note that the second multiplication \cc{maxmsg * sizeof(void *)}
+the other for the addition.
+Note that the second multiplication \cc{maxmsg * sizeof(void *)}
 never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
 With NaN integers, a developer can directly use \cc{isnan}
@@ -102,12 +99,11 @@ adds 1--3 cycles on average, and manual overflow checking adds
 Given the negligible overhead, we believe that it is practical
 to replace manual overflow checks with NaN integers.
 
-For compilers that do not support NaN integers, we encourage
-developers to use safe allocators that perform overflow checking
-internally.  Particularly, we contributed \cc{kmalloc_array(n,
-size)} for array allocation, which checks overflow for $\cc{n}
-\times_u \cc{size}$. This function has been incorporated in the Linux kernel
-since v3.4-rc1.
+For compilers that do not support NaN integers, we encourage developers to use
+safe allocators that perform overflow checking internally.  We contributed
+\cc{kmalloc_array(n, size)} for array allocation to the Linux kernel, which
+checks overflow for $\cc{n} \times_u \cc{size}$. This function has been
+incorporated in the Linux kernel since v3.4-rc1.
 
 \if 0
 Below is an example check in the infiniband driver.
