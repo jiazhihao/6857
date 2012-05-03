@@ -1,7 +1,7 @@
 \section{Evaluation}
 \label{s:eval}
 
-The evaluation tries to answer the following questions.
+The evaluation answers the following questions:
 \begin{CompactItemize}
 \item
 Is \sys effective in discovering new integer errors?
@@ -27,14 +27,15 @@ and submitted patches according to \sys's reports.
 The kernel developers confirmed and fixed \nrbugslinux integer errors.
 %
 We also applied \sys to two popular user-space applications, lighttpd
-and OpenSSH; the developers fixed \nrbugslighttpd and \nrbugsopenssh
-integer errors reported by \sys, respectively.
+and OpenSSH; the developers fixed respectively \nrbugslighttpd and \nrbugsopenssh
+integer errors reported by \sys.
 %
 The results show that \sys is effective in finding new integer
-errors, and the developers are willing to fix them.
+errors, and the developers are willing to fix them.  The rest
+of this subsection explores the bugs found in Linux in more detail.
 
-We use the Linux kernel for a case study.  \autoref{f:data:linux}
-summarizes integer errors \sys discovered in its source code.
+\autoref{f:data:linux}
+summarizes the integer errors \sys discovered in Linux.
 Each line represents a patch that fixes one or more integer errors; the
 number is shown in the ``Error'' column if it is more than one.  We
 organize the patches based on the source directories.  Most
@@ -93,7 +94,7 @@ protocols.
 
 Multiplication appears to be the most error-prone operation; it is
 often used for calculating allocation size, such as $n \times
-\cc{sizeof}(...)$.  This is vulnerable if $n$ can be controlled
+\cc{sizeof}(...)$.  This use is vulnerable if $n$ can be controlled
 by an adversary, causing the allocation size to wrap around to an
 unanticipated smaller value.
 
