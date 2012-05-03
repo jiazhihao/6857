@@ -69,7 +69,7 @@ such signedness conversions are so widely used in C
 code that doing so would cause a flood of false
 errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
 Similarly, a common way to detect overflow in C is to 
-check the overflowed the result after the fact. For example, to test
+check the overflowed result after the fact. For example, to test
 if \textit{base} plus \textit{len} overflows, kernel developers write
 expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
 which \sys should not consider as an error.
@@ -137,4 +137,4 @@ describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
 the Linux kernel and known CVE cases.
 %\autoref{s:common} summarizes common integer errors
 \autoref{s:miti} proposes the NaN integer family.
-Finally, \autoref{s:concl} concludes.
+\autoref{s:concl} summarizes our conclusions.

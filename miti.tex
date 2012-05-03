@@ -70,7 +70,7 @@ We will use a more complex example to show how NaN integers
 help reduce manual overflow checks.
 %
 Below is a code snippet (simplified for clarification) from the
-\cc{mq_attr_ok} function in the Linux kernel (v3.3).
+\cc{mq_attr_ok} function in the Linux kernel.
 %
 \input{code/mq}
 %
@@ -81,7 +81,8 @@ the other for the addition;
 note that the second multiplication \cc{maxmsg * sizeof(void *)}
 never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, one rewrites the code as follows.
+With NaN integers, one simply encloses the intended check with
+\cc{isnan}, without worrying about intermediate overflows:
 \input{code/mq-nan}
 
 We further show that using NaN integers incurs little runtime
