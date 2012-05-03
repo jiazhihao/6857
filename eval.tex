@@ -257,20 +257,19 @@ once.
 \subsection{False Errors}
 
 To evaluate how many false errors are in \sys's reports,
-we first tested \sys on the patched code of these CVE cases
+we first tested \sys on the patched code of the CVE cases
 in \autoref{s:eval:complete},
 and expected that ideally \sys would not report any errors.
 The results are also shown in \autoref{f:data:cve}.
 \sys reports no bugs in 29 of the 36 cases, times out in 1 case, and
 reports errors in 6 cases.
 %
-In these 6 cases,
-the patched code of CVE-2010-3873 (x25)
+One case,the patched code of CVE-2010-3873 (x25),
 contains additional integer errors that are covered by CVE-2010-4164,
 which \sys correctly identified;
-four cases contain either new errors or bad fixes,
+Four cases contain either new errors or bad fixes,
 as we have shown in \autoref{s:eval:linux}.
-There is one false error in CVE-2011-4097 (oom), as detailed below.
+One case is a false error in CVE-2011-4097 (oom), as detailed below.
 
 \input{code/oom}
 The code
@@ -292,6 +291,8 @@ There is an implicit rule that the sum of these numbers of pages
 additions never overflow.  \sys does not understand the rule and
 reports false errors for these additions.
 
+\fk{separate in two paragraph? one about the 12 hours and one about
+the effectiveness of range analysis etc. to reduce false errors}
 When applying \sys to the whole Linux kernel, it reported 134,051 possible
 integer errors in total. After filtering for sensitive sinks, 1,024 of them are
 related to memory allocation sizes, and 2,255 are related to memory moving
@@ -309,12 +310,13 @@ domain-specific knowledge.
 
 To measure the running time of \sys, we ran \sys against the source
 code of Linux kernel 3.4-rc1.  We set the timeout
-to 5 seconds for each constraint solving query.   \sys analyzed
-8,896 files and made 420,743 solving queries, 992 of which timeouts.
+to 5 seconds for each query to the constraint solver.   \sys analyzed
+8,896 files and made 420,743 queries, 992 of which timeout.
 The predicate generation and constraint solving (excluding compilation)
 took 40 minutes.  This shows that \sys can analyze a large
 system in a reasonable amount of time.
 
+\fk{weren't we going to delete this?}
 As discussed in \autoref{s:gen:opt}, \sys rewrites error checking
 idioms for better performance.  We measured the solving time of three
 equivalent forms: division, multiplication, and overflow detection
