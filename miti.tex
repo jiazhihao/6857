@@ -23,7 +23,7 @@ to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
 An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
-when computed with an integer of type $\cc{nan}\ T$.
+when used with an integer of type $\cc{nan}\ T$.
 \item
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
@@ -52,6 +52,18 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
 
+<<<<<<< HEAD
+=======
+\zj{Should we change \cc{unnan} API to R\ \cc{unnan}(\cc{nan}\ T\; x,\; R\; v), 
+therefore programmers can write codes like \cc{if (unnan(x < y, true))}, where \cc{x}, \cc{y} are NaN Type}
+
+Comparison with $\cc{nan}\ T$ is interesting: when either operand is 
+in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
+the semantic of this comparison. Therefore programmers are expected to 
+use \cc{unnan} with \cc{if} statements, and tells the compilers what to do
+when the result is NaN\@.
+
+>>>>>>> c7ada2f2c662d33c0131a9963ae76e793364c9c3
 We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
 \input{code/malloc-nan}
@@ -108,6 +120,12 @@ are $700\%$ and $31.6\%$, respectively.
 %
 We believe that it is practical to adopt NaN integers for
 replacing manual overflow checking with a low overhead.
+
+For legacy C code that is unlikely to adopt NaN integers, we encourage
+developers to use safe allocators that perform overflow checking
+internally.  Particularly, we contributed \cc{kmalloc_array(n,
+size)} for array allocation, which checks overflow for $\cc{n}
+\times_u \cc{size}$; this function landed in the Linux kernel v3.4-rc1.
 
 \if 0
 Below is an example check in the infiniband driver.
