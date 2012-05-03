@@ -200,7 +200,7 @@ Linux kernel.
 
 To address the scalability issue, when generating predicates across functions
 (i.e., for entities like function parameters, return values, global variables,
-and structure fields), \sys bounds each integer-typed entity using two constant
+and structure members), \sys bounds each integer-typed entity using two constant
 integers as the minimum and maximum values, respectively. For example, if the
 value of a parameter $x$ ranges from 1 to 10, \sys generates the range
 predicates $x \geq 1 \land x < 11$.
@@ -212,11 +212,11 @@ system call parameters (see \autoref{s:rank:input}), which are initialized to
 full sets.
 
 \sys scans through every function of the entire code base. When encountering
-accesses to a cross-function entity, such as loads from a structure field or a
+accesses to a cross-function entity, such as loads from a structure member or a
 global variable, \sys retrieves the entity's value range from the global range
 table.  Within a function, \sys propagates value ranges using range
 arithmetic~\cite{range-analysis}.  When a value reaches an external sink
-through argument passing, function returns, stores to structure fields or
+through argument passing, function returns, stores to structure members or
 global variables, the corresponding range table entry is updated by merging its
 previous range with the range of the incoming value. The algorithm runs
 iteratively until the range table converges.  If some table entries do not
@@ -227,7 +227,7 @@ site with a set of possible callee functions.  To do so, \sys builds
 the graph beforehand using a similar iterative algorithm. For each
 indirect call site, \sys collects possible assignments to the
 function pointer by looking at all initialization code and stores
-to the corresponding structure field, variable, or parameter.
+to the corresponding structure member, variable, or parameter.
 
 To further reduce false errors, \sys refines the output ranges using
 domain-specific knowledge. For example, many \cc{sysctl} parameters in the

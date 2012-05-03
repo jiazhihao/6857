@@ -11,12 +11,12 @@ tool inside Microsoft~\cite{moy:z3prefix}, which also uses constraint solving
 techniques.  Compared to \sys, Microsoft's tool imposes too strict integer
 semantics.
 
-Consider the sign conversion below, a widely seen code pattern in
+Consider the signedness conversion below, a widely seen code pattern in
 the Linux kernel.
 \input{code/endian}
 Note that \cc{le32_to_cpu} returns an unsigned 32-bit integer, which
 is silently converted to the signed \cc{status} of the same size.
-The Microsoft tool will issue a warning for the sign conversion if
+The Microsoft tool will issue a warning for the conversion if
 the value returned from \cc{le32_to_cpu} can be as large as $2^{32}
 - 1$, because $2^{32} - 1$ is out of the bounds of 32-bit signed
 integers~(at most $2^{31} - 1$) and turns \cc{status} negative.
@@ -43,7 +43,7 @@ and covers all paths in a loop-free program.
 In addition, \sys performs a set of effective analyses
 tailored for integer error detection, which are missing in the
 Microsoft tool.  For example, to reduce false errors, \sys infers
-the value ranges of integral structure field across the whole
+the value ranges of integral structure members across the whole
 kernel~(see \autoref{s:gen:range}), and distinguishes integers coming
 through untrusted channels that can be controlled by an adversary
 from trusted ones~(see \autoref{s:rank}).
@@ -79,14 +79,16 @@ IntScope~\cite{intscope}.
 Applying these tools to the Linux kernel is challenging.  One would
 have to model hardware devices, otherwise the corresponding driver
 code will not load or function correctly.  The environment and
-constraints are so complex that one may also have to split
+constraints are so complex that one may also have to isolate
 individual modules for model checking~\cite{engler:vs}.  These
 changes require too much manual effort, especially given the
 large number of drivers and the rapid code changes in the Linux
-kernel.  To avoid these complications \sys is a static analysis tool that
-generates predicates carefully to allow it to scale to the Linux kernel, without
-making any modifications to the Linux source code. \sys can be inserted into the
-Linux compilation workflow transparently.
+kernel.
+%
+Independent of these difficulties, \sys is a static analysis tool that
+generates predicates carefully to allow it to scale to the Linux kernel,
+without making any modifications to the kernel source code. \sys can be
+integrated into the Linux compilation workflow transparently.
 
 \paragraph{Precision.}
 It is difficult for tools that do not track path conditions (e.g.,
@@ -101,7 +103,7 @@ eliminates cases where a user-controlled value is checked against
 is used in a PREfast-based tool from Microsoft~\cite{prefast}.  This
 approach will miss integer errors due to incorrect bounds checking since
 it does not perform reasoning on the actual values of the bounds. \sys avoids
-these issues by generating carefully predicates that includes path conditions.
+these issues by carefully generating predicates that include path conditions.
 
 \paragraph{Coverage.}
 Dynamic integer error detection tools,
@@ -123,10 +125,11 @@ An alternative approach is to instrument binary executable files,
 such as IntFinder~\cite{intfinder} and UQBTng~\cite{uqbtng}.
 %
 The advantage of these tools is that they have a lower false error rate.
-Using them to find integer errors requires input that can trigger
-those bugs, and thus it is in general difficult to achieve high
-coverage.  In particular, because triggering integer errors often requires
-carefully chosen input values.
+Using them to find integer errors, however, requires carefully chosen
+input that can trigger those bugs.
+Therefore they are in general difficult to achieve high coverage.
+%In particular, because triggering integer errors often requires
+%carefully chosen input values.
 
 \if 0
 \paragraph{OS testing tools.}
@@ -167,7 +170,7 @@ For example, developers
 change their code by calling a library function $\cc{addsl}(x, y)$
 to add two signed long integers $x$ and $y$.
 The library then performs sanity checks at run time, and invokes a
-preset error handler if an integer error happens.
+preset error handler if an integer error occurs.
 
 %SafeInt~\cite{safeint} is a C++ template class widely used in Microsoft
 %products and Mozilla Firefox.  It eases the adoption and allows to write
@@ -175,7 +178,7 @@ preset error handler if an integer error happens.
 %developers need to declare $x$ and $y$ as the \cc{SafeInt<long>}
 %type.
 
-The integer library is trusted to be implemented correctly.
+These integer libraries are trusted and supposed to be implemented correctly.
 Unfortunately, integer errors have recently been discovered in both
 IntegerLib and SafeInt~\cite{ioc}.
 %Below is IntegerLib's \cc{addsl} implementation.
