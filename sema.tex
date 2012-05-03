@@ -152,17 +152,17 @@ kernel crash, to a stack overflow.
 \label{f:ax25-sign}
 \end{figure}
 
+\if 0
 \subsection{Equivalence}
 \label{s:sema:eqv}
 
-\if 0
 Let $\uintmax(n)$ denote the largest $n$-bit unsigned integer ~(i.e.,
 $2^n-1$).  Consider two functionally equivalent expressions $x -_u
 1$ and $x +_u \uintmax(n)$, where $x$ is an $n$-bit unsigned integer.
 According to \autoref{f:in-bounds}, the in-bounds requirement of
 $x -_u 1$ is $x \geq_u 1$, while that of $x +_u \uintmax(n)$ is $x
 = 0$.
-\fi
+
 As explained in \autoref{s:sema:sec}, \sys imposes different in-bounds
 requirements for $x \shl 1$ and $x \times_u 2$, despite the fact
 that they are functionally equivalent.
@@ -176,37 +176,7 @@ or a pointer~\cite{gcc:signed-overflow,us-cert:gcc}, unless a special
 option \cc{-fwrapv} or \cc{-fno-strict-overflow} is
 given.  To avoid the interference, \sys is designed to run with
 these optimizations disabled.
-
-\subsection{Overflow Semantics}
-\label{s:sema:def}
-
-Consider the following code snippet.
-\input{code/array-neg-index}
-
-\sys would catch $x +_s y$ if it overflows. The result of signed overflow,
-however, is undefined in C. On many architectures~(e.g., x86) the overflowed
-result becomes a negative value. In practice, to further catch more errors,
-such as the potentially negative array index, \sys needs to continue evaluating
-$x +_s y$, even if it overflows.  \sys models the semantics for some integer
-operations that the C standard specifies as undefined behavior, as follows:
-
-\begin{itemize}
-\item
-The result of signed overflow wraps around using two's complement.
-\item
-The shifting amount for an $n$-bit integer wraps around at $n$,
-similarly to x86's shift instructions.  For example, shifting
-a 32-bit integer by 32 bits is the same as by $0$ bit,
-so we have $1 \shl 32 = 1$.
-\end{itemize}
-Division by zero remains undefined.  \sys does not consider the case
-in further expressions.
-
-\sys may miss integer errors that are not modeled by the semantics.
-Consider the expression $x / (1 \shl 32)$, which will trigger a
-division by zero on PowerPC.  \sys will be able to detect the
-oversized shift, but not the division by zero, since \sys evaluates
-the divisor to 1.
+\fi
 
 \subsection{White Listing Idioms}
 \label{s:sema:whitelist}
@@ -263,3 +233,36 @@ $(x \times y) /_u y \neq x$ & $x >_u \uintmax(n) /_u y$   \\
 Here $\uintmax(n)$ denotes the largest $n$-bit unsigned integer.}
 \label{f:whitelist}
 \end{figure}
+
+\subsection{Overflow Semantics}
+\label{s:sema:def}
+
+Consider the following code snippet.
+\input{code/array-neg-index}
+
+\sys would catch $x +_s y$ if it overflows. The result of signed overflow,
+however, is undefined in C. On many architectures~(e.g., x86) the overflowed
+result becomes a negative value. In practice, to further catch more errors,
+such as the potentially negative array index, \sys needs to continue evaluating
+$x +_s y$, even if it overflows.  \sys models the semantics for some integer
+operations that the C standard specifies as undefined behavior, as follows:
+
+\begin{itemize}
+\item
+The result of signed overflow wraps around using two's complement.
+\item
+The shifting amount for an $n$-bit integer wraps around at $n$,
+similarly to x86's shift instructions.  For example, shifting
+a 32-bit integer by 32 bits is the same as by $0$ bit,
+so we have $1 \shl 32 = 1$.
+\end{itemize}
+Division by zero remains undefined.  \sys does not consider the case
+in further expressions.
+
+\sys may miss integer errors that are not modeled by the semantics.
+Consider the expression $x / (1 \shl 32)$, which will trigger a
+division by zero on PowerPC.  \sys will be able to detect the
+oversized shift, but not the division by zero, since \sys evaluates
+the divisor to 1.
+
+
