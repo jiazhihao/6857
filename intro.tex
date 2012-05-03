@@ -18,20 +18,20 @@ kernel due to multiplication overflow~(CVE-2006-5751).  The size
 for allocating \cc{buf} is calculated from the multiplication of
 \cc{maxnum}, an integer read from user space,
 and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
-a 32-bit platform, both \cc{maxnum} and \cc{size} are 32-bit unsigned
+a 32-bit system, both \cc{maxnum} and \cc{size} are 32-bit unsigned
 integers, ranging from 0 to $2^{32} - 1$.  The developer's intention
 is to limit the values of \cc{maxnum} and \cc{size} to 256 and 4096,
 respectively.
 
-If an adversary supplies a large \cc{maxnum}, say $2^{31}$,
-however, the multiplication $\cc{maxnum} \times 16$ would
-overflow the bound of 32-bit unsigned integer and result in \cc{size}
+If an adversary supplies a large \cc{maxnum}, say $2^{31}$, however,
+the multiplication $\cc{maxnum} \times 16$ would overflow the bounds
+of 32-bit unsigned integer and result in \cc{size}
 being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
 are incorrectly limited.  In this case \cc{buf} is allocated as
-a zero-length buffer; any further access into \cc{buf} is out of
+a zero-length buffer; any further write into \cc{buf} is out of
 bounds and may cause a kernel panic (i.e., denial-of-service).
-Furthermore, the adversary may control the out-of-bounds writes
+Furthermore, the adversary may control the out-of-bounds write
 (i.e., buffer overflow) in a more elaborate way with carefully
 crafted input, so as to execute arbitrary code and gain root
 privilege.  A similar integer error was actually exploited
@@ -79,11 +79,11 @@ while still effectively catch integer errors.
 
 A second challenge is to precisely reason about integer operations
 on every code path.  Given the semantics of an integer operation,
-\sys needs to determine whether the control flow can reach that
-operation while simultaneously producing an out-of-bounds value.  For
-example, in \autoref{f:bridge}, \sys should conclude that an overflowed
-product \cc{size} will bypass the sanity check and reach the
-\cc{kmalloc} call.
+\sys needs to track sanity checks in source code, and determine
+whether the control flow can bypass the checks while simultaneously
+producing an out-of-bounds value.  For example, in \autoref{f:bridge},
+\sys should conclude that an overflowed product \cc{size} will
+bypass the sanity check and reach the \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
 Linux kernel.  \sys needs to finish analyzing the source code in a
@@ -96,12 +96,21 @@ less likely to receive interest than by network input.
 semantics that define integer errors, a precise analysis algorithm
 that performs bit-level reasoning per function, and a set of ranking
 criteria that estimate the security impacts of possible integer
-errors.  \sys
+errors.
 %accept C source code as input, and inspects each
 %integer operation for possible integer errors.
-%
-is implemented using the LLVM compiler framework~\cite{lattner:llvm}
-and the Boolector constraint solver~\cite{boolector}.
+
+We implemented \sys using the LLVM compiler framework~\cite{lattner:llvm}
+and the Boolector constraint solver~\cite{boolector}, and applied it
+to the Linux kernel, the lighttpd web server, and OpenSSH.  \sys
+identified \nrbugs integer errors in these systems, which were
+confirmed and fixed by the developers.  It also revealed that even
+two previously known CVE cases were fixed incorrectly.
+%The evaluation
+\sys's reports are fairly complete: it is able to detect 34 out of the
+36 known Linux kernel integer errors from the CVE over the past three
+years.
+
 %
 %To further reduce false errors, \sys asks users to provide a white
 %list of overflow checking idioms, as well as additional range
@@ -109,25 +118,22 @@ and the Boolector constraint solver~\cite{boolector}.
 
 The primary contributions of this paper are:
 \begin{CompactItemize}
-\item A design and implementation of integer error checker that has a pragmatic
-  definition of integer errors and can scale to programs of the size of the
+\item a design and implementation of integer error checker that has a pragmatic
+  definition of integer errors and can scale to systems of the size of the
   Linux kernel;
-\item An experimental evaluation in which identified \nrbugs integer errors in
-  the Linux kernel, the lighttpd web server, and OpenSSH, which were confirmed
-  and fixed by the developers.  It also reveals that even two previously known
-  CVE cases were fixed incorrectly.  The evaluation also shows that \sys is
-  complete: \sys is able to detect 34 of the 36 known integer errors in the
-  Linux kernel from the past three years.
-\item A few mitigation strategies, which include a new integer type that enters
-  an error state once it overflows.
+\item \nrbugs integer errors confirmed and fixed in
+  the Linux kernel, the lighttpd web server, and OpenSSH;
+\item a proposal of a new integer family with NaN semantics, which
+  enters an error state once its value overflows.
 \end{CompactItemize}
 
-The rest of this paper is organized as follows. \autoref{s:sema}
+The rest of this paper is organized as follows.
+\autoref{s:relwk} reviews previous work on integer error detection.
+\autoref{s:sema}
 defines the integer semantics that \sys uses.  \autoref{s:gen}
 presents \sys's design for generating constraints.  \autoref{s:rank}
 describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
-the Linux kernel source tree and known CVE cases.
+the Linux kernel and known CVE cases.
 %\autoref{s:common} summarizes common integer errors
-\autoref{s:miti} discusses mitigation strategies.
-\autoref{s:relwk} relates \sys to previous work and \autoref{s:concl}
-concludes.
+\autoref{s:miti} proposes the NaN integers.
+\autoref{s:concl} concludes.
