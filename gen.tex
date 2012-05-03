@@ -285,28 +285,29 @@ would have flagged an error.
 \paragraph{Memory model.}
 \sys employs a simple memory model: a value returned from a load
 instruction is unconstrained~(unless the value has a range predicate).
-%
-In other words, \sys regards values returned by different load
-instructions as unrelated.
+To reduce false errors, \sys merges load instructions from the same
+pointer.
 Consider the example below.
 \input{code/alias}
-There are four occurrences of \cc{arg->count}, each meaning a load
-from memory.  \sys must merge these load instructions, otherwise
-\sys would consider the \cc{arg->count} in \cc{copy_from_user}
-as a fresh load and the value is unconstrained, despite the fact
-that earlier code limits \cc{arg->count} to 128; this would cause
-\sys to report a false multiplication overflow.
+The code correctly limits \cc{arg->count} to avoid multiplication
+overflows.  However, since each occurrence of \cc{arg->count} means
+a load from memory, \sys would report false errors for \cc{arg->count
+* sizeof(int)}, since it considers the value from the load for
+\cc{arg->count} unconstrained.  Therefore, \sys must merge these
+load instructions for \cc{arg->count}.
 
 LLVM's load elimination algorithm is too conservative and does not
-fit our goal.  For the above example, it would conservatively
-assume that the call to \cc{kmalloc} \emph{may} modify \cc{arg->count}
-(e.g., via some global variable that points to \cc{arg}).
+fit our goal.  For the above example, it conservatively
+assumes that the call to \cc{kmalloc} \emph{may} modify \cc{arg->count}
+(e.g., via some global variable that points to \cc{arg}),
+and thus cannot merge the \cc{arg->count} in \cc{copy_from_user}
+with the others.
 
 \sys merges load instructions as follows.
-It first adopts an aliasing assumption: a pointer passed to a
+It first adopts an unsound assumption: a pointer passed to a
 function argument or a global variable points to a memory location
-that is distinct from any other pointers.  This assumption,
-though unsound, has been proven to be practical for detecting bugs
+that is distinct from any other pointers.  This assumption
+has been proven to be practical for detecting bugs
 in C programs~\cite{livshits:ipssa}.
 %
 In the example, \sys assumes that \cc{kmalloc} cannot hold a pointer
