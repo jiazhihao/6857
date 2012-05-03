@@ -1,15 +1,6 @@
 \section{NaN Integers Semantics}
 \label{s:miti}
 
-\if 0
-Writing integer error checks is tedious and error-prone.
-Even for a simple multiplication \cc{n * size} that is often used
-as the allocation size for an array, programmers would
-have to write a non-trivial overflow check like \cc{(size \&\& n >
-SIZE_MAX / size)}.  We contributed \cc{kmalloc_array(n, size)}
-to help perform the check, which landed in the Linux kernel v3.4-rc1.
-\fi
-
 \autoref{s:eval} shows that a major source of integer errors is due
 to unanticipated integer wraparound.  To mitigate the issue, we
 propose a new integer family with NaN semantics: the value enters
@@ -19,8 +10,8 @@ This section will illustrate how NaN integers help automate integer
 error checking.
 
 The basic usage is to add a type qualifier \cc{nan}
-to an actual integer type, such as \cc{nan size_t}. The conversion
-rule between NaN types and regular integer types is as follows.
+to an actual integer type, such as \cc{nan size_t}. The type conversion
+rules for NaN integers are as follows.
 \begin{CompactItemize}
 \item
 An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
@@ -52,20 +43,18 @@ $T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{CompactItemize}
 
-\fk{which malloc?}
-We modified \cc{malloc} to take an \cc{nan size_t} as
-the allocation size, as follows.
+To demonstrate the use of the API, we modified libc's \cc{malloc}
+to take an \cc{nan size_t} as the allocation size.
 \input{code/malloc-nan}
-The modified \cc{malloc} would change the allocation size to a large
-value \cc{SIZE_MAX} if \cc{size} is NaN (i.e., the calculation
-overflows).  We assume that \cc{libc_malloc(SIZE_MAX)} would return
-\cc{NULL} given a too large allocation size.  \fk{i don't change ``would''; does
-  it do it or not?}
+The modified \cc{malloc} returns \cc{NULL} if the allocation size
+overflowed.  To do so, it sets the allcation size to a large value
+\cc{SIZE_MAX} if \cc{size} overflowed, which will cause
+\cc{libc_malloc(SIZE_MAX)} to return \cc{NULL}.
 
+With the NaN-ized \cc{malloc}, developers do not have to write any overflow checks
+when calculating the allocation size.
 An example usage is as follows.
 \input{code/use-nan}
-In this way, programmers do not have to write any overflow checks
-when calculating the allocation size.
 
 \begin{figure}
 \centering
