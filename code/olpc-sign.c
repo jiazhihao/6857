@@ -9,9 +9,9 @@ static u8 dcon_read_status_xo_1_5(u8 *status)
 		return -1;
 	...
 }
-irqreturn_t dcon_interrupt(int irq, void *id)
+static struct dcon_platform_data *pdata = ...;
+irqreturn_t dcon_interrupt(...)
 {
-	struct dcon_platform_data *pdata = ...;
 	int status = pdata->read_status();
 	if (status == -1)
 		return IRQ_NONE;
