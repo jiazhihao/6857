@@ -241,7 +241,7 @@ Consider the following code snippet.
 \input{code/array-neg-index}
 
 \sys would catch $x +_s y$ if it overflows. The result of signed overflow,
-however, is undefined in C. On many architectures~(e.g., x86) the overflowed
+however, is undefined in C\@. On many architectures~(e.g., x86) the overflowed
 result becomes a negative value. In practice, to further catch more errors,
 such as the potentially negative array index, \sys needs to continue evaluating
 $x +_s y$, even if it overflows.  \sys models the semantics for some integer
@@ -261,7 +261,7 @@ in further expressions.
 
 \sys may miss integer errors that are not modeled by the semantics.
 Consider the expression $x / (1 \shl 32)$, which will trigger a
-division by zero on PowerPC.  \sys will be able to detect the
+division by zero on PowerPC\@.  \sys will be able to detect the
 oversized shift, but not the division by zero, since \sys evaluates
 the divisor to 1.
 

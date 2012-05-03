@@ -58,7 +58,7 @@ Comparison with $\cc{nan}\ T$ is interesting: when either operand is
 in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
 the semantic of this comparison. Therefore programmers are expected to 
 use \cc{unnan} with \cc{if} statements, and tells the compilers what to do
-when the result is NaN.
+when the result is NaN\@.
 
 We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
