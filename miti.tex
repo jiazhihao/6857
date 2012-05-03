@@ -1,4 +1,4 @@
-\section{NaN Integer Semantics}
+\section{NaN Integers Semantics}
 \label{s:miti}
 
 \if 0
@@ -23,13 +23,14 @@ to an actual integer type, such as \cc{nan size_t}.
 \begin{itemize}
 \item
 An integer of type $T$ will be automatically promoted to $\cc{nan}\ T$
-when used with an integer of type $\cc{nan}\ T$.
+when computed with an integer of type $\cc{nan}\ T$.
 \item
 The result type of an arithmetic or comparison operation with
 operands of type $\cc{nan}\ T$ is also $\cc{nan}\ T$.
 \end{itemize}
+
 We implement NaN integers by modifying the Clang compiler.
-The compiler inserts error checks for every arithmetic or
+The compiler inserts overflow checks for every arithmetic or
 comparison operation of type $\cc{nan}\ T$, and sets the result to
 NaN if either any source operand is NaN or an integer error occurred
 during the operation.
@@ -46,10 +47,24 @@ The NaN integer API consists of two functions:
 $\cc{bool}\ \cc{isnan}(\cc{nan}\ T\; x)$ \hfill (NaN testing) \\
 returns true if $x$ is NaN, or false otherwise.
 \item
-$T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (integer casting) \\
+$T\ \cc{unnan}(\cc{nan}\ T\; x,\; T\; v)$ \hfill (Type casting) \\
 returns $v$ if $x$ is NaN, or $(T)x$ otherwise.
 \end{itemize}
-With the API, we modify \cc{malloc} to take an \cc{nan size_t} as
+
+\zj{Should we change \cc{unnan} API to R\ \cc{unnan}(\cc{nan}\ T\; x,\; R\; v), 
+therefore programmers can write codes like \cc{if (unnan(x < y, true))}, where \cc{x}, \cc{y} are NaN Type}
+
+\if 0
+\zj{above doesn't explain the return value of comparison with NaN Type, necessary to say?} 
+\fi
+
+Comparison with $\cc{nan}\ T$ is interesting: when either operand is 
+in NaN state, the result will be NaN, otherwise it will be 0 or 1 based on
+the semantic of this comparison. Therefore programmers are expected to 
+use \cc{unnan} with \cc{if} statements, and tells the compilers what to do
+when the result is NaN.
+
+We modify \cc{malloc} to take an \cc{nan size_t} as
 the allocation size, as follows.
 \input{code/malloc-nan}
 The modified \cc{malloc} would change the allocation size to a large
@@ -77,7 +92,7 @@ slight modification to make it clear.
 \input{code/mq}
 The above checks intend to return 0 if the result of \cc{lhs} 
 overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
-$\cc{ULONG_MAX}$, otherwise it will return 1.   
+$\cc{ULONG_MAX}$, otherwise it will return 1.
 
 With NaN integers, one can wrap the original tricky checks with
 $\cc{isnan}$.
