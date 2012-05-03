@@ -25,8 +25,8 @@ respectively.
 
 If an adversary supplies a large \cc{maxnum}, say $2^{31}$, however,
 the multiplication $\cc{maxnum} \times 16$ would overflow the bounds
-of 32-bit unsigned integer and result in \cc{size}
-being set to 0.  Subsequently, the sanity check $\cc{size} > 4096$
+of 32-bit unsigned integers and result in \cc{size} wrapping around
+to 0.  Subsequently, the sanity check $\cc{size} > 4096$
 will be bypassed, so that the values of \cc{size} and \cc{maxnum}
 are incorrectly limited.  In this case \cc{buf} is allocated as
 a zero-length buffer; any further write into \cc{buf} is out of
@@ -62,7 +62,7 @@ This paper presents \sys, a compile-time tool that analyzes
 source code written in C for integer errors.
 %
 A key challenge facing \sys is knowing what are actual integer errors.  For
-example, some previous tools rigidly classify any conversions from a
+example, some previous tools rigidly classify any conversion from a
 signed integer with possibly negative value to an unsigned integer
 as an error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}; 
 such signedness conversions are so widely used in C
