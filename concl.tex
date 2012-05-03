@@ -1,10 +1,8 @@
 \section{Conclusion}
 \label{s:concl}
 
-This paper describes the design and implementation of \sys, a static
-analysis tool that identified and aided to fix \nrbugs integer
-errors in the Linux kernel, the lighttpd web server, and OpenSSH\@.
-Our experience shows that integer errors are prevalent in system software,
-often due to unanticipated integer wraparound caused by values from
-untrusted inputs.  We hope that NaN integers can help mitigate the
-issue in practice.
+This paper describes the design and implementation of \sys, a static analysis
+tool that identified and aided in fixing \nrbugs integer errors in the Linux
+kernel, the lighttpd web server, and OpenSSH\@.  A common integer error is
+unanticipated integer wraparound caused by values from untrusted inputs.  We
+hope that the NaN integers we propose can mitigate that problem in the future.
