@@ -143,16 +143,14 @@ patches for clarification and reliability improvement.
 \subsubsection{Bad Fixes}
 \label{s:eval:bad}
 
-\sys discovered 7 integer errors, where kernel developers had written checks,
-but the checks were incorrect or insufficient.
 The ``\# of prev. checks'' column in \autoref{f:data:linux} counts
-the those checks that were committed into the mainline repository.
-%those only proposed on the mailing list are not included.
-Some integer errors were fixed incorrectly more than once before
-we submitted a correct patch.
-\xw{this doesn't match the data.
-we wanted to show the number of generations
-of bad checks.  36 is not really what we wanted.}
+the number of sanity checks that were incorrect or insufficient
+from the history of the Linux kernel repository.
+It shows that even though developers were aware of the fact that
+those values needed sanity checking, it is still non-trivial
+to write correct checks.
+One of the cases, sctp's autoclose timer, was incorrectly fixed
+three times before we submitted a patch.
 
 %
 It is interesting that two bad patches were committed to fix
