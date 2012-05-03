@@ -291,20 +291,19 @@ reports false errors for these additions.
 %\fk{separate in two paragraph? one about the 12 hours and one about the
 %effectiveness of range analysis etc. to reduce false errors} 
 
-When applying \sys to the whole Linux kernel, it reported 134,051 possible
-integer errors in total. We scanned through them and inspected 97 reports in
-detail.  It took us roughly 12 hours to discover the first batch of 6
-exploitable errors, all of them are related to erroneous allocation size.
-The other 91 warnings are either harmless overflows or
-false warnings.  Most of the false warnings are due to imprecise range analysis
-or lack of domain-specific knowledge.
+%, and 2,255 are related to memory moving %sizes.
 
-After filtering for sensitive sinks, only 1,024 of the 134,051 reports are
-related to memory allocation sizes, and 2,255 are related to memory moving
-sizes. Out of the 1,024 reported allocation size errors, 646 are derived from
-untrusted inputs, which include all the 6 bugs we found before.
-This shows that \sys's ranking strategy is useful in helping
-users focus on high risk errors.
+For the whole Linux kernel, \sys reported 134,051 warnings in total.
+After filtering for sensitive sinks, 1,024 are related to memory
+allocation sizes, 646 of which are derived from untrusted inputs.
+This shows that \sys's ranking strategy is effective in helping users
+focus on high-risk warnings.
+
+We inspected 97 warnings in detail.  It took us roughly 12 hours
+to discover the first batch of 6 exploitable errors.  The other 91
+warnings are either false errors or overflows that we did not know
+how to exploit.  Most of the false errors are due to imprecise range
+analysis or lack of domain-specific knowledge.
 
 % first batch: ?, (aacraid), uvc, drm, vmwgfx, vt6656, comedi
 
