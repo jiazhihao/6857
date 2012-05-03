@@ -12,7 +12,7 @@ solver answers ``satisfiable'' with an assignment of variables,
 there is a potential integer error that could be triggered with
 that assignment.  This workflow is shown in \autoref{f:flow}.
 
-The central challenge is reducing the complexity of these predicates,
+The key challenge is to reduce the complexity of these predicates,
 so that the solver can run efficiently.  This section describes how
 \sys generates the predicates.
 
@@ -39,7 +39,7 @@ out-of-bounds~(OOB) predicate, satisfying which implies an error.
 \paragraph{Addition, subtraction, and multiplication.}
 The Boolector constraint solver provides an API for constructing
 efficient overflow detection
-predicates~\cite[\chapterautorefname~3.5]{brummayer:phd}.
+predicates~\cite[\subsectionautorefname~3.5]{brummayer:phd}.
 \sys invokes the API to generate OOB predicates for additive and
 multiplicative operations.
 
@@ -47,7 +47,7 @@ multiplicative operations.
 For signed division $x /_s y$, \sys generates the OOB predicate
 $y = 0 \lor (x = -2^{n-1} \land y = -1)$.
 For unsigned division $x /_u y$, the OOB predicate is simply
-$y \neq 0$.
+$y = 0$.
 
 \if 0
 Take multiplication for an example.  Given two $n$-bit unsigned
@@ -87,38 +87,38 @@ in the following cases.
 
 To detect tautological comparisons, \sys derives a predicate from
 each comparison.  If the predicate is trivially true or false,
-and it resulted from an integer conversion within that function, \sys
+and results from an integer conversion within that function, \sys
 reports the conversion as an integer error.
 
 For an array index $x$, \sys generates an OOB predicate $x <_s 0$.
 \sys implements a front-end plugin to recognize array indices.
 
 Similarly, for a data size $x$, \sys generates an OOB predicate $x <_s 0$.
-\sys requires user-provided annotations on ``size'' function parameters.  As for
-the Linux kernel, we annotate the ``size'' parameters in functions like \cc{memcpy},
-\cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
+\sys requires user-provided annotations on ``size'' function parameters.  
+As for the Linux kernel, we annotate the ``size'' parameters in functions 
+like \cc{memcpy}, \cc{copy_from_user}, and \cc{sock_alloc_send_skb}.
 
 \subsection{Path Predicate Generation}
 \label{s:gen:path}
 
-\sys generates a path predicate for each integer operation, that encodes
+\sys generates a path predicate for each integer operation, which encodes
 the constraints on the variables that arise from preceding operations
 in the function's control flow.  These constraints arise from two general
 sources: assignments to variables by preceding operations, and conditional
 branches along the execution path.  Satisfying the path predicate with
-a given set of variable assignments means that the integer operation is
-reachable from the start of its function with those variable values.
+a set of variable assignments means that the integer operation is
+reachable from the beginning of the function with the given variable values.
 The path predicate is used to filter out integer errors that cannot
 happen due to previous statements in a function, such as assignments or
 explicit overflow checks.
 
-Let's consider loop-free programs first.
+Let us consider loop-free programs first.
 %
-We use \autoref{f:ax25-sign} as an example.  The control flow of
+We use the code in \autoref{f:ax25-sign} as an example.  The control flow of
 the code is shown in \autoref{f:cfg}.  There are two sanity checks
 on \cc{optlen} before it reaches the call to \cc{copy_from_user}.
-For clarification purposes, \cc{optlen} is numbered every time it is
-assigned a new value~\cite[\chapterautorefname~8.11]{whale}.  Our
+For clarification purposes, \cc{optlen} is renumbered every time it is
+assigned a new value~\cite[\subsectionautorefname~8.11]{whale}.  Our
 goal is to evaluate the path predicate for the call to \cc{copy_from_user}.
 
 The basic algorithm works as follows.  Since there is no loop, the
@@ -165,14 +165,11 @@ the error: for example, $\cc{optlen}_0 = -1$.
 \label{f:cfg}
 \end{figure}
 
-For programs that contain loops, \sys handles them using
-loop unrolling~\cite{xie:saturn}.  The path
-predicate generation algorithm unrolls each loop once and ignores
-branching edges that jump back in the control flow,
-so as to restrict the size of the path predicate
-and reduce the solving time.
-This trades off soundness for performance.
-The complete algorithm is listed in \autoref{f:path-cstr}.
+For programs that contain loops, the path predicate generation algorithm
+unrolls each loop once and ignores branching edges that jump back in the
+control flow~\cite{xie:saturn}. This approach limits the growth of complexity
+of the path predicate, and thus sacrifices soundness for performance.  
+The complete algorithm is shown in \autoref{f:path-cstr}.
 
 \begin{figure}
 \input{algo/path}
@@ -181,7 +178,7 @@ The complete algorithm is listed in \autoref{f:path-cstr}.
 \end{figure}
 
 To partially alleviate missing predicates due to loop unrolling,
-\sys tries to move predicates within a loop to the outside scope.
+\sys tries to move predicates inside a loop to the outer scope.
 Consider the following loop.
 \input{code/loop}
 \sys generates an OOB predicate $i <_s 0$ since $i$ is used
@@ -191,7 +188,7 @@ integer error (e.g., if the code does not correctly restrict $n$).
 To address the problem, \sys generates a new predicate $n <_s 0$
 outside the loop, by substituting the loop variable $i$ with its
 exit value $n$ in the predicate $i <_s 0$.
-
+\hc{a bit hard to follow, should we say loop invariants?}
 
 \subsection{Range Predicate Generation}
 \label{s:gen:range}
@@ -203,7 +200,7 @@ Linux kernel.
 
 To address the scalability issue, when generating predicates across functions
 (i.e., for entities like function parameters, return values, global variables,
-and structure fields), \sys bounds each integral entity using two constant
+and structure fields), \sys bounds each integer-typed entity using two constant
 integers as the minimum and maximum values, respectively. For example, if the
 value of a parameter $x$ ranges from 1 to 10, \sys generates the range
 predicates $x \geq 1 \land x < 11$.
@@ -225,7 +222,7 @@ previous range with the range of the incoming value. The algorithm runs
 iteratively until the range table converges.  If some table entries do not
 converge within a limited number of rounds, \sys sets them to be full sets.
 
-\sys requires a system-wide call graph that associates each call
+The algorithm requires a system-wide call graph that associates each call
 site with a set of possible callee functions.  To do so, \sys builds
 the graph beforehand using a similar iterative algorithm. For each
 indirect call site, \sys collects possible assignments to the
@@ -235,8 +232,8 @@ to the corresponding structure field, variable, or parameter.
 To further reduce false errors, \sys refines the output ranges using
 domain-specific knowledge. For example, many \cc{sysctl} parameters in the
 Linux kernel have lower and upper bounds encoded in the initialization code of
-their \cc{sysctl} table entries.  \sys understands the \cc{sysctl} structures
-and extracts the bounds from these entries.
+their \cc{sysctl} table entries.  \sys recognizes the \cc{sysctl} table
+structures and extracts the bounds accordingly.
 
 
 \subsection{Code Rewriting}
