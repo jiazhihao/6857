@@ -86,9 +86,10 @@ previously in an attempt to address the same problem.}
 \subsubsection{Distribution}
 
 The integer errors \sys found span a wide range of kernel subsystems,
-including the core kernel, drivers, file systems, and network protocols.
-The core kernel has fewer integer errors, since it does not
-interact with the outside as frequently as the rest of the kernel.
+including the core kernel, device drivers, file systems, and network
+protocols.
+%The core kernel has fewer integer errors, since it does not
+%interact with the outside as frequently as the rest of the kernel.
 
 Multiplication appears to be the most error-prone operation; it is
 often used for calculating allocation size, such as $n \times
@@ -96,10 +97,10 @@ often used for calculating allocation size, such as $n \times
 by an adversary, causing the allocation size to wrap around to an
 unanticipated smaller value.
 
-Surprisingly,  a simple tautological comparison $<_u 0$,
-comparing an unsigned integer with 0 (usually for error handling),
+Surprisingly,  a simple tautological expression that 
+compares an unsigned integer with 0 ($<_u 0$, usually for error handling),
 affected several subsystems.
-One driver (wl128x) contains 36 such bugs alone, effectively
+The wl128x driver alone contains 36 such bugs, effectively
 disabling most of its error handling paths.
 
 \subsubsection{Impact}

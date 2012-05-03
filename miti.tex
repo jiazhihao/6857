@@ -81,7 +81,8 @@ the other for the addition;
 note that the second multiplication \cc{maxmsg * sizeof(void *)}
 never overflows 32 bits since \cc{maxmsg} is at most $2^{15}$.
 
-With NaN integers, the check can be simplified as:
+With NaN integers, a developer can directly use \cc{isnan}
+without worrying about intermediate overflows:
 \input{code/mq-nan}
 
 To show that the runtime overhead of NaN integers is low, we compare
