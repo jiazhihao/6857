@@ -34,7 +34,7 @@ bounds and may cause a kernel panic (i.e., denial-of-service).
 Furthermore, the adversary may control the out-of-bounds write
 (i.e., buffer overflow) in a more elaborate way with carefully
 crafted input, so as to execute arbitrary code and gain root
-privilege. The iOS jailbreak also exploited a similar integer 
+privilege. The iOS jailbreak exploited a similar integer 
 error~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
@@ -58,23 +58,23 @@ arbitrary code via a large \cc{maxnum} from user space.
 \label{f:bridge}
 \end{figure}
 
-This paper presents \sys, a compile-time tool that analyzes C-language
-source code for integer errors.
+This paper presents \sys, a compile-time tool that analyzes
+source code written in C for integer errors.
 %
 A key challenge facing \sys is knowing what are actual integer errors.  For
 example, some previous tools rigidly classify any conversions from a
 signed integer with possibly negative value to an unsigned integer
 as an error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}; 
 such signedness conversions are so widely used in C
-code that doing so would cause a flood of noisy false
+code that doing so would cause a flood of false
 errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
 Similarly, a common way to detect overflow in C is to 
 check the overflowed the result after the fact. For example, to test
 if \textit{base} plus \textit{len} overflows, kernel developers write
 expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
 which \sys should not consider as an error.
-\sys needs integer semantics that recognize commonly used code patterns
-while still effectively catch integer errors.
+\sys needs integer semantics that both recognize commonly used code patterns
+and still effectively catch integer errors.
 %Conceptually, any integer operation that may produce a
 %result different from the infinitely ranged mathematical counterpart
 %flags a potential integer error~\cite{air}.
@@ -88,7 +88,7 @@ producing an out-of-bounds value.  For example, in \autoref{f:bridge},
 bypass the sanity check and reach the \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
-Linux kernel.  \sys needs to finish in a
+Linux kernel, which means that \sys needs to finish in a
 reasonable amount of time.  \sys should also rank reported integer
 errors so as to ease human inspection.  For example, an integer error
 that could only be triggered by misbehaved hardware is
@@ -129,12 +129,12 @@ The primary contributions of this paper are:
 \end{CompactItemize}
 
 The rest of this paper is organized as follows.
-\autoref{s:relwk} differentiates \sys with previous work on integer 
+\autoref{s:relwk} differentiates \sys from previous work on integer 
 error detection. \autoref{s:sema}
 defines the integer semantics that \sys uses.  \autoref{s:gen}
 presents \sys's design for generating constraints.  \autoref{s:rank}
 describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
 the Linux kernel and known CVE cases.
 %\autoref{s:common} summarizes common integer errors
-\autoref{s:miti} proposes the NaN integers.
-\autoref{s:concl} concludes.
+\autoref{s:miti} proposes the NaN integer family.
+Finally, \autoref{s:concl} concludes.
