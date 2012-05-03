@@ -8,7 +8,7 @@ Common Vulnerabilities and Exposures~(CVE)~\cite{cve} suggests that
 they are already ``number 2 for OS vendor
 advisories''~\cite{christey:vuln}, second only to buffer overflows.
 A recent survey~\cite{chen:kbugs} reviews the Linux kernel
-vulnerabilities in the CVE from 2010 to early 2011, and confirms
+vulnerabilities in CVE from 2010 to early 2011, and confirms
 the finding that integer errors account for more than one third of
 the vulnerabilities that can be misused to corrupt the kernel and
 gain root privilege.
@@ -34,8 +34,8 @@ bounds and may cause a kernel panic (i.e., denial-of-service).
 Furthermore, the adversary may control the out-of-bounds write
 (i.e., buffer overflow) in a more elaborate way with carefully
 crafted input, so as to execute arbitrary code and gain root
-privilege.  A similar integer error was actually exploited
-in the iOS jailbreak~\cite{esser:ios}.
+privilege. The iOS jailbreak also exploited a similar integer 
+error~\cite{esser:ios}.
 
 Integer errors enable a spectrum of attacks.  In addition to
 denial-of-service, buffer overflow, and privilege escalation
@@ -62,16 +62,19 @@ This paper presents \sys, a compile-time tool that analyzes C-language
 source code for integer errors.
 %
 A key challenge facing \sys is knowing what are actual integer errors.  For
-example, some previous tools rigidly classify any signed-to-unsigned integer
-conversion from a possibly negative value as an error~\cite{brumley:rich,
-  moy:z3prefix, seacord:secure-c}; such sign conversions are so widely used in C
+example, some previous tools rigidly classify any conversions from a
+signed integer with possibly negative value to an unsigned integer
+as an error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}; 
+such signedness conversions are so widely used in C
 code that doing so would cause a flood of noisy false
-errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.  In C, a common way to
-test if an integer operation overflows is using overflow; for example, to test
+errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
+\hc{does 6.2 talk about this?}
+Similarly, a common way to detect overflow in C is to 
+check the overflowed the result after the fact. For example, to test
 if \textit{base} plus \textit{len} overflows, kernel developers write
 expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
-which \sys should not consider as
-errors.  \sys needs integer semantics that recognize commonly used code patterns
+which \sys should not consider as an error.
+\sys needs integer semantics that recognize commonly used code patterns
 while still effectively catch integer errors.
 %Conceptually, any integer operation that may produce a
 %result different from the infinitely ranged mathematical counterpart
@@ -87,10 +90,10 @@ bypass the sanity check and reach the \cc{kmalloc} call.
 
 The final challenge is to apply \sys to large systems such as the
 Linux kernel.  \sys needs to finish analyzing the source code in a
-reasonable amount of time.  \sys also should rank reported integer
-errors to ease human inspection.  For example, an integer error
+reasonable amount of time.  \sys should also rank reported integer
+errors so as to ease human inspection.  For example, an integer error
 that could only be triggered by misbehaved hardware is
-less likely to receive interest than by network input.
+less likely to receive interest than those triggered by network input.
 
 \sys addresses these challenges with three ideas: practical integer
 semantics that define integer errors, a precise analysis algorithm
@@ -108,8 +111,8 @@ confirmed and fixed by the developers.  It also revealed that even
 two previously known CVE cases were fixed incorrectly.
 %The evaluation
 \sys's reports are fairly complete: it is able to detect 34 out of the
-36 known Linux kernel integer errors from the CVE over the past three
-years.
+36 known integer errors in the Linux kernel reported in CVE over the past
+three years.
 
 %
 %To further reduce false errors, \sys asks users to provide a white
@@ -118,18 +121,19 @@ years.
 
 The primary contributions of this paper are:
 \begin{CompactItemize}
-\item a design and implementation of integer error checker that has a pragmatic
-  definition of integer errors and can scale to systems of the size of the
-  Linux kernel;
-\item \nrbugs integer errors confirmed and fixed in
+\item a design and implementation of an integer error checker that has a 
+  pragmatic definition of integer errors and can scale to systems of the 
+  size of the Linux kernel;
+\item \nrbugs confirmed and fixed integer errors in
   the Linux kernel, the lighttpd web server, and OpenSSH;
 \item a proposal of a new integer family with NaN semantics, which
-  enters an error state once its value overflows.
+  enters an error state once its value overflows. 
+  \hc{`family' sounds weired, why not just say `type'?}
 \end{CompactItemize}
 
 The rest of this paper is organized as follows.
-\autoref{s:relwk} reviews previous work on integer error detection.
-\autoref{s:sema}
+\autoref{s:relwk} differentiates \sys with previous work on integer 
+error detection. \autoref{s:sema}
 defines the integer semantics that \sys uses.  \autoref{s:gen}
 presents \sys's design for generating constraints.  \autoref{s:rank}
 describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
