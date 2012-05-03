@@ -19,10 +19,12 @@
 
 \input{code/fmt}
 
-\def\sectionautorefname{Section}
-\def\subsectionautorefname{Section}
-\def\subsubsectionautorefname{Section}
-\def\chapterautorefname{Chapter}
+\def\Snospace~{\S{}}
+\renewcommand*\sectionautorefname{\Snospace}
+\def\sectionautorefname{\Snospace}
+\def\subsectionautorefname{\Snospace}
+\def\subsubsectionautorefname{\Snospace}
+\def\chapterautorefname{{}}
 
 \numberwithin{equation}{section}
 
