@@ -127,7 +127,7 @@ The above checks intend to return 0 if the result of \cc{lhs}
 overflows in unsigned long case, i.e. the expected result of \cc{lhs} exceeds 
 $\cc{ULONG_MAX}$, otherwise it will return 1m.   
 
-With NaN integers, one can wrap the original tricky checks with $\cc{isnan}(nan T)$
+With NaN integers, one can wrap the original tricky checks with \cc{isnan(nan T)}
 \input{code/mq-nan}
 
 \if 0
