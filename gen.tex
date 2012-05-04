@@ -204,12 +204,12 @@ integers as the minimum and maximum values, respectively. For example, if the
 value of a parameter $x$ ranges from 1 to 10, \sys generates the range
 predicates $x \geq 1 \land x < 11$.
 
-\sys tracks the range for each cross-function entity. Initially,
-\sys sets the ranges of untrusted entities (e.g., system call
-parameters, see \autoref{s:rank:input}) to full sets and the rest
-to empty.  Then it updates their ranges iteratively, until the
-ranges converge, or simply set the ranges to full sets after a limited
-number of rounds.
+\sys keeps a range for each cross-function entity in a global
+range table.  Initially, \sys sets the ranges of untrusted entities
+(e.g., system call parameters, see \autoref{s:rank:input}) to full
+sets and the rest to empty.  Then it updates their ranges iteratively,
+until the ranges converge, or simply set the ranges to full sets
+after a limited number of rounds.
 
 The iteration works as follows.
 \sys scans through every function of the entire code base. When encountering
