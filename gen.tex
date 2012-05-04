@@ -317,7 +317,7 @@ not modify \cc{arg->count}.
 \sys then hoists every load instruction to
 the earliest possible point within the function.  The hope is that
 those load instructions will be moved up and put close to each
-other, so as to easily merge identical ones.
+other, so that \sys can easily merge identical ones.
 %
 Consider a load instruction $L$ that loads from pointer $p$.  $L$ is
 safe to move across its previous instruction $I$ if:
