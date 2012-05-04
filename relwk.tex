@@ -59,6 +59,11 @@ constraint solver.  \sys does precise bit-level reasoning
 since we did not experience the issue.
 \fi
 
+Verification tools such as ArC~\cite{arc} and Jessie~\cite{jessie}
+can catch integer errors, but they only accept a restrictive subset
+of C (e.g., no function pointers) and cannot apply to systems like
+the Linux kernel.
+
 %First, 
 %it formalizes error constraints in a pragmatic way: rather
 %than imposing constraints on every conversion~\cite{brumley:rich,
