@@ -227,7 +227,7 @@ each indirect call site (i.e., function pointers), \sys collects
 possible target functions from initialization code and stores to
 the function pointer.
 
-To further reduce false errors, \sys refines the output ranges using
+\sys refines ranges using
 domain-specific knowledge. For example, many \cc{sysctl} parameters in the
 Linux kernel have lower and upper bounds encoded in the initialization code of
 their \cc{sysctl} table entries.  \sys recognizes the \cc{sysctl} table
