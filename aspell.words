@@ -1,8 +1,9 @@
-personal_ws-1.1 en 102 
+personal_ws-1.1 en 106 
 allocator
 analyses
 API
 Archerr
+autoclose
 bignum
 bitwise
 Boolector
@@ -42,11 +43,13 @@ IntScope
 IOC
 iOS
 IPC
+ized
 JDK
 JungleGreen
 kint
 len
 libc
+libc's
 lighttpd
 LLBMC
 lll
@@ -84,6 +87,7 @@ sandboxing
 satisfiability
 scalability
 sctp
+sctp's
 signedness
 SmartFuzz
 strawman
