@@ -76,7 +76,7 @@ this paper.
 \fi
 
 \paragraph{Shift.}
-The OOB predicate \sys generates for a $n$-bit shift operation
+The OOB predicate \sys generates for an $n$-bit shift
 $x \shl y$ or $x \shr y$ is a simple comparison $y \geq_u n$.
 
 \paragraph{Conversion.}
@@ -109,6 +109,15 @@ reachable from the beginning of the function with the given variable values.
 The path predicate is used to filter out integer errors that cannot
 happen due to previous statements in a function, such as assignments or
 explicit overflow checks.
+
+\begin{figure}
+\centering
+\resizebox{\linewidth}{!}{
+\input{figs/cfg}
+}
+\caption{The control flow of the code snippet in \autoref{f:ax25-sign}.}
+\label{f:cfg}
+\end{figure}
 
 Let us consider loop-free programs first.
 %
@@ -153,15 +162,6 @@ path predicate and the OOB predicate (i.e., $\cc{optlen}_1 <_s 0$) into
 the solver to determine whether the integer operation can have an error.
 In this case, the solver will reply with an assignment that triggers
 the error: for example, $\cc{optlen}_0 = -1$.
-
-\begin{figure}
-\centering
-\resizebox{\linewidth}{!}{
-\input{figs/cfg}
-}
-\caption{The control flow of the code snippet in \autoref{f:ax25-sign}.}
-\label{f:cfg}
-\end{figure}
 
 For programs that contain loops, the path predicate generation algorithm
 unrolls each loop once and ignores branching edges that jump back in the
