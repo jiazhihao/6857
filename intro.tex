@@ -1,139 +1,32 @@
 \section{Introduction}
 \label{s:intro}
+Vandalism is a problem encountered in content systems where the set of users permitted to edit is not restricted to a small trusted set of users. In Wikipedia, where the barrier to editing is particularly and intentionally low but the need for credibility is critical, vandalism is a big concern. Vandalism which is not promptly reverted is bad not only because it can convey misinformation and ruin the site's reputation,  but also from a security perspective, because it can even be used as a vector for other malicious attacks such as directing users via external links to phishing sites or sites containing malware.
 
-Integer errors, including arithmetic overflow, division-by-zero,
-oversized shift, lossy truncation, and sign misinterpretation, have
-emerged as a threat to systems security.  A 2007 study of the
-Common Vulnerabilities and Exposures~(CVE)~\cite{cve} suggests that
-they are already ``number 2 for OS vendor
-advisories''~\cite{christey:vuln}, second only to buffer overflows.
-A recent survey~\cite{chen:kbugs} reviews the Linux kernel
-vulnerabilities in CVE from 2010 to early 2011, and confirms
-the finding that integer errors account for more than one third of
-the vulnerabilities that can be misused to corrupt the kernel and
-gain root privilege.
+It has been said that making a secure system against adversarial attacks is like a game of chess, not only does one have to come up with an effective strategy, but also has to counter the opponentÕs response to that strategy. In our particular project, we have attempted to do the former and will discuss improvements that can be made in dealing with the latter. 
 
-\autoref{f:bridge} shows an example of an integer error in the Linux
-kernel due to multiplication overflow~(CVE-2006-5751).  The size
-for allocating \cc{buf} is calculated from the multiplication of
-\cc{maxnum}, an integer read from user space,
-and \cc{sizeof(struct __fdb_entry)}, the constant 16.  Assuming
-a 32-bit system, both \cc{maxnum} and \cc{size} are 32-bit unsigned
-integers, ranging from 0 to $2^{32} - 1$.  The developer's intention
-is to limit the values of \cc{maxnum} and \cc{size} to 256 and 4096,
-respectively.
+Wikipedia uses a reactive model to vandalism, rather than a preventative model. A group of users, often self-named ``patrollers'' for vandalism, scan the list of recent changes to Wikipedia, looking for suspicious changes. These users then find and revert vandalism. Vandalism detection algorithms like \sys are particularly helpful for assisting these users, as they can spot out edits which are likely to be vandalism and bring them into attention to patrollers. This way, the efforts of patrollers can be focused more on edits which are more likely to be vandalism. Vandalism detection algorithms like \sys can also revert edits automatically if it is heavily suspected of being vandalism.
 
-If an adversary supplies a large \cc{maxnum}, say $2^{31}$, however,
-the multiplication $\cc{maxnum} \times 16$ would overflow the bounds
-of 32-bit unsigned integers and result in \cc{size} wrapping around
-to 0.  Subsequently, the sanity check $\cc{size} > 4096$
-will be bypassed, so that the values of \cc{size} and \cc{maxnum}
-are incorrectly limited.  In this case \cc{buf} is allocated as
-a zero-length buffer; any further write into \cc{buf} is out of
-bounds and may cause a kernel panic (i.e., denial-of-service).
-Furthermore, the adversary may control the out-of-bounds write
-(i.e., buffer overflow) in a more elaborate way with carefully
-crafted input, so as to execute arbitrary code and gain root
-privilege. The iOS jailbreak exploited a similar integer 
-error~\cite{esser:ios}.
+Vandalism detection algorithms are not always correct. In the event of a false positive (the tool detects a legitimate edit as vandalism, and reverts it) then a user can undo the revert, in which case the algorithm will leave it as-is. In the event of a false negative (the tool fails to detect and revert actual vandalism) then the page will remain vandalized until someone else notices, and reverts it manually.
 
-Integer errors enable a spectrum of attacks.  In addition to
-denial-of-service, buffer overflow, and privilege escalation
-mentioned above, an integer error can also lead to information
-leakage, for example, if it is used to determine the number of data
-items to be sent via network, raising privacy concerns~(CVE-2009-1265).
-It may cause more subtle logic bugs if the value is used in decision
-making, such as misleading the kernel to kill an innocent
-process~(CVE-2011-4097).
 
 \begin{figure}[t]
 \centering
-\input{code/bridge}
+\includegraphics[width=0.7\textwidth]{figs/falsepositives-prev.png}
 \vspace{-1em}
-\caption{An integer error in the Ethernet bridge subsystem of the
-Linux kernel~(CVE-2006-5751), where a multiplication overflow
-may lead to buffer overflows and allow local users to execute
-arbitrary code via a large \cc{maxnum} from user space.
-}
-\label{f:bridge}
+\caption{false positive rate v.s. vandalism detection rate in original \sys}
+\label{f:falsepositives-prev}
 \end{figure}
 
-This paper presents \sys, a compile-time tool that analyzes
-source code written in C for integer errors.
-%
-A key challenge facing \sys is knowing what are actual integer errors.  For
-example, some previous tools rigidly classify any conversion from a
-signed integer with possibly negative value to an unsigned integer
-as an error~\cite{brumley:rich, moy:z3prefix, seacord:secure-c}; 
-such signedness conversions are so widely used in C
-code that doing so would cause a flood of false
-errors~\cite[\subsectionautorefname~6.2]{moy:z3prefix}.
-Similarly, a common way to detect overflow in C is to 
-check the overflowed result after the fact. For example, to test
-if \textit{base} plus \textit{len} overflows, kernel developers write
-expressions such as $\mathit{base} + \mathit{len} < \mathit{base}$~\cite{ioc},
-which \sys should not consider as an error.
-\sys needs integer semantics that both recognize commonly used code patterns
-and still effectively catch integer errors.
-%Conceptually, any integer operation that may produce a
-%result different from the infinitely ranged mathematical counterpart
-%flags a potential integer error~\cite{air}.
+There are tradeoffs for each type of error; one can manipulate the threshold for declaring an edit as vandalism to reduce the number of false positives, or false negatives. In the case of \sys, the algorithm's thresholds are clearly tailored towards minimizing false positives -- the version on the sites (without our modifications) catches only 5.1$\%$ of the vandalism in the test dataset of vandalism. The particular reason for minimizing false positives is to avoid alienating users by auto-reverting their edits; new editors who have their edits auto-reverted by systems like \sys are often not aware that it was a bot which auto-reverted their edit, and can rather believe that the Wikipedia community is not welcoming of new editors, and thus stop contributing. Changing the submission and reversion process to make it more apparent and visible that algorithmic vandalism review is taking place, particularly for such new editors, may allow for a higher false positive rate to be tolerated (hence allowing more vandalism to be caught) without alienating new editors.
 
-A second challenge is to precisely reason about integer operations
-on every code path.  Given the semantics of an integer operation,
-\sys needs to track sanity checks in source code, and determine
-whether the control flow can bypass the checks while simultaneously
-producing an out-of-bounds value.  For example, in \autoref{f:bridge},
-\sys should conclude that an overflowed product \cc{size} will
-bypass the sanity check and reach the \cc{kmalloc} call.
+We define cyber vandalism as a form of activity taken up by adversaries who damage information infrastructures on the internet. There are several forms of internet vandals:
 
-The final challenge is to apply \sys to large systems such as the
-Linux kernel, which means that \sys needs to finish in a
-reasonable amount of time.  \sys should also rank reported integer
-errors so as to ease human inspection.  For example, an integer error
-that could only be triggered by misbehaved hardware is
-less likely to receive interest than those triggered by network input.
-
-\sys addresses these challenges with three ideas:
-practical integer semantics that define integer errors,
-a precise analysis that performs bit-level reasoning per function
-combined with a coarse-grained range analysis across functions,
-and a set of ranking criteria that estimate the security impacts
-of possible integer errors.
-
-We implemented \sys using the LLVM compiler framework~\cite{lattner:llvm}
-and the Boolector constraint solver~\cite{boolector}, and applied it
-to the Linux kernel, the lighttpd web server, and OpenSSH\@.  \sys
-identified \nrbugs integer errors in these systems, which were
-confirmed and fixed by the developers.  It also revealed that even
-two previously known CVE cases were fixed incorrectly.
-%The evaluation
-\sys's reports are fairly complete: it is able to detect 34 out of the
-36 known integer errors in the Linux kernel reported in CVE over the past
-three years.
-
-%
-%To further reduce false errors, \sys asks users to provide a white
-%list of overflow checking idioms, as well as additional range
-%constraint annotations to filter out infeasible cases.
-
-The primary contributions of this paper are:
 \begin{CompactItemize}
-\item a design and implementation of an integer error checker that has a 
-  pragmatic definition of integer errors and can scale to the Linux kernel;
-\item \nrbugs confirmed and fixed integer errors in
-  the Linux kernel, the lighttpd web server, and OpenSSH;
-\item a proposal of a new integer family with NaN semantics, which
-  enters an error state once its value overflows. 
+\item[1.]
+Denial of Service Attacks
+\item[2.]
+Penetrate, hide, and collect
+\item[3.]
+Information Vandalism
 \end{CompactItemize}
 
-The rest of this paper is organized as follows.
-\autoref{s:relwk} differentiates \sys from previous work on integer 
-error detection. \autoref{s:sema}
-defines the integer semantics that \sys uses.  \autoref{s:gen}
-presents \sys's design for generating constraints.  \autoref{s:rank}
-describes ranking heuristics.  \autoref{s:eval} evaluates \sys using
-the Linux kernel and known CVE cases.
-%\autoref{s:common} summarizes common integer errors
-\autoref{s:miti} proposes the NaN integer family.
-\autoref{s:concl} summarizes our conclusions.

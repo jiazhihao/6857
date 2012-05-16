@@ -1,7 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
-\PY{k+kt}{void} \PY{o}{*}\PY{n+nf}{malloc}\PY{p}{(}\PY{k+kt}{nan} \PY{k+kt}{size\PYZus{}t} \PY{n}{size}\PY{p}{)}
-\PY{p}{\PYZob{}}
-    \PY{k+kt}{size\PYZus{}t} \PY{n}{bytes} \PY{o}{=} \PY{n+nf}{unnan}\PY{p}{(}\PY{n}{size}\PY{p}{,} \PY{n}{SIZE\PYZus{}MAX}\PY{p}{)}\PY{p}{;}
-    \PY{k}{return} \PY{n}{libc\PYZus{}malloc}\PY{p}{(}\PY{n}{bytes}\PY{p}{)}\PY{p}{;}
-\PY{p}{\PYZcb{}}
-\end{Verbatim}

@@ -1,6 +1,11 @@
-\section{NaN Integer Semantics}
+\section{NaN Integer}
 \label{s:miti}
+\autoref{s:eval} shows that a major source of integer errors is unanticipated
+integer wraparound.  To mitigate these errors, we propose a new integer family
+with NaN semantics: once an integer has an overflow error, its value enters and
+stays in the NaN state. This section details the NaN integer type.
 
+\subsection{NaN Integer Semantics}
 \begin{figure}
 \small
 \centering
@@ -13,10 +18,14 @@ operations, averaged over 1,000 runs.}
 \label{f:data:nan-micro}
 \end{figure}
 
-\autoref{s:eval} shows that a major source of integer errors is unanticipated
-integer wraparound.  To mitigate these errors, we propose a new integer family
-with NaN semantics: once an integer has an overflow error, its value enters and
-stays in the NaN state. This section details the NaN integer type.
+\begin{figure}
+\small
+\centering
+\input{data/e1000}
+\caption{Performance overhead}
+\label{f:data:e1000}
+\end{figure}
+
 
 Programmers can declare an integer to be an NaN integer by adding a type
 qualifier \cc{nan} to an integer declaration: \cc{nan int}. The type conversion
@@ -62,6 +71,7 @@ overflowed.  To do so, it sets the allocation size to a large value
 \cc{SIZE_MAX} if \cc{size} overflowed, which will cause
 \cc{libc_malloc(SIZE_MAX)} to return \cc{NULL}.
 
+\subsection{Real-world case $\#$ 1}
 With the NaN-ized \cc{malloc}, developers do not have to write any overflow
 checks when calculating the allocation size, as illustrated by the following
 example.
@@ -85,6 +95,36 @@ without worrying about intermediate overflows:
 %
 \input{code/mq-nan}
 %
+
+\subsection{Real-world case $\#$2}
+Below is an example check in the infiniband driver.
+\input{code/ib-check}
+In the check, \cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} are
+all directly from user space, and thus their values can be any
+(32-bit) integers.  Carefully crafted values would overflow the
+multiplications and addition at the right-hand side and bypass
+check.  To avoid overflows, one would need to write additional
+checks, such as:
+\input{code/ib-more}
+With NaN integers, one needs to change the type of
+\cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} to NaN integers,
+and wrap the original check with $\cc{unnan}(\dots, \cc{true})$.
+
+\subsection{Kernel Module}
+To measure the enforcement overhead of NaN integers, we measure 
+how much NaN integers slow down the SFI microbenchmarks. 
+To run the tests, we turn each benchmark into a Linux kernel module, 
+replace every allocation-related integers with corresponding NaN integers,
+and add integer overflow check for allocator functions as follows:
+\input{code/e1000}
+We run the tests on a desktop equipped with an Intel(R) Core(TM) 
+i3-550 3.2 GHz CPU, 6GB memory, and an Intel 82540EM Gigabit Ethernet card.
+
+\autoref{f:data:e1000} summarizes the results from the measurements.
+This result is sufficient to show the enforcement overhead of NaN integers
+is negligible. 
+
+\subsection{Microbenchmarks}
 To show that the runtime overhead of NaN integers is low, we compare
 the cost of a single multiplication (\cc{x * y}), as well as a multiplication
 followed by a \cc{malloc} call, in three scenarios: with no overflow
@@ -101,31 +141,12 @@ adds 1--3 cycles on average, and manual overflow checking adds
 Given the negligible overhead, we believe that it is practical
 to replace manual overflow checks with NaN integers.
 
+\subsection{Compiler Checking}
 For compilers that do not support NaN integers, we encourage developers to use
 safe allocators that perform overflow checking internally.  We contributed
 \cc{kmalloc_array(n, size)} for array allocation to the Linux kernel, which
 checks overflow for $\cc{n} \times_u \cc{size}$. This function has been
 incorporated in the Linux kernel since v3.4-rc1.
-
-\if 0
-Below is an example check in the infiniband driver.
-\input{code/ib-check}
-In the check, \cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} are
-all directly from user space, and thus their values can be any
-(32-bit) integers.  Carefully crafted values would overflow the
-multiplications and addition at the right-hand side and bypass
-check.  To avoid overflows, one would need to write additional
-checks, such as:
-\input{code/ib-more}
-With NaN integers, one needs to change the type of
-\cc{wqe_size}, \cc{wr_count}, and \cc{sqe_count} to NaN integers,
-and wrap the original check with $\cc{nan}(\dots, \cc{true})$.
-\input{code/ib-nan}
-\fi
-
-\if 0
-
-\subsection{Compiler Checking}
 
 It would be useful to have the compiler check and warn against
 integer errors, so that developers can fix these bugs
@@ -136,7 +157,7 @@ so that developers are willing to enable the check.
 Due to the above two concerns, one cannot directly integrate
 \sys's solver-based approach into a compiler.  A pragmatic workaround
 could be to match and warn against the common error patterns
-summarized in \autoref{s:common}, which can be done efficiently
+summarized in previous section, which can be done efficiently
 with a low false error rate.
 
 Decent C compilers have some support for detecting integer error
@@ -176,7 +197,7 @@ given.  Clang can detect one without any special options.}
 \subsection{Replacing Allocation Calls}
 
 Integer errors that affect allocation size are particularly dangerous,
-as discussed in \autoref{s:rank}.
+as discussed before.
 We plan to develop a tool to prevent integer errors
 in such cases at run time.
 The idea is to extend the C compiler
@@ -185,8 +206,6 @@ If any of the checks fails at run time,
 the inserted code forces the corresponding allocation call to return
 \cc{NULL}, which we assume is handled by existing code
 as out of memory.
-
-\fi
 
 \if 0
 The grsecurity patch~\cite{grsecurity}

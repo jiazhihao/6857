@@ -1,390 +1,50 @@
-@manual{c11,
-	organization = {ISO/IEC},
-	title = {ISO/IEC 9899:2011, Programming languages --- C},
-	year = {2011},
-}
-
-@manual{intel:vol1,
-	organization = {Intel},
-	title = {Intel 64 and IA-32 Architectures Software Developer's Manual, Volume~1: Basic Architecture},
-	year = {2011}
-}
-
-@book{seacord:secure-c,
-	author = {Robert C. Seacord},
-	title = {The CERT C Secure Coding Standard},
-	publisher = {Addison-Wesley Professional},
-	year = {2008}
-}
-
-@manual{christey:vuln,
-	author = {Steve Christey and Robert A. Martin},
-	note = {\url{http://cve.mitre.org/docs/vuln-trends/vuln-trends.pdf}},
-	title = {Vulnerability Type Distributions in {CVE}},
-	month = {May},
-	year = {2007}
-}
-
-@misc{cve,
-	howpublished = {\url{http://cve.mitre.org/}},
-	title = {Common Vulnerabilities and Exposures ({CVE})},
-}
-
-@techreport{gcc-new,
-	note = {\url{http://gcc.gnu.org/bugzilla/show_bug.cgi?id=19351}},
-	title = {\texttt{operator new[]} can return heap blocks which are too small},
-	year = {2005},
-	institution = {GCC},
-	type = {Bug},
-	number = {19351},
-}
-
-@techreport{java-bsearch,
-	note = {\url{http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5045582}},
-        title = {\texttt{binarySearch()} fails for size larger than $1 \shl 30$},
-        year = {2004},
-	type = {Bug},
-	institution = {Java},
-	number = {5045582},
-}
-
-@techreport{nacl,
-	author = {Cliff L. Biffle},
-	note = {\url{http://code.google.com/p/nativeclient/issues/detail?id=245}},
-	title = {{NaCl}/x86 appears to leave return addresses unaligned when returning through the springboard},
-	year = {2010},
-	number = {245},
-	type = {Issue},
-	institution = {Google Native Client},
-}
-
-@techreport{rus-cert:calloc,
-	note = {\url{http://cert.uni-stuttgart.de/ticker/advisories/calloc.html}},
-	title = {Flaw in \texttt{calloc} and similar routines},
-	institution = {RUS-CERT},
-	type = {Advisory},
-	number = {2002-08:02},
-	year = {2004}
-}
-
-@inproceedings{air,
-	title = {As-If Infinitely Ranged Integer Model},
-	author = {Roger B. Dannenberg and Will Dormann and David Keaton and Thomas Plum and Robert C. Seacord and David Svoboda and Alex Volkovitsky and Timothy Wilson},
-	year = {2010},
-	month = {November},
-	pages = {91--100},
-	address = {San Jose, CA},
-	booktitle = {Proceedings of the 21st IEEE International Symposium on Software Reliability Engineering},
-}
-
-@techreport{ranged-c,
-	title = {Ranged Integers for the {C} Programming Language},
-	author = {Jeff Gennari and Shaun Hedrick and Fred Long and Justin Pincar and Robert C. Seacord},
-	year = {2007},
-	type = {Technical Note},
-	number = {CMU/SEI-2007-TN-027},
-	institution = {Carnegie Mellon University},
-}
-
-@techreport{us-cert:gcc,
-	note = {\url{http://www.kb.cert.org/vuls/id/162289}},
-	title = {{C} compilers may silently discard some wraparound checks},
-	institution = {US-CERT},
-	type = {Vulnerability Note},
-	number = {VU\#162289},
-	year = {2008}
-}
-
-@misc{usb:buffer-overflow,
-	author = {{MWR InfoSecurity}},
-	title = {{Linux} Kernel caiaq {USB} Drivers Buffer Overflow Vulnerability},
-	howpublished = {Security Advisory for CVE-2011-0712},
-	year = {2011},
-}
-
-@techreport{gcc:signed-overflow,
-	note = {\url{http://gcc.gnu.org/bugzilla/show_bug.cgi?id=30475}},
-	title = {\cc{assert(int+100 > int)} optimized away},
-	institution = {GCC},
-	type = {Bug},
-	number = {30475},
-	year = {2007},
-}
-
-@techreport{moy:z3prefix,
-	author = {Yannick Moy and Nikolaj Bj{\o}rner and David Sielaff},
-	institution = {Microsoft Research},
-	number = {MSR-TR-2009-57},
-	title = {Modular Bug-finding for Integer Overflows in the Large: Sound, Efficient, Bit-precise Static Analysis},
-	year = {2009}
-}
-
-@article{bush:prefix,
-	author = {William R. Bush and Jonathan D. Pincus and David J. Sielaff},
-	title = {A static analyzer for finding dynamic programming errors},
-	journal = {Software---Practice and Experience},
-	volume = {30},
-	number = {7},
-	year = {2000},
-	pages = {775--802},
-}
-
-@inproceedings{boolector,
-	author = {Robert Brummayer and Armin Biere},
-	title = {Boolector: An Efficient {SMT} Solver for Bit-Vectors and Arrays},
-	crossref = {TACAS09},
-	pages = {174--177}
-}
-
-@phdthesis{brummayer:phd,
-	author = {Robert Brummayer},
-	title = {Efficient {SMT} Solving for Bit-Vectors and the Extensional Theory of Arrays},
-	school = {Johannes Kepler University Linz},
-	year = {2009},
-	month = {November},
-	address = {Linz, Austria},
-}
-
-@inproceedings{brummayer:perf,
-	author = {Robert Brummayer and Armin Biere},
-	title = {Fuzzing and Delta-Debugging {SMT} Solvers},
-	booktitle = {Proceedings of the 7th International Workshop on Satisfiability Modulo Theories},
-	pages = {1--5},
-	address = {Montreal, QC, Canada},
-	year = {2009},
-	month = {August},
-}
-
-@book{whale,
-	author = {Steven S. Muchnick},
-	title = {Advanced Compiler Design and Implementation},
-	publisher = {Morgan Kaufmann},
-	year = {1997}
-}
-
-@inproceedings{engelen:symbolic,
-	author = {Robert A. van Engelen},
-	title = {Efficient Symbolic Analysis for Optimizing Compilers},
-	crossref = {CC01},
-	pages = {118--132}
-}
-
-@inproceedings{lattner:llvm,
-	author = {Chris Lattner and Vikram Adve},
-	title = {{LLVM}: A Compilation Framework for Lifelong Program Analysis \& Transformation},
-	crossref = {CGO04},
-	pages = {75--86},
-}
-
-@inproceedings{esser:ios,
-	author = {Stefan Esser},
-	title = {Exploiting the {iOS} Kernel},
-	booktitle = {Proceedings of the Black Hat Technical Security Conference},
-	address = {Las Vegas, NV},
-	year = {2011},
-	month = {August},
-}
-
-@misc{grsecurity,
-	author = {Bradley A. Spengler},
-	howpublished = {\url{http://grsecurity.net/}},
-	title = {The {grsecurity} patch}
-}
-
-@inproceedings{livshits:ipssa,
-	author = {V. Benjamin Livshits and Monica S. Lam},
-	title = {Tracking Pointers with Path and Context Sensitivity for Bug Detection in {C} Programs},
-	booktitle = {Proceedings of the 4th joint meeting of the European Software Engineering Conference and ACM SIGSOFT Symposium on the Foundations of Software Engineering},
-	pages = {317--326},
-	year = {2003},
-	month = {September},
-	address = {Helsinki, Finland},
-}
-
-@book{ldd3,
-	author = {Jonathan Corbet and Alessandro Rubini and Greg Kroah-Hartman},
-	title = {Linux Device Drivers},
-	publisher = {O'Reilly Media},
-	year = {2005},
-	edition = {3rd},
-}
-
-@inproceedings{xie:saturn,
-	author = {Yichen Xie and Alex Aiken},
-	title = {Scalable Error Detection using {Boolean} Satisfiability},
-	address = {Long Beach, CA},
-	year = {2005},
-	month = {January},
-	booktitle = {Proceedings of the 32nd ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
-	pages = {351--363},
-}
-
-@inproceedings{molnar:catchconv,
-	author = {David Molna and Xue Cong Li and David A. Wagner},
-	title = {Dynamic Test Generation To Find Integer Bugs in x86 Binary {Linux} Programs},
-	crossref = {USEC09},
-	pages = {67--81},
-}
-
-@inproceedings{ioc,
-	author = {Will Dietz and Peng Li and John Regehr and Vikram Adve},
-	title = {Understanding Integer Overflow in {C}/{C++}},
-	year = {2012},
-	booktitle = {Proceedings of the 34th International Conference on Software Engineering},
-	address = {Zurich, Switzerland},
-	month = {June},
-}
-
-@misc{safeint,
-	author = {David LeBlanc},
-	title = {Integer Handling with the {C++} {SafeInt} Class},
-	year = {2004},
-	howpublished = {\url{http://msdn.microsoft.com/en-us/library/ms972705}},
-}
-
-@inproceedings{cqual,
-	author = {Ebrima N. Ceesay and Jingmin Zhou and Michael Gertz and Karl Levitt and Matt Bishop},
-	booktitle = {Proceedings of the 3rd GI SIG SIDAR Conference on Detection of Intrusions \& Malware, and Vulnerability Assessment},
-	title = {Using Type Qualifiers to Analyze Untrusted Integers and Detecting Security Flaws in {C} Programs},
-	year = {2006},
-	month = {July},
-	pages = {1--16},
-	address = {Berlin, Germany},
-}
-
-@inproceedings{lclint,
-	author = {David Evans and John V. Guttag and James J. Horning and Yang Meng Tan},
-	title = {{LCLint}: A Tool for Using Specifications to Check Code},
-	booktitle = {Proceedings of the 2nd SIGSOFT Symposium on the Foundations of Software Engineering},
-	year = {1994},
-	month = {December},
-	address = {New Orleans, LA},
-	pages = {87--96},
-}
-
-@inproceedings{range-checker,
-	author = {Ken Ashcraft and Dawson Engler},
-        title = {Using Programmer-Written Compiler Extensions to Catch Security Holes},
-	crossref = {IEEESP02},
-	pages = {143--159},
-}
-
-@techreport{prefast,
-	author = {Dipanwita Sarkar and Muthu Jagannathan and Jay Thiagarajan and Ramanathan Venkatapathy},
-	institution = {Microsoft Research},
-	number = {MSR-TR-2006-44},
-	title = {Flow-Insensitive Static Analysis for Detecting Integer Anomalies in Programs},
-        Year = {2006},
-}
-
-@inproceedings{intpatch,
-	author = {Chao Zhang and Tielei Wang and Tao Wei and Yu Chen and Wei Zou},
-	title = {{IntPatch}: Automatically Fix Integer-Overflow-to-Buffer-Overflow Vulnerability at Compile-Time},
-	crossref = {ESORICS10},
-	pages = {71--86},
-}
-
-@article{blip,
-	author = {Oded Horovitz},
-	journal = {Phrack},
-	number = {0x3c},
-	title = {Big Loop Integer Protection},
-	volume = {0x0b},
-	year = {2002},
-}
-
-@inproceedings{archerr,
-	author = {Ramkumar Chinchani and Anusha Iyer and Bharat Jayaraman and Shambhu Upadhyaya},
-	booktitle = {Proceedings of the 9th European Symposium on Research in Computer Security},
-	title = {{ARCHERR}: Runtime Environment Driven Program Safety},
-	crossref = {ESORICS04},
-	pages = {385--406},
-}
-
-@inproceedings{intscope,
-	author = {Tielei Wang and Tao Wei and Zhiqiang Lin and Wei Zou},
-	crossref = {NDSS09},
-	title = {{IntScope}: Automatically Detecting Integer Overflow Vulnerability in X86 Binary Using Symbolic Execution},
-}
-
-@inproceedings{intfinder,
-	author = {Ping Chen and Hao Han and Yi Wang and Xiaobin Shen and Xinchun Yin and Bing Mao and Li Xie},
-	title = {{IntFinder}: Automatically Detecting Integer Bugs in x86 Binary Program},
-	booktitle = {Proceedings of the 11th International Conference on Information and Communications Security},
-	year = {2009},
-	month = {December},
-	pages = {336--345},
-	address = {Beijing, China},
-}
-
-@inproceedings{uqbtng,
-	author = {Rafal Wojtczuk},
-	booktitle = {Proceedings of the 22nd Chaos Communication Congress},
-	title = {{UQBTng}: A tool capable of automatically finding integer overows in {Win32} binaries},
-	year = {2005},
-	month = {December},
-	address = {Berlin, Germany},
-}
-
-@inproceedings{llbmc,
-	author = {Florian Merz and Stephan Falke and Carsten Sinz},
-	booktitle = {Proceedings of the 4th International Conference on Verified Software: Theories, Tools, and Experiments},
-	title = {{LLBMC}: Bounded Model Checking of {C} and {C++} Programs Using a Compiler {IR}},
-	address = {Philadelphia, PA},
-	year = {2012},
-	month = {January},
-}
-
-@inproceedings{engler:vs,
-	author = {Dawson Engler and Madanlal Musuvathi},
-	booktitle = {Proceedings of the 5th International Conference on Verification, Model Checking, and Abstract Interpretation},
-	title = {Static analysis versus software model checking for bug finding},
-	year = {2004},
-	month = {January},
-	address = {Venice, Italy},
-	pages = {191--210},
-}
-
-@misc{trinity,
-	author = {Dave Jones},
-	howpublished = {\url{http://codemonkey.org.uk/projects/trinity/}},
-	title = {Trinity: A system call fuzzer},
-        year = {2012},
-}
-
-@misc{iknowthis,
-	author = {Tavis Ormandy},
-	howpublished = {\url{http://code.google.com/p/iknowthis/}},
-	title = {{iknowthis} {Linux} System Call Fuzzer},
-        year = {2011},
-}
+%% This BibTeX bibliography file was created using BibDesk.
+%% http://bibdesk.sourceforge.net/
 
 
-@article{range-analysis,
-	author = {William H. Harrison},
-	title = {Compiler Analysis of the Value Ranges for Variables},
-	journal = {IEEE Transactions on Software Engineering},
-	volume = {SE-3},
-	number = {3},
-	month = {May},
-	year = {1977},
-	pages = {243--250},
-} 
+%% Created for Zhihao Jia at 2012-05-16 16:34:49 -0400 
 
-@phdthesis{jessie,
-	author = {Yannick Moy},
-	title = {Automatic Modular Static Safety Checking for {C} Programs},
-	year = {2009},
-	month = {January},
-	school = {Universit\'{e} Paris-Sud},
-	address = {Orsay, France},
-}
 
-@manual{arc,
-	title = {Verifying absence of integer overflow},
-	author = {David Crocker},
-	year = {2010},
-	month = {June},
-	note = {\url{http://critical.eschertech.com/2010/06/07/verifying-absence-of-integer-overflow/}},
-	organization = {Escher Technologies},
-}
+%% Saved with string encoding Unicode (UTF-8) 
+
+
+
+@webpage{vandalism_statistics,
+	Date-Added = {2012-05-16 20:34:04 +0000},
+	Date-Modified = {2012-05-16 20:34:49 +0000},
+	Keywords = {Vandalism Statistics},
+	Month = {March},
+	Url = {http://en.wikipedia.org/wiki/Wikipedia:Vandalism_statistics},
+	Year = {2012}}
+
+@webpage{curb-false-info,
+	Date-Added = {2012-05-16 20:33:21 +0000},
+	Date-Modified = {2012-05-16 20:33:51 +0000},
+	Keywords = {Curb False Info},
+	Month = {August},
+	Url = {http://www.csmonitor.com/Innovation/2009/0825/wikipedia-testing-new-method-to-curb-false-info},
+	Year = {2009}}
+
+@webpage{ponder-editing-changes,
+	Date-Added = {2012-05-16 20:31:43 +0000},
+	Date-Modified = {2012-05-16 20:33:06 +0000},
+	Keywords = {Ponder Editing Changes},
+	Month = {January},
+	Url = {http://www.abc.net.au/news/2009-01-28/vandals-prompt-wikipedia-to-ponder-editing-changes/275942?section=world},
+	Year = {2009}}
+
+@webpage{golfer-sues-wikipedia-vandalism,
+	Date-Added = {2012-05-16 20:29:41 +0000},
+	Date-Modified = {2012-05-16 20:30:52 +0000},
+	Keywords = {Wikipedia Vandalism},
+	Month = {February},
+	Url = {golfer-sues-wikipedia-vandalism},
+	Year = {2007}}
+
+@webpage{wikipedia:bot_policy,
+	Date-Added = {2012-05-16 20:27:25 +0000},
+	Date-Modified = {2012-05-16 20:29:05 +0000},
+	Keywords = {Wikipedia Bot Policy},
+	Month = {March},
+	Url = {http://en.wikipedia.org/wiki/Wikipedia:Bot_policy},
+	Year = {2012}}
