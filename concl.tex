@@ -1,8 +1,3 @@
-\section{Conclusion}
+\section{CONCLUSION}
 \label{s:concl}
-
-This project describes the design and implementation of \sys, a static analysis
-tool that identified and aided in fixing \nrbugs integer errors in the Linux
-kernel, the lighttpd web server, and OpenSSH\@.  A common integer error is
-unanticipated integer wraparound caused by values from untrusted inputs.  We
-hope that the NaN integers we propose can mitigate that problem in the future.
+For this project we described a two front approach to combating vandalism in wikipedia. The first part of it is a new edit mechanism (Voting-Delayed Revisions) which keeps true to Wikipedia's mission by allowing anyone to edit,  and reduces the amount of visible vandalism by delaying their publishing according to user votes. The second front is to improve the current vandalism detection infrastructure. We improved the performance of one of the leading vandalism detection and reversion bots, called ClueBot NG, by enriching its feature set.  Additionally, the new review policy makes it possible for ClueBot NG to be more aggressive in identifying vandalism, as false positives are less damaging under the new uses we present for ClueBot NG within the Voting-Delayed Revisions system. Finally, questions about the inherent insecurity of machine learning based systems led us to attempt to understand what security means for a machine learning system, and to describe ways in which ClueBot NG could be fooled.
